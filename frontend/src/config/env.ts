@@ -1,4 +1,5 @@
-export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:8000/api';
+const DEFAULT_API_BASE = typeof window !== 'undefined' ? '/api' : 'http://localhost:8000/api';
+export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? DEFAULT_API_BASE;
 export const DEMO_MODE = (process.env.REACT_APP_DEMO_MODE ?? '').toLowerCase() === 'true';
 
 export const FIREBASE_CONFIG = {

@@ -343,6 +343,8 @@ export const getAuthErrorMessage = (errorCode: string): string => {
       return 'Authentication configuration error. Please contact support.';
     case 'auth/operation-not-allowed':
       return 'This sign-in method is not enabled. Please contact support.';
+    case 'auth/unauthorized-domain':
+      return 'This domain is not authorized for authentication. Please contact support.';
     case 'auth/invalid-credential':
       return 'Invalid credentials. Please try again.';
     case 'auth/user-disabled':
