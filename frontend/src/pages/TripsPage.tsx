@@ -49,24 +49,22 @@ const TripsPage: React.FC = () => {
     }
 
     // Get an initial fix for accurate origin and UI center
-    try {
-      await new Promise<void>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const cur: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-            setCurrentPos({ lat: cur[0], lon: cur[1], accuracy: pos.coords.accuracy });
-            setInitialCenter(cur);
-            lastPointRef.current = cur;
-            resolve();
-          },
-          (err) => {
-            console.warn('Initial geolocation failed', err);
-            resolve();
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      });
-    } catch {}
+    await new Promise<void>((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const cur: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          setCurrentPos({ lat: cur[0], lon: cur[1], accuracy: pos.coords.accuracy });
+          setInitialCenter(cur);
+          lastPointRef.current = cur;
+          resolve();
+        },
+        (err) => {
+          console.warn('Initial geolocation failed', err);
+          resolve();
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
 
     const id = navigator.geolocation.watchPosition(
       async (pos) => {
