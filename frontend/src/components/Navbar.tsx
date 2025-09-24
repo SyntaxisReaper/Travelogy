@@ -101,12 +101,19 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar>
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        {/* Mobile menu button (left) */}
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
+          <IconButton color="inherit" aria-label="Open navigation menu" onClick={() => setMobileOpen(true)}>
+            <MenuIcon />
+          </IconButton>
+        </Box>
+
         <Typography
           variant="h6"
           component={RouterLink}
           to="/"
-          sx={{ flexGrow: 1, fontWeight: 'bold', color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}
+          sx={{ flexGrow: 1, fontWeight: 'bold', color: 'inherit', textDecoration: 'none', cursor: 'pointer', ml: { xs: 1, md: 0 } }}
         >
           🌍 TraveLogy
         </Typography>
@@ -118,6 +125,8 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
           maxWidth: '100%',
           overflowX: 'auto',
           flexWrap: 'nowrap',
+          WebkitOverflowScrolling: 'touch',
+          scrollBehavior: 'smooth',
           '::-webkit-scrollbar': { height: 6 },
           '::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.3)', borderRadius: 3 },
         }}>
@@ -203,6 +212,13 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
           </List>
         </Box>
       </Drawer>
+
+      {/* Mobile floating menu button for extra visibility */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', bottom: 16, left: 16, zIndex: (theme) => theme.zIndex.modal + 1 }}>
+        <IconButton color="primary" sx={{ bgcolor: 'background.paper', boxShadow: 3 }} aria-label="Open menu" onClick={() => setMobileOpen(true)}>
+          <MenuIcon />
+        </IconButton>
+      </Box>
     </AppBar>
   );
 };
