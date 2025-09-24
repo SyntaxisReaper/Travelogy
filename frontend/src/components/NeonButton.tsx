@@ -58,7 +58,7 @@ const ripple = keyframes`
 `;
 
 const NeonButtonContainer = styled(Button)<NeonButtonProps>(
-  ({ theme, glowColor = colors.neonCyan, pulseAnimation = false, borderAnimation = false }) => ({
+  ({ glowColor = colors.neonCyan, pulseAnimation = false, borderAnimation = false }) => ({
     position: 'relative',
     padding: '12px 24px',
     background: `

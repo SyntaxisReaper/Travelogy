@@ -115,7 +115,7 @@ const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather
         style={{ width: '100%', height: '100%' }}
         mapStyle={style}
         mapboxAccessToken={MAPBOX_TOKEN}
-        projection={'globe'}
+        projection={{ name: 'globe' } as any}
       >
         {hasTarget && (
           <Marker longitude={longitude as number} latitude={latitude as number} anchor="bottom" onClick={() => setPopupOpen(true)}>

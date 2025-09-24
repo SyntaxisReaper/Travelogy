@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Alert, Slide, IconButton } from '@mui/material';
+import { Box, Alert, IconButton } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { colors } from '../styles/techTheme';

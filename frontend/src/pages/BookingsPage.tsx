@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Container, Typography, Paper, Box, Tabs, Tab, Grid, TextField, Button, Stack, Alert, Divider, Chip, MenuItem } from '@mui/material';
 import { bookingsAPI } from '../services/api';
 
@@ -36,7 +36,7 @@ const BookingsPage: React.FC = () => {
     setHotelError(null);
     setSearchingHotels(true);
     try {
-      const res = await bookingsAPI.searchHotels({ city, check_in: checkIn, check_out: checkOut, guests, provider: hotelProvider, rooms, adults, children } as any);
+      const res = await bookingsAPI.searchHotels({ city, check_in: checkIn, check_out: checkOut, guests, provider: hotelProvider, rooms, adults, children });
       setHotelResults(Array.isArray(res?.results) ? res.results : Array.isArray(res) ? res : []);
     } catch (e) {
       setHotelError('Failed to search hotels');
@@ -49,7 +49,7 @@ const BookingsPage: React.FC = () => {
     setTrainError(null);
     setSearchingTrains(true);
     try {
-      const res = await bookingsAPI.searchTrains({ from, to, date, class: trainClass, provider: trainProvider, passengers } as any);
+      const res = await bookingsAPI.searchTrains({ from, to, date, class: trainClass, provider: trainProvider, passengers });
       setTrainResults(Array.isArray(res?.results) ? res.results : Array.isArray(res) ? res : []);
     } catch (e) {
       setTrainError('Failed to search trains');
