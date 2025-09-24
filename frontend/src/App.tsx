@@ -42,7 +42,7 @@ const StoresPage = lazy(() => import('./pages/StoresPage'));
 
 // Google Fonts for tech typography
 const googleFontsLink = document.createElement('link');
-googleFontsLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&display=swap';
+googleFontsLink.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;700&family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;600;700&family=Fira+Code:wght@300;400;600&display=swap';
 googleFontsLink.rel = 'stylesheet';
 document.head.appendChild(googleFontsLink);
 
@@ -317,33 +317,50 @@ const App: React.FC = () => {
   });
   // Theme controls
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => (localStorage.getItem('themeMode') as 'light' | 'dark') || 'dark');
-  const [themeFont, setThemeFont] = useState<'tech' | 'system'>(() => (localStorage.getItem('themeFont') as 'tech' | 'system') || 'tech');
-  const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange'>(() => (localStorage.getItem('accent') as any) || 'cyan');
+  const [themeFont, setThemeFont] = useState<'tech' | 'system' | 'mono' | 'grotesk'>(() => (localStorage.getItem('themeFont') as any) || 'tech');
+  const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber'>(() => (localStorage.getItem('accent') as any) || 'cyan');
 
   const accentHex = useMemo(() => ({
     cyan: '#1de9b6',
     pink: '#ff4081',
     green: '#66bb6a',
     orange: '#ffa726',
+    purple: '#ab47bc',
+    blue: '#42a5f5',
+    teal: '#26a69a',
+    amber: '#ffca28',
   }[accent]), [accent]);
 
   const activeTheme = useMemo(() => createTheme({
     palette: {
       mode: themeMode,
       primary: { main: accentHex },
+      secondary: { main: themeMode === 'dark' ? '#90caf9' : '#7b1fa2' },
       background: {
-        default: themeMode === 'dark' ? '#0c0f14' : '#fafafa',
-        paper: themeMode === 'dark' ? '#11161e' : '#ffffff',
+        default: themeMode === 'dark' ? '#0b0f15' : '#f8fafc',
+        paper: themeMode === 'dark' ? '#10151d' : '#ffffff',
+      },
+      text: {
+        primary: themeMode === 'dark' ? '#e6f8ff' : '#0b0f15',
+        secondary: themeMode === 'dark' ? '#9fb6bf' : '#4b5563',
       },
     },
     typography: {
-      fontFamily: themeFont === 'tech' ? '"Orbitron","Roboto Mono", monospace' : 'Roboto, Inter, Segoe UI, Arial, sans-serif',
+      fontFamily:
+        themeFont === 'tech' ? '"Orbitron","Roboto Mono", monospace' :
+        themeFont === 'mono' ? '"Fira Code","Roboto Mono", monospace' :
+        themeFont === 'grotesk' ? '"Space Grotesk","Inter","Segoe UI", Arial, sans-serif' :
+        'Inter, Roboto, Segoe UI, Arial, sans-serif',
+      h1: { fontWeight: 800 },
+      h2: { fontWeight: 800 },
+      h3: { fontWeight: 700 },
+      button: { textTransform: 'none' },
     },
   }), [themeMode, themeFont, accentHex]);
 
   const handleChangeThemeMode = useCallback((m: 'light'|'dark') => { setThemeMode(m); localStorage.setItem('themeMode', m); }, []);
-  const handleChangeThemeFont = useCallback((f: 'tech'|'system') => { setThemeFont(f); localStorage.setItem('themeFont', f); }, []);
-  const handleChangeAccent = useCallback((a: 'cyan'|'pink'|'green'|'orange') => { setAccent(a); localStorage.setItem('accent', a); }, []);
+  const handleChangeThemeFont = useCallback((f: 'tech'|'system'|'mono'|'grotesk') => { setThemeFont(f); localStorage.setItem('themeFont', f); }, []);
+  const handleChangeAccent = useCallback((a: 'cyan'|'pink'|'green'|'orange'|'purple'|'blue'|'teal'|'amber') => { setAccent(a); localStorage.setItem('accent', a); }, []);
 
 
   useEffect(() => {
@@ -437,16 +454,20 @@ const App: React.FC = () => {
     <ThemeProvider theme={activeTheme}>
       <CssBaseline />
       <Router>
-        <Navbar
-          themeMode={themeMode}
-          themeFont={themeFont}
-          accent={accent}
-          onChangeThemeMode={handleChangeThemeMode}
-          onChangeThemeFont={handleChangeThemeFont}
-          onChangeAccent={handleChangeAccent}
-        />
-        <ScrollToTop />
-        <Toolbar />
+        {isLoggedIn && (
+          <>
+            <Navbar
+              themeMode={themeMode}
+              themeFont={themeFont}
+              accent={accent}
+              onChangeThemeMode={handleChangeThemeMode}
+              onChangeThemeFont={handleChangeThemeFont}
+              onChangeAccent={handleChangeAccent}
+            />
+            <ScrollToTop />
+            <Toolbar />
+          </>
+        )}
         <Box sx={{ minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
           {/* Background effects */}
           <LightweightBackground />
@@ -461,89 +482,99 @@ const App: React.FC = () => {
               fullscreen
             />
           }>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <DashboardPageWrapper />
-                </ProtectedRoute>
-              } />
-              <Route path="/trips" element={
-                <ProtectedRoute>
-                  <TripsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/trips/list" element={
-                <ProtectedRoute>
-                  <TripsListPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/trips/:id" element={
-                <ProtectedRoute>
-                  <TripDetailsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/analytics" element={
-                <ProtectedRoute>
-                  <AnalyticsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/journal" element={
-                <ProtectedRoute>
-                  <JournalPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
-              <Route path="/book" element={
-                <ProtectedRoute>
-                  <BookingsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/stores" element={
-                <ProtectedRoute>
-                  <StoresPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/weather" element={<WeatherPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/" element={<LandingPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
+            {isLoggedIn ? (
+              <Routes>
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <DashboardPageWrapper />
+                  </ProtectedRoute>
+                } />
+                <Route path="/trips" element={
+                  <ProtectedRoute>
+                    <TripsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/trips/list" element={
+                  <ProtectedRoute>
+                    <TripsListPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/trips/:id" element={
+                  <ProtectedRoute>
+                    <TripDetailsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <AnalyticsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/journal" element={
+                  <ProtectedRoute>
+                    <JournalPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/book" element={
+                  <ProtectedRoute>
+                    <BookingsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/stores" element={
+                  <ProtectedRoute>
+                    <StoresPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/weather" element={<WeatherPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            ) : (
+              <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="*" element={<LoginPage />} />
+              </Routes>
+            )}
           </Suspense>
           </NotifyProvider>
         </Box>
         
-        {/* Notification System */}
-        <NotificationSystem
-          notifications={notifications}
-          onClearNotification={clearNotification}
-          onClearAll={clearAllNotifications}
-        />
+        {isLoggedIn && (
+          <>
+            {/* Notification System */}
+            <NotificationSystem
+              notifications={notifications}
+              onClearNotification={clearNotification}
+              onClearAll={clearAllNotifications}
+            />
 
-        {/* Emergency SOS floating button */}
-        <EmergencySOS />
-        
-        {/* Analytics Modal */}
-        <AnalyticsModal
-          open={showAnalytics}
-          onClose={() => setShowAnalytics(false)}
-        />
+            {/* Emergency SOS floating button */}
+            <EmergencySOS />
+            
+            {/* Analytics Modal */}
+            <AnalyticsModal
+              open={showAnalytics}
+              onClose={() => setShowAnalytics(false)}
+            />
 
-        {/* Contact floating button */}
-        <ContactFab />
+            {/* Contact floating button */}
+            <ContactFab />
+
+            {/* Footer */}
+            <Box component="footer" sx={{ textAlign: 'center', py: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
+              <Typography variant="body2">
+                © {new Date().getFullYear()} Travelogy — <a href="/contact" style={{ color: '#1de9b6', textDecoration: 'none' }}>Contact Team SkyStack</a>
+              </Typography>
+            </Box>
+          </>
+        )}
       </Router>
-      
-      {/* Footer */}
-      <Box component="footer" sx={{ textAlign: 'center', py: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
-        <Typography variant="body2">
-          © {new Date().getFullYear()} Travelogy — <a href="/contact" style={{ color: '#1de9b6', textDecoration: 'none' }}>Contact Team SkyStack</a>
-        </Typography>
-      </Box>
     </ThemeProvider>
   );
 };

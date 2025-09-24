@@ -8,7 +8,7 @@ import {
   Paper,
   Card,
   CardContent,
-} from '@mui/material';
+} from '@mui/material';import TypewriterText from '../components/TypewriterText';
 import {
   DirectionsWalk,
   NaturePeople,
@@ -66,9 +66,18 @@ const LandingPage: React.FC = () => {
           <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
             🌍 TraveLogy
           </Typography>
-          <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-            Your AI-Powered Smart Travel Diary
-          </Typography>
+          <Box sx={{ mb: 4 }}>
+            <TypewriterText
+              lines={[
+                'Your AI-Powered Smart Travel Diary',
+                'Track trips. Detect modes. Gain insights.',
+                'Privacy-first. Beautiful. Fast.'
+              ]}
+              variant="h5"
+              typingSpeedMs={28}
+              pauseMs={1400}
+            />
+          </Box>
           <Typography variant="h6" sx={{ mb: 6, maxWidth: 600, mx: 'auto' }}>
             Track your journeys, understand your impact, and contribute to sustainable transport research
           </Typography>

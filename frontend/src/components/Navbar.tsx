@@ -37,11 +37,11 @@ import { signOutUser } from '../services/authService';
 
 interface NavbarProps {
   themeMode?: 'light' | 'dark';
-  themeFont?: 'tech' | 'system';
-  accent?: 'cyan' | 'pink' | 'green' | 'orange';
+  themeFont?: 'tech' | 'system' | 'mono' | 'grotesk';
+  accent?: 'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber';
   onChangeThemeMode?: (m: 'light' | 'dark') => void;
-  onChangeThemeFont?: (f: 'tech' | 'system') => void;
-  onChangeAccent?: (a: 'cyan' | 'pink' | 'green' | 'orange') => void;
+  onChangeThemeFont?: (f: 'tech' | 'system' | 'mono' | 'grotesk') => void;
+  onChangeAccent?: (a: 'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber') => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech', accent = 'cyan', onChangeThemeMode, onChangeThemeFont, onChangeAccent }) => {
@@ -94,7 +94,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
     }
     await dispatch(logout());
     handleClose();
-    navigate('/');
+    navigate('/login');
   };
 
   const handleProfileNavigate = () => {
@@ -190,11 +190,17 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             <MenuItem disabled>Font</MenuItem>
             <MenuItem selected={themeFont==='tech'} onClick={() => { onChangeThemeFont?.('tech'); setThemeAnchor(null); }}>Tech</MenuItem>
             <MenuItem selected={themeFont==='system'} onClick={() => { onChangeThemeFont?.('system'); setThemeAnchor(null); }}>System</MenuItem>
+            <MenuItem selected={themeFont==='mono'} onClick={() => { onChangeThemeFont?.('mono'); setThemeAnchor(null); }}>Mono</MenuItem>
+            <MenuItem selected={themeFont==='grotesk'} onClick={() => { onChangeThemeFont?.('grotesk'); setThemeAnchor(null); }}>Grotesk</MenuItem>
             <MenuItem disabled>Accent</MenuItem>
             <MenuItem selected={accent==='cyan'} onClick={() => { onChangeAccent?.('cyan'); setThemeAnchor(null); }}>Cyan</MenuItem>
             <MenuItem selected={accent==='pink'} onClick={() => { onChangeAccent?.('pink'); setThemeAnchor(null); }}>Pink</MenuItem>
             <MenuItem selected={accent==='green'} onClick={() => { onChangeAccent?.('green'); setThemeAnchor(null); }}>Green</MenuItem>
             <MenuItem selected={accent==='orange'} onClick={() => { onChangeAccent?.('orange'); setThemeAnchor(null); }}>Orange</MenuItem>
+            <MenuItem selected={accent==='purple'} onClick={() => { onChangeAccent?.('purple'); setThemeAnchor(null); }}>Purple</MenuItem>
+            <MenuItem selected={accent==='blue'} onClick={() => { onChangeAccent?.('blue'); setThemeAnchor(null); }}>Blue</MenuItem>
+            <MenuItem selected={accent==='teal'} onClick={() => { onChangeAccent?.('teal'); setThemeAnchor(null); }}>Teal</MenuItem>
+            <MenuItem selected={accent==='amber'} onClick={() => { onChangeAccent?.('amber'); setThemeAnchor(null); }}>Amber</MenuItem>
           </Menu>
 
           {isLoggedIn ? (

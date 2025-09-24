@@ -6,7 +6,7 @@ import LeafletMap from '../components/maps/LeafletMap';
 import WeatherMapModal from '../components/maps/WeatherMapModal';
 import MapToolbar from '../components/maps/MapToolbar';
 import PlaceSearch, { PlaceSuggestion } from '../components/maps/PlaceSearch';
-import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint, inferSeason, fetchRainNearby, RainPoint } from '../services/weather';
+import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint, inferSeason, fetchRainNearby, RainPoint, generateWeatherInsights } from '../services/weather';
 
 const WeatherPage: React.FC = () => {
   const [place, setPlace] = useState<PlaceSuggestion | null>(null);
@@ -75,6 +75,29 @@ const WeatherPage: React.FC = () => {
               {typeof weather.tempC === 'number' && (
                 <Typography variant="h5" fontWeight={700}>{weather.tempC.toFixed(1)}°C</Typography>
               )}
+              <Grid container spacing={1} sx={{ mt: 1 }}>
+                {typeof weather.feelsLikeC === 'number' && (
+                  <Grid item><Typography variant="caption">Feels: {weather.feelsLikeC.toFixed(1)}°C</Typography></Grid>
+                )}
+                {typeof weather.humidity === 'number' && (
+                  <Grid item><Typography variant="caption">Humidity: {weather.humidity}%</Typography></Grid>
+                )}
+                {typeof weather.windSpeedMs === 'number' && (
+                  <Grid item><Typography variant="caption">Wind: {(weather.windSpeedMs * 3.6).toFixed(0)} km/h</Typography></Grid>
+                )}
+                {typeof weather.pressure === 'number' && (
+                  <Grid item><Typography variant="caption">Pressure: {weather.pressure} hPa</Typography></Grid>
+                )}
+                {typeof weather.clouds === 'number' && (
+                  <Grid item><Typography variant="caption">Clouds: {weather.clouds}%</Typography></Grid>
+                )}
+                {typeof weather.rain1h === 'number' && weather.rain1h > 0 && (
+                  <Grid item><Typography variant="caption">Rain(1h): {weather.rain1h.toFixed(1)} mm</Typography></Grid>
+                )}
+                {typeof weather.visibility === 'number' && (
+                  <Grid item><Typography variant="caption">Visibility: {Math.round(weather.visibility/1000)} km</Typography></Grid>
+                )}
+              </Grid>
             </>
           ) : (
             <Typography variant="body2">Type to search a place. Select one to see its weather and map.</Typography>
@@ -89,7 +112,18 @@ const WeatherPage: React.FC = () => {
             <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Air Quality</Typography>
               {aq ? (
-                <Box sx={{ color: '#e6f8ff' }}>AQI: <b>{aq.aqi}</b></Box>
+                <Box sx={{ color: '#e6f8ff' }}>
+                  AQI: <b>{aq.aqi}</b>
+                  {aq.components?.pm2_5 !== undefined && (
+                    <><br/>PM2.5: {Math.round(aq.components.pm2_5)} µg/m³</>
+                  )}
+                  {aq.components?.pm10 !== undefined && (
+                    <><br/>PM10: {Math.round(aq.components.pm10)} µg/m³</>
+                  )}
+                  {aq.components?.no2 !== undefined && (
+                    <><br/>NO₂: {Math.round(aq.components.no2)} µg/m³</>
+                  )}
+                </Box>
               ) : (
                 <Typography variant="body2" sx={{ color: '#9fb6bf' }}>Unavailable</Typography>
               )}
@@ -119,15 +153,18 @@ const WeatherPage: React.FC = () => {
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
-              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Health & Activities</Typography>
+              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>AI Insights</Typography>
               <Box sx={{ color: '#e6f8ff' }}>
                 {(() => {
-                  const t = weather?.tempC ?? 20;
-                  const aqi = aq?.aqi ?? 2;
-                  if (aqi >= 4) return 'Air quality is poor. Avoid outdoor strenuous activity.';
-                  if (t > 32) return 'It’s hot. Hydrate well and prefer light activities.';
-                  if (t < 8) return 'It’s cold. Dress warmly for outdoor activities.';
-                  return 'Conditions look fine for a walk or light run.';
+                  const gi = generateWeatherInsights(weather, aq);
+                  return (
+                    <>
+                      <Typography variant="body2" sx={{ mb: 1 }}>{gi.summary}</Typography>
+                      {gi.tips.map((t, i) => (
+                        <Typography key={i} variant="caption" display="block" sx={{ color: '#9fb6bf' }}>• {t}</Typography>
+                      ))}
+                    </>
+                  );
                 })()}
               </Box>
             </Paper>
