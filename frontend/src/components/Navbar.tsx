@@ -9,6 +9,12 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider as MDivider,
 } from '@mui/material';
 import {
   Dashboard,
@@ -18,6 +24,8 @@ import {
   ExitToApp,
   ColorLens,
   Public,
+  Menu as MenuIcon,
+  MoreHoriz,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -38,6 +46,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
   const { user } = useAppSelector((state) => state.auth);
   
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const fallbackInitial = user?.first_name?.[0] || user?.email?.[0] || 'U';
 
@@ -102,7 +111,16 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
           🌍 TraveLogy
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        {/* Desktop / tablet nav (scrollable if overflow) */}
+        <Box sx={{
+          display: { xs: 'none', md: 'flex' },
+          gap: 1,
+          maxWidth: '100%',
+          overflowX: 'auto',
+          flexWrap: 'nowrap',
+          '::-webkit-scrollbar': { height: 6 },
+          '::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.3)', borderRadius: 3 },
+        }}>
           {navigationItems.map((item) => (
             <Button
               key={item.path}
@@ -110,15 +128,22 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
               startIcon={item.icon}
               onClick={() => navigate(item.path)}
               sx={{
+                whiteSpace: 'nowrap',
                 backgroundColor: location.pathname === item.path ? 'rgba(255,255,255,0.1)' : 'transparent',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                },
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
+                flex: '0 0 auto',
               }}
             >
               {item.label}
             </Button>
           ))}
+        </Box>
+
+        {/* Mobile menu button */}
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
+          <IconButton color="inherit" aria-label="Open navigation menu" onClick={() => setMobileOpen(true)}>
+            <MenuIcon />
+          </IconButton>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
@@ -162,6 +187,22 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
           </Menu>
         </Box>
       </Toolbar>
+
+      {/* Mobile drawer */}
+      <Drawer anchor="left" open={mobileOpen} onClose={() => setMobileOpen(false)}>
+        <Box sx={{ width: 260 }} role="presentation" onClick={() => setMobileOpen(false)} onKeyDown={() => setMobileOpen(false)}>
+          <Typography variant="h6" sx={{ p: 2 }}>Menu</Typography>
+          <MDivider />
+          <List>
+            {navigationItems.map((item) => (
+              <ListItemButton key={item.path} onClick={() => navigate(item.path)} selected={location.pathname === item.path}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
     </AppBar>
   );
 };
