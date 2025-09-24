@@ -1,12 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Paper, Typography, Box, Grid } from '@mui/material';
 import GlobeMap from '../components/maps/GlobeMap';
+import LeafletMap from '../components/maps/LeafletMap';
+import WeatherMapModal from '../components/maps/WeatherMapModal';
 import PlaceSearch, { PlaceSuggestion } from '../components/maps/PlaceSearch';
 import { fetchWeather, WeatherData } from '../services/weather';
 
 const WeatherPage: React.FC = () => {
   const [place, setPlace] = useState<PlaceSuggestion | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [showRadar, setShowRadar] = useState<boolean>(!!process.env.REACT_APP_OWM_API_KEY);
+  const [maximized, setMaximized] = useState<boolean>(false);
+  const hasMapbox = !!process.env.REACT_APP_MAPBOX_TOKEN;
 
   useEffect(() => {
     let cancelled = false;
@@ -31,7 +36,40 @@ const WeatherPage: React.FC = () => {
         ☁️ Weather
       </Typography>
       <Paper sx={{ p: 2, mb: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
-        <PlaceSearch onSelect={setPlace} placeholder="Search city, place…" />
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Box sx={{ flex: 1, minWidth: 280 }}>
+            <PlaceSearch onSelect={setPlace} placeholder="Search city, place…" />
+          </Box>
+          <button
+            onClick={() => setShowRadar(v => !v)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1px solid #1de9b6',
+              background: showRadar ? '#1de9b6' : 'transparent',
+              color: showRadar ? '#0c0f14' : '#1de9b6',
+              fontWeight: 700
+            }}
+            aria-pressed={showRadar}
+            title="Toggle radar overlay"
+          >
+            {showRadar ? 'Radar ON' : 'Radar OFF'}
+          </button>
+          <button
+            onClick={() => setMaximized(true)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1px solid #1de9b6',
+              background: 'transparent',
+              color: '#1de9b6',
+              fontWeight: 700
+            }}
+            title="Maximize map"
+          >
+            ⛶ Maximize
+          </button>
+        </Box>
         <Box sx={{ mt: 2, color: '#e6f8ff', opacity: 0.85 }}>
           {weather ? (
             <>
@@ -48,15 +86,36 @@ const WeatherPage: React.FC = () => {
       </Paper>
 
       <Paper sx={{ p: 0, overflow: 'hidden', height: 460, background: '#0c0f14', border: '1px solid #1de9b6' }}>
-        <GlobeMap
-          latitude={place?.latitude}
-          longitude={place?.longitude}
-          label={mapLabel}
-          weather={weather}
-          dark
-          showRadar={!!process.env.REACT_APP_OWM_API_KEY}
-        />
+        {hasMapbox ? (
+          <GlobeMap
+            latitude={place?.latitude}
+            longitude={place?.longitude}
+            label={mapLabel}
+            weather={weather}
+            dark
+            showRadar={showRadar}
+          />
+        ) : (
+          <LeafletMap
+            latitude={place?.latitude}
+            longitude={place?.longitude}
+            label={mapLabel}
+            weather={weather}
+            dark
+            showRadar={showRadar}
+          />
+        )}
       </Paper>
+
+      <WeatherMapModal
+        open={maximized}
+        onClose={() => setMaximized(false)}
+        useMapbox={hasMapbox}
+        showRadar={showRadar}
+        place={place}
+        onSelectPlace={setPlace}
+        weather={weather}
+      />
     </Container>
   );
 };
