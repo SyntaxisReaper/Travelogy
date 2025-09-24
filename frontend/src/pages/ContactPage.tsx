@@ -38,7 +38,7 @@ const ContactPage: React.FC = () => {
           <IconButton component={Link} href="https://www.linkedin.com/in/ritesh-mishra-16161648lm" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
             <LinkedIn />
           </IconButton>
-          <IconButton component={Link} href="https://www.instagram.com/ritesh._mishra_" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <IconButton component={Link} href="https://www.instagram.com/skystack_.official/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <Instagram />
           </IconButton>
           <IconButton component={Link} href="https://github.com/Akash943-ct" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
