@@ -35,11 +35,15 @@ import { auth } from '../services/firebase';
 import type { Auth } from 'firebase/auth';
 
 interface NavbarProps {
-  themeStyle?: 'calm' | 'dynamic';
-  onToggleTheme?: () => void;
+  themeMode?: 'light' | 'dark';
+  themeFont?: 'tech' | 'system';
+  accent?: 'cyan' | 'pink' | 'green' | 'orange';
+  onChangeThemeMode?: (m: 'light' | 'dark') => void;
+  onChangeThemeFont?: (f: 'tech' | 'system') => void;
+  onChangeAccent?: (a: 'cyan' | 'pink' | 'green' | 'orange') => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) => {
+const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech', accent = 'cyan', onChangeThemeMode, onChangeThemeFont, onChangeAccent }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
@@ -47,6 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
   
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [themeAnchor, setThemeAnchor] = React.useState<null | HTMLElement>(null);
 
   const fallbackInitial = user?.first_name?.[0] || user?.email?.[0] || 'U';
 
@@ -159,7 +164,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
           <Button
             color="inherit"
             startIcon={<ColorLens />}
-            onClick={onToggleTheme}
+            onClick={(e) => setThemeAnchor(e.currentTarget)}
             sx={{
               mr: 1,
               backgroundColor: 'transparent',
@@ -167,8 +172,21 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
               textTransform: 'none',
             }}
           >
-            Theme: {themeStyle === 'dynamic' ? 'Dynamic' : 'Calm'}
+            Theme
           </Button>
+          <Menu anchorEl={themeAnchor} open={Boolean(themeAnchor)} onClose={() => setThemeAnchor(null)}>
+            <MenuItem disabled>Mode</MenuItem>
+            <MenuItem selected={themeMode==='dark'} onClick={() => { onChangeThemeMode?.('dark'); setThemeAnchor(null); }}>Dark</MenuItem>
+            <MenuItem selected={themeMode==='light'} onClick={() => { onChangeThemeMode?.('light'); setThemeAnchor(null); }}>Light</MenuItem>
+            <MenuItem disabled>Font</MenuItem>
+            <MenuItem selected={themeFont==='tech'} onClick={() => { onChangeThemeFont?.('tech'); setThemeAnchor(null); }}>Tech</MenuItem>
+            <MenuItem selected={themeFont==='system'} onClick={() => { onChangeThemeFont?.('system'); setThemeAnchor(null); }}>System</MenuItem>
+            <MenuItem disabled>Accent</MenuItem>
+            <MenuItem selected={accent==='cyan'} onClick={() => { onChangeAccent?.('cyan'); setThemeAnchor(null); }}>Cyan</MenuItem>
+            <MenuItem selected={accent==='pink'} onClick={() => { onChangeAccent?.('pink'); setThemeAnchor(null); }}>Pink</MenuItem>
+            <MenuItem selected={accent==='green'} onClick={() => { onChangeAccent?.('green'); setThemeAnchor(null); }}>Green</MenuItem>
+            <MenuItem selected={accent==='orange'} onClick={() => { onChangeAccent?.('orange'); setThemeAnchor(null); }}>Orange</MenuItem>
+          </Menu>
           <IconButton onClick={handleProfileClick} color="inherit">
             {authInstance ? (
               <FirebaseAvatarWithAuth fallback={fallbackInitial} />
@@ -213,12 +231,6 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
         </Box>
       </Drawer>
 
-      {/* Mobile floating menu button for extra visibility */}
-      <Box sx={{ display: { xs: 'flex', md: 'none' }, position: 'fixed', bottom: 16, left: 16, zIndex: (theme) => theme.zIndex.modal + 1 }}>
-        <IconButton color="primary" sx={{ bgcolor: 'background.paper', boxShadow: 3 }} aria-label="Open menu" onClick={() => setMobileOpen(true)}>
-          <MenuIcon />
-        </IconButton>
-      </Box>
     </AppBar>
   );
 };

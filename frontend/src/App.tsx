@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box, Container, Typography, Grid, Toolbar } from '@mui/material';
 import { motion } from 'framer-motion';
 import { colors, techTheme as calmTheme } from './styles/techTheme';
@@ -310,15 +310,35 @@ const App: React.FC = () => {
     activeConnections: 1247,
     dataProcessed: 15840,
   });
-  const [themeStyle, setThemeStyle] = useState<'calm' | 'dynamic'>(() => (localStorage.getItem('themeStyle') as 'calm' | 'dynamic') || 'calm');
-  const activeTheme = themeStyle === 'dynamic' ? dynamicTheme : calmTheme;
-  const toggleTheme = useCallback(() => {
-    setThemeStyle((prev) => {
-      const next = prev === 'calm' ? 'dynamic' : 'calm';
-      localStorage.setItem('themeStyle', next);
-      return next;
-    });
-  }, []);
+  // Theme controls
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => (localStorage.getItem('themeMode') as 'light' | 'dark') || 'dark');
+  const [themeFont, setThemeFont] = useState<'tech' | 'system'>(() => (localStorage.getItem('themeFont') as 'tech' | 'system') || 'tech');
+  const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange'>(() => (localStorage.getItem('accent') as any) || 'cyan');
+
+  const accentHex = useMemo(() => ({
+    cyan: '#1de9b6',
+    pink: '#ff4081',
+    green: '#66bb6a',
+    orange: '#ffa726',
+  }[accent]), [accent]);
+
+  const activeTheme = useMemo(() => createTheme({
+    palette: {
+      mode: themeMode,
+      primary: { main: accentHex },
+      background: {
+        default: themeMode === 'dark' ? '#0c0f14' : '#fafafa',
+        paper: themeMode === 'dark' ? '#11161e' : '#ffffff',
+      },
+    },
+    typography: {
+      fontFamily: themeFont === 'tech' ? '"Orbitron","Roboto Mono", monospace' : 'Roboto, Inter, Segoe UI, Arial, sans-serif',
+    },
+  }), [themeMode, themeFont, accentHex]);
+
+  const handleChangeThemeMode = useCallback((m: 'light'|'dark') => { setThemeMode(m); localStorage.setItem('themeMode', m); }, []);
+  const handleChangeThemeFont = useCallback((f: 'tech'|'system') => { setThemeFont(f); localStorage.setItem('themeFont', f); }, []);
+  const handleChangeAccent = useCallback((a: 'cyan'|'pink'|'green'|'orange') => { setAccent(a); localStorage.setItem('accent', a); }, []);
 
 
   useEffect(() => {
@@ -412,7 +432,14 @@ const App: React.FC = () => {
     <ThemeProvider theme={activeTheme}>
       <CssBaseline />
       <Router>
-        <Navbar themeStyle={themeStyle} onToggleTheme={toggleTheme} />
+        <Navbar
+          themeMode={themeMode}
+          themeFont={themeFont}
+          accent={accent}
+          onChangeThemeMode={handleChangeThemeMode}
+          onChangeThemeFont={handleChangeThemeFont}
+          onChangeAccent={handleChangeAccent}
+        />
         <ScrollToTop />
         <Toolbar />
         <Box sx={{ minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
