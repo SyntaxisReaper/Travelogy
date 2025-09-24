@@ -17,6 +17,7 @@ import {
   AccountCircle,
   ExitToApp,
   ColorLens,
+  Public,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -81,6 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
   const navigationItems = [
     { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
     { label: 'Trips', path: '/trips', icon: <DirectionsWalk /> },
+    { label: 'Weather', path: '/weather', icon: <Public /> },
     { label: 'Journal', path: '/journal', icon: <Analytics /> },
     { label: 'Analytics', path: '/analytics', icon: <Analytics /> },
     { label: 'Bookings', path: '/book', icon: <DirectionsWalk /> },

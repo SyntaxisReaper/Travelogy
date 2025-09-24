@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline, Box, Container, Typography, Grid, Toolbar } from '@mui/material';
 import { motion } from 'framer-motion';
-import { techTheme, colors } from './styles/techTheme';
+import { colors, techTheme as calmTheme } from './styles/techTheme';
 import LightweightBackground from './components/LightweightBackground';
 import GlitchText from './components/GlitchText';
 import HolographicCard from './components/HolographicCard';
@@ -16,7 +16,6 @@ import AnalyticsModal from './components/AnalyticsModal';
 import Navbar from './components/Navbar';
 import EmergencySOS from './components/EmergencySOS';
 import { dynamicTheme } from './styles/dynamicTheme';
-import { techTheme as calmTheme } from './styles/techTheme';
 // IMPORTANT: Lazy-load ProtectedRoute so Firebase isn't initialized at startup
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 // Lazy load pages for better performance
@@ -27,6 +26,7 @@ const TripsPage = lazy(() => import('./pages/TripsPage'));
 const TripsListPage = lazy(() => import('./pages/TripsListPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const WeatherPage = lazy(() => import('./pages/WeatherPage'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const BookingsPage = lazy(() => import('./pages/BookingsPage'));
@@ -469,6 +469,7 @@ const App: React.FC = () => {
                   <StoresPage />
                 </ProtectedRoute>
               } />
+              <Route path="/weather" element={<WeatherPage />} />
               <Route path="/" element={<LandingPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
