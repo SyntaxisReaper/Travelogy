@@ -34,6 +34,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase';
 import type { Auth } from 'firebase/auth';
 import { signOutUser } from '../services/authService';
+import ThemePanel from './ThemePanel';
 
 interface NavbarProps {
   themeMode?: 'light' | 'dark';
@@ -53,6 +54,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [themeAnchor, setThemeAnchor] = React.useState<null | HTMLElement>(null);
+  const [themeOpen, setThemeOpen] = React.useState(false);
 
   const fallbackInitial = user?.first_name?.[0] || user?.email?.[0] || 'U';
 
@@ -184,6 +186,9 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             Theme
           </Button>
           <Menu anchorEl={themeAnchor} open={Boolean(themeAnchor)} onClose={() => setThemeAnchor(null)}>
+            <MenuItem onClick={() => { setThemeOpen(true); setThemeAnchor(null); }}>
+              Advanced…
+            </MenuItem>
             <MenuItem disabled>Mode</MenuItem>
             <MenuItem selected={themeMode==='dark'} onClick={() => { onChangeThemeMode?.('dark'); setThemeAnchor(null); }}>Dark</MenuItem>
             <MenuItem selected={themeMode==='light'} onClick={() => { onChangeThemeMode?.('light'); setThemeAnchor(null); }}>Light</MenuItem>
@@ -261,6 +266,16 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
       </Drawer>
 
     </AppBar>
+      <ThemePanel
+        open={themeOpen}
+        onClose={() => setThemeOpen(false)}
+        themeMode={themeMode}
+        themeFont={themeFont}
+        accent={accent}
+        onChangeThemeMode={(m) => onChangeThemeMode?.(m)}
+        onChangeThemeFont={(f) => onChangeThemeFont?.(f)}
+        onChangeAccent={(a) => onChangeAccent?.(a)}
+      />
   );
 };
 

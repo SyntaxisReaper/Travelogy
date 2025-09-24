@@ -4,8 +4,9 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loadUser, updateUserProfile, clearError, updateConsent } from '../store/slices/authSlice';
 import { authAPI, bookingsAPI, gamificationAPI } from '../services/api';
 import EmergencySOS from '../components/EmergencySOS';
-import { auth, googleProvider } from '../services/firebase';
+import { auth, googleProvider, db } from '../services/firebase';
 import type { Auth, linkWithPopup, unlink } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const ProfilePage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -398,12 +399,28 @@ const ProfilePage: React.FC = () => {
           </Grid>
         </Grid>
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-          <Button variant="contained" onClick={() => {
-            const to = 'mailto:team@skystack.dev';
-            const subject = encodeURIComponent(fbSubject || 'Travelogy Feedback');
-            const from = user?.email || '';
-            const body = encodeURIComponent(`${fbMessage}\n\nFrom: ${from}`);
-            window.location.href = `${to}?subject=${subject}&body=${body}`;
+          <Button variant="contained" onClick={async () => {
+            try {
+              if (!db) throw new Error('No database configured');
+              if (!fbSubject || !fbMessage) throw new Error('Please fill subject and message');
+              await addDoc(collection(db, 'feedback'), {
+                subject: fbSubject,
+                message: fbMessage,
+                user_email: user?.email || null,
+                user_id: (auth as Auth | null)?.currentUser?.uid || null,
+                created_at: serverTimestamp(),
+              });
+              setSuccess('Feedback sent. Thank you!');
+              setFbSubject('');
+              setFbMessage('');
+            } catch (e) {
+              console.error('Feedback submit failed, using mailto fallback', e);
+              const to = 'mailto:team@skystack.dev';
+              const subject = encodeURIComponent(fbSubject || 'Travelogy Feedback');
+              const from = user?.email || '';
+              const body = encodeURIComponent(`${fbMessage}\n\nFrom: ${from}`);
+              window.location.href = `${to}?subject=${subject}&body=${body}`;
+            }
           }}>
             Send Feedback
           </Button>
