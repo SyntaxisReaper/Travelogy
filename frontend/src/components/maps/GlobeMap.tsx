@@ -95,10 +95,10 @@ const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather
     }
   }, [showRadar]);
 
-  if (!MAPBOX_TOKEN) {
+  if (!MAPBOX_TOKEN || (MAPBOX_TOKEN && MAPBOX_TOKEN.startsWith('sk.'))) {
     return (
-      <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0c0f14', color: '#e6f8ff', border: '1px solid #1de9b6', borderRadius: 12 }}>
-        Add REACT_APP_MAPBOX_TOKEN to use globe map.
+      <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0c0f14', color: '#e6f8ff', border: '1px solid #1de9b6', borderRadius: 12, textAlign: 'center', padding: 16 }}>
+        {(!MAPBOX_TOKEN) ? 'Add REACT_APP_MAPBOX_TOKEN to use globe map.' : 'Your Mapbox token starts with sk. Use a public token (pk.*) in the browser.'}
       </div>
     );
   }

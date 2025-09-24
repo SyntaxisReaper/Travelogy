@@ -16,7 +16,8 @@ const WeatherPage: React.FC = () => {
   const [rains, setRains] = useState<RainPoint[] | null>(null);
   const [showRadar, setShowRadar] = useState<boolean>(!!process.env.REACT_APP_OWM_API_KEY);
   const [maximized, setMaximized] = useState<boolean>(false);
-  const hasMapbox = !!process.env.REACT_APP_MAPBOX_TOKEN;
+  const mapboxToken = process.env.REACT_APP_MAPBOX_TOKEN;
+  const hasMapbox = !!mapboxToken && mapboxToken.startsWith('pk.');
   const [provider, setProvider] = useState<'mapbox' | 'leaflet' | 'both'>(() => (hasMapbox ? 'mapbox' : 'leaflet'));
   const [mapboxStyle, setMapboxStyle] = useState<'dark' | 'streets' | 'satellite'>('dark');
   const [leafletStyle, setLeafletStyle] = useState<'dark' | 'osm' | 'topo'>('dark');
@@ -159,7 +160,7 @@ const WeatherPage: React.FC = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 0, overflow: 'hidden', height: 460, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+            <Paper sx={{ p: 0, overflow: 'hidden', height: { xs: 260, md: 420 }, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <LeafletMap
                 latitude={place?.latitude}
                 longitude={place?.longitude}
@@ -174,7 +175,7 @@ const WeatherPage: React.FC = () => {
           </Grid>
         </Grid>
       ) : provider === 'mapbox' && hasMapbox ? (
-        <Paper sx={{ p: 0, overflow: 'hidden', height: { xs: 320, md: 460 }, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+        <Paper sx={{ p: 0, overflow: 'hidden', height: { xs: 260, md: 420 }, background: '#0c0f14', border: '1px solid #1de9b6' }}>
           <GlobeMap
             latitude={place?.latitude}
             longitude={place?.longitude}
@@ -187,7 +188,7 @@ const WeatherPage: React.FC = () => {
           />
         </Paper>
       ) : (
-        <Paper sx={{ p: 0, overflow: 'hidden', height: 460, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+        <Paper sx={{ p: 0, overflow: 'hidden', height: { xs: 260, md: 420 }, background: '#0c0f14', border: '1px solid #1de9b6' }}>
           <LeafletMap
             latitude={place?.latitude}
             longitude={place?.longitude}

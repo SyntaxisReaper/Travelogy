@@ -157,8 +157,8 @@ const PlaceSearch: React.FC<PlaceSearchProps> = ({ onSelect, placeholder = 'Sear
             padding: 4,
             margin: 0,
             listStyle: 'none',
-            zIndex: 50,
-            boxShadow: '0 12px 24px rgba(0,0,0,0.4)'
+            zIndex: 2000,
+            boxShadow: '0 12px 24px rgba(0,0,0,0.5)'
           }}
         >
           {suggestions.map((s, i) => (

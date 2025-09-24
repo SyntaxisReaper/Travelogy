@@ -225,7 +225,7 @@ const TripsPage: React.FC = () => {
         {/* Quick Weather Map Section */}
         <Typography variant="h6" sx={{ mb: 1 }}>Destination Weather</Typography>
         <Box>
-          <WeatherCard height={260} />
+          <WeatherCard height={200} />
         </Box>
       </Box>
       <Paper sx={{ height: 500, overflow: 'hidden' }}>
