@@ -11,6 +11,7 @@ export interface LeafletMapProps {
   dark?: boolean;
   showRadar?: boolean;
   tileName?: 'dark' | 'osm' | 'topo';
+  rainPoints?: Array<{ lat: number; lon: number; name?: string }>;
 }
 
 const OWM_API_KEY = process.env.REACT_APP_OWM_API_KEY;
@@ -40,7 +41,7 @@ const MapFlyTo: React.FC<{ center?: [number, number] }> = ({ center }) => {
   return null;
 };
 
-const LeafletMap: React.FC<LeafletMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar, tileName }) => {
+const LeafletMap: React.FC<LeafletMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar, tileName, rainPoints }) => {
   const hasTarget = typeof latitude === 'number' && typeof longitude === 'number';
   const center = hasTarget ? [latitude as number, longitude as number] : [20, 0];
   const tileUrl = tileName ? TILE_LAYERS[tileName] : (dark ? TILE_LAYERS.dark : TILE_LAYERS.osm);
@@ -63,6 +64,12 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ latitude, longitude, label, wea
             </Popup>
           </Marker>
         )}
+        {/* Rain markers */}
+        {Array.isArray(rainPoints) && rainPoints.map((p, i) => (
+          <Marker key={`rain-${i}`} position={[p.lat as any, p.lon as any] as any} icon={new L.DivIcon({ className: 'leaflet-rain', html: '<div style="font-size:16px">💧</div>' }) as any}>
+            <Popup>{p.name || 'Rain'}</Popup>
+          </Marker>
+        ))}
         <MapFlyTo center={hasTarget ? (center as any) : undefined} />
       </MapContainer>
     </div>

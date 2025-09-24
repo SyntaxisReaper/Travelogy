@@ -11,6 +11,7 @@ export interface GlobeMapProps {
   dark?: boolean;
   showRadar?: boolean;
   styleName?: 'dark' | 'streets' | 'satellite';
+  rainPoints?: Array<{ lat: number; lon: number; name?: string }>;
 }
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
@@ -25,7 +26,7 @@ const MAP_STYLES = {
 const RADAR_SOURCE_ID = 'owm-radar';
 const RADAR_LAYER_ID = 'owm-radar-layer';
 
-const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar, styleName }) => {
+const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar, styleName, rainPoints }) => {
   const [internalStyle, setInternalStyle] = useState(dark ? MAP_STYLES.dark : MAP_STYLES.streets);
   const style = styleName
     ? (styleName === 'dark' ? MAP_STYLES.dark : styleName === 'streets' ? MAP_STYLES.streets : MAP_STYLES.satellite)
@@ -128,6 +129,12 @@ const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather
             </div>
           </Popup>
         )}
+        {/* Rain markers */}
+        {Array.isArray(rainPoints) && rainPoints.map((p, i) => (
+          <Marker key={`rain-${i}`} longitude={p.lon} latitude={p.lat} anchor="bottom">
+            <div title={p.name || 'Rain'} style={{ fontSize: 16 }}>💧</div>
+          </Marker>
+        ))}
         <NavigationControl position="top-left" showCompass />
       </Map>
     </div>

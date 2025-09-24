@@ -6,13 +6,14 @@ import LeafletMap from '../components/maps/LeafletMap';
 import WeatherMapModal from '../components/maps/WeatherMapModal';
 import MapToolbar from '../components/maps/MapToolbar';
 import PlaceSearch, { PlaceSuggestion } from '../components/maps/PlaceSearch';
-import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint, inferSeason } from '../services/weather';
+import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint, inferSeason, fetchRainNearby, RainPoint } from '../services/weather';
 
 const WeatherPage: React.FC = () => {
   const [place, setPlace] = useState<PlaceSuggestion | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [aq, setAQ] = useState<AirQualityData | null>(null);
   const [fc, setFC] = useState<ForecastPoint[] | null>(null);
+  const [rains, setRains] = useState<RainPoint[] | null>(null);
   const [showRadar, setShowRadar] = useState<boolean>(!!process.env.REACT_APP_OWM_API_KEY);
   const [maximized, setMaximized] = useState<boolean>(false);
   const hasMapbox = !!process.env.REACT_APP_MAPBOX_TOKEN;
@@ -24,12 +25,13 @@ const WeatherPage: React.FC = () => {
     let cancelled = false;
     const run = async () => {
       if (!place) return;
-      const [w, air, fore] = await Promise.all([
+      const [w, air, fore, rainpts] = await Promise.all([
         fetchWeather(place.latitude, place.longitude),
         fetchAirQuality(place.latitude, place.longitude),
         fetchForecast(place.latitude, place.longitude),
+        fetchRainNearby(place.latitude, place.longitude),
       ]);
-      if (!cancelled) { setWeather(w); setAQ(air); setFC(fore); }
+      if (!cancelled) { setWeather(w); setAQ(air); setFC(fore); setRains(rainpts); }
     };
     run();
     return () => { cancelled = true; };
@@ -152,6 +154,7 @@ const WeatherPage: React.FC = () => {
                 dark
                 showRadar={showRadar}
                 styleName={mapboxStyle}
+                rainPoints={rains || undefined}
               />
             </Paper>
           </Grid>
@@ -165,6 +168,7 @@ const WeatherPage: React.FC = () => {
                 dark
                 showRadar={showRadar}
                 tileName={leafletStyle}
+                rainPoints={rains || undefined}
               />
             </Paper>
           </Grid>
@@ -179,6 +183,7 @@ const WeatherPage: React.FC = () => {
             dark
             showRadar={showRadar}
             styleName={mapboxStyle}
+            rainPoints={rains || undefined}
           />
         </Paper>
       ) : (
@@ -191,6 +196,7 @@ const WeatherPage: React.FC = () => {
             dark
             showRadar={showRadar}
             tileName={leafletStyle}
+            rainPoints={rains || undefined}
           />
         </Paper>
       )}

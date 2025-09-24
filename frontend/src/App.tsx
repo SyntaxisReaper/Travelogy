@@ -16,6 +16,7 @@ import ScrollToTop from './components/ScrollToTop';
 import AnalyticsModal from './components/AnalyticsModal';
 import Navbar from './components/Navbar';
 import EmergencySOS from './components/EmergencySOS';
+import { useAppSelector } from './store/hooks';
 import { dynamicTheme } from './styles/dynamicTheme';
 // IMPORTANT: Lazy-load ProtectedRoute so Firebase isn't initialized at startup
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
@@ -56,6 +57,7 @@ const LandingPageContentBase: React.FC<LandingPageContentProps> = ({
   handleViewAnalytics,
 }) => {
   const navigate = useNavigate();
+  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
 
   return (
     <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 10 }}>
@@ -247,10 +249,12 @@ const LandingPageContentBase: React.FC<LandingPageContentProps> = ({
               </NeonButton>
             </Box>
             
-            {/* Authentication Buttons */}
+          {/* Authentication Buttons */}
+          {!isAuthenticated && (
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
               <NeonButton
                 glowColor={colors.neonBlue}
+                textColor="#0c0f14"
                 size="medium"
                 onClick={() => navigate('/login')}
               >
@@ -258,12 +262,14 @@ const LandingPageContentBase: React.FC<LandingPageContentProps> = ({
               </NeonButton>
               <NeonButton
                 glowColor={colors.neonOrange}
+                textColor="#0c0f14"
                 size="medium"
                 onClick={() => navigate('/register')}
               >
                 🌟 Sign Up
               </NeonButton>
             </Box>
+          )}
           </motion.div>
 
           {/* Footer Info */}

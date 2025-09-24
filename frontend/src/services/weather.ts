@@ -12,6 +12,8 @@ export interface AirQualityData {
 
 export interface ForecastPoint { dt: number; tempC: number; description?: string }
 
+export interface RainPoint { lat: number; lon: number; name?: string }
+
 export function inferSeason(lat: number, date: Date = new Date()): 'Winter' | 'Spring' | 'Summer' | 'Autumn' {
   // Simple meteorological seasons; flip for southern hemisphere
   const m = date.getUTCMonth(); // 0-11
@@ -67,6 +69,24 @@ export async function fetchAirQuality(lat: number, lon: number): Promise<AirQual
     const json = await res.json();
     const item = json?.list?.[0];
     return item ? { aqi: item.main?.aqi, components: item.components } : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchRainNearby(lat: number, lon: number): Promise<RainPoint[] | null> {
+  if (!OWM_KEY) return null;
+  try {
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/find?lat=${lat}&lon=${lon}&cnt=50&appid=${OWM_KEY}&units=metric`);
+    const json = await res.json();
+    const list = Array.isArray(json?.list) ? json.list : [];
+    const rains = list.filter((it: any) => {
+      const hasRainMain = (it.weather || []).some((w: any) => String(w.main).toLowerCase().includes('rain'));
+      const hasRainField = !!it.rain;
+      return hasRainMain || hasRainField;
+    }).map((it: any) => ({ lat: it.coord?.lat, lon: it.coord?.lon, name: it.name }))
+    .filter((p: any) => typeof p.lat === 'number' && typeof p.lon === 'number');
+    return rains;
   } catch (e) {
     return null;
   }
