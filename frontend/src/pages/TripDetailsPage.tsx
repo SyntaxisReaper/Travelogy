@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Paper, Box, Stack, Chip, Button, TextField } from '@mui/material';
+import { uploadTripPhotos } from '../services/storage';
+import { storage } from '../services/firebase';
 import { useNotify } from '../contexts/NotifyContext';
 import { MapContainer, TileLayer, Polyline, Circle } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
@@ -48,6 +50,12 @@ const TripDetailsPage: React.FC = () => {
   const diaries: DiaryEntry[] = trip?.diaries || trip?.diary_entries || [];
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>('');
+
+  // New entry state
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [newCaptions, setNewCaptions] = useState<string[]>([]);
+  const [savingNew, setSavingNew] = useState(false);
 
   const beginEdit = (d: DiaryEntry) => {
     setEditingId(d.id || '');
@@ -143,6 +151,53 @@ const TripDetailsPage: React.FC = () => {
         }}>Export GPX</Button>
       </Stack>
 
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Typography variant="h6" gutterBottom>Add New Diary Entry</Typography>
+        <Stack spacing={1} sx={{ mb: 2 }}>
+          <TextField label="Note" value={editingText} onChange={(e) => setEditingText(e.target.value)} fullWidth multiline minRows={3} placeholder="Write about your trip..." />
+          <Button variant="outlined" component="label">Attach Photos<input type="file" hidden multiple accept="image/*" onChange={(e) => {
+            const list = e.target.files; if (!list) return; const files = Array.from(list);
+            setNewFiles(files);
+            setNewPreviews(files.map(f => URL.createObjectURL(f)));
+            setNewCaptions(new Array(files.length).fill(''));
+          }} /></Button>
+          {newPreviews.length > 0 && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {newPreviews.map((src, i) => (
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box component="img" src={src} alt={`preview-${i}`} sx={{ width: 120, height: 90, objectFit: 'cover', borderRadius: 1 }} />
+                  <TextField size="small" label="Caption" value={newCaptions[i] || ''} onChange={(e) => setNewCaptions(prev => { const next=[...prev]; next[i]=e.target.value; return next; })} fullWidth />
+                </Box>
+              ))}
+            </Box>
+          )}
+          <Box>
+            <Button variant="contained" disabled={savingNew} onClick={async () => {
+              if (!trip?.id) return;
+              setSavingNew(true);
+              try {
+                if (storage && newFiles.length > 0) {
+                  const urls = await uploadTripPhotos(trip.id, newFiles);
+                  const photos = urls.map((u, i) => ({ url: u, caption: newCaptions[i] }));
+                  await tripsAPI.addDiaryUrls(trip.id, editingText, photos as any);
+                } else {
+                  await tripsAPI.addDiary(trip.id, editingText, newFiles, newCaptions);
+                }
+                const t = await tripsAPI.getTripById(trip.id);
+                setTrip(t);
+                setEditingText('');
+                newPreviews.forEach(u => URL.revokeObjectURL(u));
+                setNewFiles([]); setNewPreviews([]); setNewCaptions([]);
+                notify('Diary entry added');
+              } catch {
+                notify('Failed to add diary entry');
+              } finally {
+                setSavingNew(false);
+              }
+            }}>Save Entry</Button>
+          </Box>
+        </Stack>
+      </Paper>
       <Paper sx={{ p: 2 }}>
         <Typography variant="h6" gutterBottom>Diary Entries</Typography>
         {!diaries?.length && (

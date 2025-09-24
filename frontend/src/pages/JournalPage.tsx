@@ -42,9 +42,44 @@ const JournalPage: React.FC = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        📓 Travel Journal
-      </Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Typography variant="h4">📓 Travel Journal</Typography>
+        {sorted.length > 0 && (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <button
+              onClick={() => {
+                const blob = new Blob([JSON.stringify(sorted, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'journal.json';
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #1de9b6', background: 'transparent', color: '#1de9b6', fontWeight: 700 }}
+            >
+              Download JSON
+            </button>
+            <button
+              onClick={() => {
+                const header = ['created_at', 'trip_id', 'note', 'photos'];
+                const rows = sorted.map(e => [e.created_at || '', e.trip_id || '', (e.note||'').replace(/\n/g,' '), Array.isArray(e.photos)? e.photos.join('|'):'' ]);
+                const csv = [header.join(','), ...rows.map(r => r.map(val => '"'+String(val).replace(/"/g,'""')+'"').join(','))].join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'journal.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #1de9b6', background: 'transparent', color: '#1de9b6', fontWeight: 700 }}
+            >
+              Download CSV
+            </button>
+          </Box>
+        )}
+      </Stack>
       {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
       {!sorted.length && (
         <Typography variant="body2" color="text.secondary">No journal entries yet. Start a trip and add a diary entry.</Typography>

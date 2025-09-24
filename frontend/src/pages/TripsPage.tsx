@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container, Typography, Paper, Box, Button, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider } from '@mui/material';
 import { MapContainer, TileLayer, Polyline, Circle, useMap } from 'react-leaflet';
+import WeatherCard from '../components/maps/WeatherCard';
 import { useNotify } from '../contexts/NotifyContext';
 import type { LatLngExpression } from 'leaflet';
 import { tripsAPI } from '../services/api';
@@ -220,6 +221,13 @@ const TripsPage: React.FC = () => {
         </Stack>
       </Paper>
 
+      <Box sx={{ mb: 2 }}>
+        {/* Quick Weather Map Section */}
+        <Typography variant="h6" sx={{ mb: 1 }}>Destination Weather</Typography>
+        <Box>
+          <WeatherCard height={260} />
+        </Box>
+      </Box>
       <Paper sx={{ height: 500, overflow: 'hidden' }}>
         <MapContainer center={center} zoom={16} style={{ height: '100%', width: '100%' }}>
           <TileLayer

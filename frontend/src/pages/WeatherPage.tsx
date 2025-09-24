@@ -5,11 +5,13 @@ import LeafletMap from '../components/maps/LeafletMap';
 import WeatherMapModal from '../components/maps/WeatherMapModal';
 import MapToolbar from '../components/maps/MapToolbar';
 import PlaceSearch, { PlaceSuggestion } from '../components/maps/PlaceSearch';
-import { fetchWeather, WeatherData } from '../services/weather';
+import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint } from '../services/weather';
 
 const WeatherPage: React.FC = () => {
   const [place, setPlace] = useState<PlaceSuggestion | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [aq, setAQ] = useState<AirQualityData | null>(null);
+  const [fc, setFC] = useState<ForecastPoint[] | null>(null);
   const [showRadar, setShowRadar] = useState<boolean>(!!process.env.REACT_APP_OWM_API_KEY);
   const [maximized, setMaximized] = useState<boolean>(false);
   const hasMapbox = !!process.env.REACT_APP_MAPBOX_TOKEN;
@@ -21,8 +23,12 @@ const WeatherPage: React.FC = () => {
     let cancelled = false;
     const run = async () => {
       if (!place) return;
-      const w = await fetchWeather(place.latitude, place.longitude);
-      if (!cancelled) setWeather(w);
+      const [w, air, fore] = await Promise.all([
+        fetchWeather(place.latitude, place.longitude),
+        fetchAirQuality(place.latitude, place.longitude),
+        fetchForecast(place.latitude, place.longitude),
+      ]);
+      if (!cancelled) { setWeather(w); setAQ(air); setFC(fore); }
     };
     run();
     return () => { cancelled = true; };
@@ -71,6 +77,47 @@ const WeatherPage: React.FC = () => {
           )}
         </Box>
       </Paper>
+
+      {/* Insights */}
+      {place && (
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Air Quality</Typography>
+              {aq ? (
+                <Box sx={{ color: '#e6f8ff' }}>AQI: <b>{aq.aqi}</b></Box>
+              ) : (
+                <Typography variant="body2" sx={{ color: '#9fb6bf' }}>Unavailable</Typography>
+              )}
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Forecast (next hours)</Typography>
+              <Box sx={{ color: '#e6f8ff', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                {(fc || []).slice(0, 6).map((p, i) => (
+                  <Box key={i} sx={{ fontSize: 12 }}>{new Date(p.dt*1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}: <b>{p.tempC.toFixed(0)}°C</b></Box>
+                ))}
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Health & Activities</Typography>
+              <Box sx={{ color: '#e6f8ff' }}>
+                {(() => {
+                  const t = weather?.tempC ?? 20;
+                  const aqi = aq?.aqi ?? 2;
+                  if (aqi >= 4) return 'Air quality is poor. Avoid outdoor strenuous activity.';
+                  if (t > 32) return 'It’s hot. Hydrate well and prefer light activities.';
+                  if (t < 8) return 'It’s cold. Dress warmly for outdoor activities.';
+                  return 'Conditions look fine for a walk or light run.';
+                })()}
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+      )}
 
       {provider === 'both' && hasMapbox ? (
         <Grid container spacing={2}>

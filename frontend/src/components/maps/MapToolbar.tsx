@@ -18,7 +18,7 @@ const btn = (active: boolean) => ({
   borderRadius: 8,
   border: '1px solid #1de9b6',
   background: active ? '#1de9b6' : 'transparent',
-  color: active ? '#0c0f14' : '#1de9b6',
+  color: active ? '#0c0f14' : '#e6f8ff',
   fontWeight: 700,
 });
 
