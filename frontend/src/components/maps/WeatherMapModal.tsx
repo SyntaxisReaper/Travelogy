@@ -13,9 +13,11 @@ interface WeatherMapModalProps {
   place: PlaceSuggestion | null;
   onSelectPlace: (p: PlaceSuggestion) => void;
   weather: { description?: string; tempC?: number; city?: string; country?: string } | null;
+  mapboxStyle?: 'dark' | 'streets' | 'satellite';
+  leafletStyle?: 'dark' | 'osm' | 'topo';
 }
 
-const WeatherMapModal: React.FC<WeatherMapModalProps> = ({ open, onClose, useMapbox, showRadar, place, onSelectPlace, weather }) => {
+const WeatherMapModal: React.FC<WeatherMapModalProps> = ({ open, onClose, useMapbox, showRadar, place, onSelectPlace, weather, mapboxStyle, leafletStyle }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl" PaperProps={{ sx: { background: '#0c0f14', border: '1px solid #1de9b6' } }}>
       <Box sx={{ position: 'relative', p: 2 }}>
@@ -34,6 +36,7 @@ const WeatherMapModal: React.FC<WeatherMapModalProps> = ({ open, onClose, useMap
               weather={weather}
               dark
               showRadar={showRadar}
+              styleName={mapboxStyle}
             />
           ) : (
             <LeafletMap
@@ -43,6 +46,7 @@ const WeatherMapModal: React.FC<WeatherMapModalProps> = ({ open, onClose, useMap
               weather={weather}
               dark
               showRadar={showRadar}
+              tileName={leafletStyle}
             />
           )}
         </Box>

@@ -10,6 +10,7 @@ export interface GlobeMapProps {
   weather?: { description?: string; tempC?: number; city?: string; country?: string } | null;
   dark?: boolean;
   showRadar?: boolean;
+  styleName?: 'dark' | 'streets' | 'satellite';
 }
 
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN;
@@ -24,8 +25,11 @@ const MAP_STYLES = {
 const RADAR_SOURCE_ID = 'owm-radar';
 const RADAR_LAYER_ID = 'owm-radar-layer';
 
-const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar }) => {
-  const [style, setStyle] = useState(dark ? MAP_STYLES.dark : MAP_STYLES.streets);
+const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar, styleName }) => {
+  const [internalStyle, setInternalStyle] = useState(dark ? MAP_STYLES.dark : MAP_STYLES.streets);
+  const style = styleName
+    ? (styleName === 'dark' ? MAP_STYLES.dark : styleName === 'streets' ? MAP_STYLES.streets : MAP_STYLES.satellite)
+    : internalStyle;
   const mapRef = useRef<any>(null);
   const [popupOpen, setPopupOpen] = useState(true);
 
@@ -100,13 +104,6 @@ const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather
 
   return (
     <div style={{ height: '100%', position: 'relative' }}>
-      <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 5, display: 'flex', gap: 8 }}>
-        <select value={style} onChange={(e) => setStyle(e.target.value)} style={{ background: '#0c0f14', color: '#e6f8ff', border: '1px solid #1de9b6', borderRadius: 8, padding: '6px 8px' }}>
-          <option value={MAP_STYLES.dark}>Dark</option>
-          <option value={MAP_STYLES.streets}>Streets</option>
-          <option value={MAP_STYLES.satellite}>Satellite</option>
-        </select>
-      </div>
       <Map
         key={mapKey}
         ref={mapRef}

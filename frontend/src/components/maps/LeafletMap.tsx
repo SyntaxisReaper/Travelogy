@@ -10,6 +10,7 @@ export interface LeafletMapProps {
   weather?: { description?: string; tempC?: number; city?: string; country?: string } | null;
   dark?: boolean;
   showRadar?: boolean;
+  tileName?: 'dark' | 'osm' | 'topo';
 }
 
 const OWM_API_KEY = process.env.REACT_APP_OWM_API_KEY;
@@ -39,14 +40,15 @@ const MapFlyTo: React.FC<{ center?: [number, number] }> = ({ center }) => {
   return null;
 };
 
-const LeafletMap: React.FC<LeafletMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar }) => {
+const LeafletMap: React.FC<LeafletMapProps> = ({ latitude, longitude, label, weather, dark = true, showRadar, tileName }) => {
   const hasTarget = typeof latitude === 'number' && typeof longitude === 'number';
   const center = hasTarget ? [latitude as number, longitude as number] : [20, 0];
+  const tileUrl = tileName ? TILE_LAYERS[tileName] : (dark ? TILE_LAYERS.dark : TILE_LAYERS.osm);
 
   return (
     <div style={{ height: '100%', position: 'relative' }}>
       <MapContainer center={center as any} zoom={hasTarget ? 10 : 2} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
-        <TileLayer url={dark ? TILE_LAYERS.dark : TILE_LAYERS.osm} attribution='&copy; OpenStreetMap contributors' />
+        <TileLayer url={tileUrl} attribution='&copy; OpenStreetMap contributors' />
         {showRadar && !!OWM_API_KEY && (
           <TileLayer url={radarUrl} opacity={0.7} attribution='Radar data © OpenWeatherMap' />
         )}
