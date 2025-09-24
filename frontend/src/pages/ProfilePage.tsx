@@ -27,6 +27,10 @@ const ProfilePage: React.FC = () => {
   });
   const [savingConsent, setSavingConsent] = useState(false);
 
+  // Feedback
+  const [fbSubject, setFbSubject] = useState('');
+  const [fbMessage, setFbMessage] = useState('');
+
   // Reservations
   const [reservations, setReservations] = useState<any[]>([]);
   useEffect(() => {
@@ -375,6 +379,39 @@ const ProfilePage: React.FC = () => {
         <Box>
           <EmergencySOS mode="inline" />
         </Box>
+      </Paper>
+
+      {/* Feedback Section */}
+      <Paper sx={{ p: 3, mt: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Feedback
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Tell Team SkyStack what you think. Share bugs, ideas, or general comments.
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField label="Subject" fullWidth value={fbSubject} onChange={(e) => setFbSubject(e.target.value)} />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField label="Message" fullWidth multiline minRows={4} value={fbMessage} onChange={(e) => setFbMessage(e.target.value)} />
+          </Grid>
+        </Grid>
+        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+          <Button variant="contained" onClick={() => {
+            const to = 'mailto:team@skystack.dev';
+            const subject = encodeURIComponent(fbSubject || 'Travelogy Feedback');
+            const from = user?.email || '';
+            const body = encodeURIComponent(`${fbMessage}\n\nFrom: ${from}`);
+            window.location.href = `${to}?subject=${subject}&body=${body}`;
+          }}>
+            Send Feedback
+          </Button>
+          <Button variant="text" onClick={() => {
+            setFbSubject('');
+            setFbMessage('');
+          }}>Clear</Button>
+        </Stack>
       </Paper>
 
       <Paper sx={{ p: 3, mt: 3 }}>

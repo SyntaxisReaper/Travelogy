@@ -8,15 +8,15 @@ const ContactPage: React.FC = () => {
   const [message, setMessage] = useState('');
 
   const mailtoHref = useMemo(() => {
-    const to = 'mailto:ritesh@example.com';
-    const subject = encodeURIComponent('Contact from Travelogy');
+    const to = 'mailto:team@skystack.dev';
+    const subject = encodeURIComponent('Contact Team SkyStack');
     const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
     return `${to}?subject=${subject}&body=${body}`;
   }, [name, email, message]);
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>Contact Ritesh Kumar Mishra</Typography>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>Contact Team SkyStack</Typography>
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>Get in touch</Typography>

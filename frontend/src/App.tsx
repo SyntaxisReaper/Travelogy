@@ -18,6 +18,9 @@ import Navbar from './components/Navbar';
 import EmergencySOS from './components/EmergencySOS';
 import { useAppSelector } from './store/hooks';
 import { dynamicTheme } from './styles/dynamicTheme';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from './services/firebase';
+import type { Auth as FirebaseAuth } from 'firebase/auth';
 // IMPORTANT: Lazy-load ProtectedRoute so Firebase isn't initialized at startup
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 // Lazy load pages for better performance
@@ -57,7 +60,9 @@ const LandingPageContentBase: React.FC<LandingPageContentProps> = ({
   handleViewAnalytics,
 }) => {
   const navigate = useNavigate();
-  const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
+  // Prefer Firebase auth state for instantaneous UI visibility of auth-dependent buttons
+  const [fbUser] = useAuthState(auth as FirebaseAuth);
+  const isLoggedIn = !!fbUser;
 
   return (
     <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 10 }}>
@@ -250,7 +255,7 @@ const LandingPageContentBase: React.FC<LandingPageContentProps> = ({
             </Box>
             
           {/* Authentication Buttons */}
-          {!isAuthenticated && (
+          {!isLoggedIn && (
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
               <NeonButton
                 glowColor={colors.neonBlue}
@@ -536,7 +541,7 @@ const App: React.FC = () => {
       {/* Footer */}
       <Box component="footer" sx={{ textAlign: 'center', py: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
         <Typography variant="body2">
-          © {new Date().getFullYear()} Travelogy — <a href="/contact" style={{ color: '#1de9b6', textDecoration: 'none' }}>Contact Ritesh Kumar Mishra</a>
+          © {new Date().getFullYear()} Travelogy — <a href="/contact" style={{ color: '#1de9b6', textDecoration: 'none' }}>Contact Team SkyStack</a>
         </Typography>
       </Box>
     </ThemeProvider>

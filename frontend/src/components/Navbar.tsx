@@ -33,6 +33,7 @@ import { logout } from '../store/slices/authSlice';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase';
 import type { Auth } from 'firebase/auth';
+import { signOutUser } from '../services/authService';
 
 interface NavbarProps {
   themeMode?: 'light' | 'dark';
@@ -56,6 +57,8 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
   const fallbackInitial = user?.first_name?.[0] || user?.email?.[0] || 'U';
 
   const authInstance = auth as Auth | null;
+  const [fbUser] = useAuthState(auth as Auth);
+  const isLoggedIn = !!fbUser || !!user;
 
   const FirebaseAvatarWithAuth: React.FC<{ fallback: string }> = ({ fallback }) => {
     const [fbUser] = useAuthState(auth as Auth);
@@ -82,8 +85,14 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    try {
+      // Sign out from Firebase if authenticated there
+      await signOutUser();
+    } catch (_) {
+      // ignore firebase signout errors
+    }
+    await dispatch(logout());
     handleClose();
     navigate('/');
   };
@@ -187,31 +196,45 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             <MenuItem selected={accent==='green'} onClick={() => { onChangeAccent?.('green'); setThemeAnchor(null); }}>Green</MenuItem>
             <MenuItem selected={accent==='orange'} onClick={() => { onChangeAccent?.('orange'); setThemeAnchor(null); }}>Orange</MenuItem>
           </Menu>
-          <IconButton onClick={handleProfileClick} color="inherit">
-            {authInstance ? (
-              <FirebaseAvatarWithAuth fallback={fallbackInitial} />
-            ) : (
-              <FallbackAvatar fallback={fallbackInitial} />
-            )}
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-          >
-            <MenuItem onClick={handleProfileNavigate}>
-              <AccountCircle sx={{ mr: 1 }} />
-              Profile
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <ExitToApp sx={{ mr: 1 }} />
-              Logout
-            </MenuItem>
-          </Menu>
+
+          {isLoggedIn ? (
+            <>
+              <IconButton onClick={handleProfileClick} color="inherit">
+                {authInstance ? (
+                  <FirebaseAvatarWithAuth fallback={fallbackInitial} />
+                ) : (
+                  <FallbackAvatar fallback={fallbackInitial} />
+                )}
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem onClick={handleProfileNavigate}>
+                  <AccountCircle sx={{ mr: 1 }} />
+                  Profile
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <ExitToApp sx={{ mr: 1 }} />
+                  Logout
+                </MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <>
+              <Button color="inherit" onClick={() => navigate('/login')} sx={{ textTransform: 'none' }}>
+                Login
+              </Button>
+              <Button color="inherit" variant="outlined" onClick={() => navigate('/register')} sx={{ textTransform: 'none', borderColor: 'rgba(255,255,255,0.5)' }}>
+                Sign Up
+              </Button>
+            </>
+          )}
         </Box>
       </Toolbar>
 
