@@ -12,6 +12,26 @@ export interface AirQualityData {
 
 export interface ForecastPoint { dt: number; tempC: number; description?: string }
 
+export function inferSeason(lat: number, date: Date = new Date()): 'Winter' | 'Spring' | 'Summer' | 'Autumn' {
+  // Simple meteorological seasons; flip for southern hemisphere
+  const m = date.getUTCMonth(); // 0-11
+  const north = lat >= 0;
+  // Seasons for northern hemisphere: DJF winter, MAM spring, JJA summer, SON autumn
+  let season: 'Winter' | 'Spring' | 'Summer' | 'Autumn';
+  if (m === 11 || m <= 1) season = 'Winter';
+  else if (m >= 2 && m <= 4) season = 'Spring';
+  else if (m >= 5 && m <= 7) season = 'Summer';
+  else season = 'Autumn';
+  if (!north) {
+    // Opposite seasons in southern hemisphere
+    season = season === 'Winter' ? 'Summer'
+      : season === 'Summer' ? 'Winter'
+      : season === 'Spring' ? 'Autumn'
+      : 'Spring';
+  }
+  return season;
+}
+
 const OWM_KEY = process.env.REACT_APP_OWM_API_KEY;
 
 export async function fetchWeather(lat: number, lon: number): Promise<WeatherData | null> {

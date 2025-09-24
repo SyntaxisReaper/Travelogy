@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Paper, Typography, Box, Grid } from '@mui/material';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import GlobeMap from '../components/maps/GlobeMap';
 import LeafletMap from '../components/maps/LeafletMap';
 import WeatherMapModal from '../components/maps/WeatherMapModal';
 import MapToolbar from '../components/maps/MapToolbar';
 import PlaceSearch, { PlaceSuggestion } from '../components/maps/PlaceSearch';
-import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint } from '../services/weather';
+import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint, inferSeason } from '../services/weather';
 
 const WeatherPage: React.FC = () => {
   const [place, setPlace] = useState<PlaceSuggestion | null>(null);
@@ -92,12 +93,24 @@ const WeatherPage: React.FC = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6', height: { xs: 200, md: 240 } }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Forecast (next hours)</Typography>
-              <Box sx={{ color: '#e6f8ff', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                {(fc || []).slice(0, 6).map((p, i) => (
-                  <Box key={i} sx={{ fontSize: 12 }}>{new Date(p.dt*1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}: <b>{p.tempC.toFixed(0)}°C</b></Box>
-                ))}
+              <Box sx={{ height: { xs: 140, md: 180 } }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={(fc || []).slice(0, 8).map(p => ({ time: new Date(p.dt*1000).toLocaleTimeString([], { hour: '2-digit' }), temp: Math.round(p.tempC) }))}>
+                    <defs>
+                      <linearGradient id="gradTemp" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#1de9b6" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#1de9b6" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1de9b666" />
+                    <XAxis dataKey="time" stroke="#e6f8ff" />
+                    <YAxis stroke="#e6f8ff" />
+                    <Tooltip contentStyle={{ background: '#0c0f14', border: '1px solid #1de9b6', color: '#e6f8ff' }} />
+                    <Area type="monotone" dataKey="temp" stroke="#1de9b6" fill="url(#gradTemp)" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
               </Box>
             </Paper>
           </Grid>
@@ -113,6 +126,14 @@ const WeatherPage: React.FC = () => {
                   if (t < 8) return 'It’s cold. Dress warmly for outdoor activities.';
                   return 'Conditions look fine for a walk or light run.';
                 })()}
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Current Season</Typography>
+              <Box sx={{ color: '#e6f8ff' }}>
+                {place ? inferSeason(place.latitude, new Date()) : '—'}
               </Box>
             </Paper>
           </Grid>

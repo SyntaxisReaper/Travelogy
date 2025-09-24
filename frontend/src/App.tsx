@@ -10,6 +10,7 @@ import HolographicCard from './components/HolographicCard';
 import NeonButton from './components/NeonButton';
 import TechLoader from './components/TechLoader';
 import NotificationSystem from './components/NotificationSystem';
+import ContactFab from './components/ContactFab';
 import { NotifyProvider } from './contexts/NotifyContext';
 import ScrollToTop from './components/ScrollToTop';
 import AnalyticsModal from './components/AnalyticsModal';
@@ -494,7 +495,17 @@ const App: React.FC = () => {
           open={showAnalytics}
           onClose={() => setShowAnalytics(false)}
         />
+
+        {/* Contact floating button */}
+        <ContactFab />
       </Router>
+      
+      {/* Footer */}
+      <Box component="footer" sx={{ textAlign: 'center', py: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
+        <Typography variant="body2">
+          © {new Date().getFullYear()} Travelogy — <a href="/contact" style={{ color: '#1de9b6', textDecoration: 'none' }}>Contact Ritesh Kumar Mishra</a>
+        </Typography>
+      </Box>
     </ThemeProvider>
   );
 };
