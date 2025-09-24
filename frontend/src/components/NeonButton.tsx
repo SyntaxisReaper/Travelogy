@@ -9,6 +9,7 @@ interface NeonButtonProps extends ButtonProps {
   pulseAnimation?: boolean;
   rippleEffect?: boolean;
   borderAnimation?: boolean;
+  textColor?: string;
 }
 
 const neonPulse = keyframes`
@@ -58,7 +59,7 @@ const ripple = keyframes`
 `;
 
 const NeonButtonContainer = styled(Button)<NeonButtonProps>(
-  ({ glowColor = colors.neonCyan, pulseAnimation = false, borderAnimation = false }) => ({
+  ({ glowColor = colors.neonCyan, pulseAnimation = false, borderAnimation = false, textColor = '#e6f8ff' }) => ({
     position: 'relative',
     padding: '12px 24px',
     background: `
@@ -71,7 +72,7 @@ const NeonButtonContainer = styled(Button)<NeonButtonProps>(
     backdropFilter: 'blur(10px)',
     border: `2px solid ${glowColor}`,
     borderRadius: '8px',
-    color: glowColor,
+    color: textColor,
     fontFamily: '"Orbitron", "Roboto Mono", monospace',
     fontWeight: 600,
     letterSpacing: '0.1em',
@@ -182,6 +183,7 @@ const NeonButton: React.FC<NeonButtonProps> = ({
   borderAnimation,
   onClick,
   sx,
+  textColor,
   ...buttonProps
 }) => {
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
@@ -218,6 +220,7 @@ const NeonButton: React.FC<NeonButtonProps> = ({
         glowColor={glowColor}
         pulseAnimation={pulseAnimation}
         borderAnimation={borderAnimation}
+        textColor={textColor}
         onClick={handleClick}
         sx={{
           position: 'relative',

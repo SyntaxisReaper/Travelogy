@@ -87,6 +87,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeStyle = 'calm', onToggleTheme }) =
     { label: 'Analytics', path: '/analytics', icon: <Analytics /> },
     { label: 'Bookings', path: '/book', icon: <DirectionsWalk /> },
     { label: 'Stores', path: '/stores', icon: <DirectionsWalk /> },
+    { label: 'Contact', path: '/contact', icon: <AccountCircle /> },
   ];
 
   return (

@@ -27,6 +27,7 @@ const TripsListPage = lazy(() => import('./pages/TripsListPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const WeatherPage = lazy(() => import('./pages/WeatherPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const BookingsPage = lazy(() => import('./pages/BookingsPage'));
@@ -470,6 +471,7 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               } />
               <Route path="/weather" element={<WeatherPage />} />
+              <Route path="/contact" element={<ContactPage />} />
               <Route path="/" element={<LandingPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -122,7 +122,7 @@ const WeatherPage: React.FC = () => {
       {provider === 'both' && hasMapbox ? (
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 0, overflow: 'hidden', height: 460, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+      <Paper sx={{ p: 0, overflow: 'hidden', height: { xs: 320, md: 460 }, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <GlobeMap
                 latitude={place?.latitude}
                 longitude={place?.longitude}
@@ -149,7 +149,7 @@ const WeatherPage: React.FC = () => {
           </Grid>
         </Grid>
       ) : provider === 'mapbox' && hasMapbox ? (
-        <Paper sx={{ p: 0, overflow: 'hidden', height: 460, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+        <Paper sx={{ p: 0, overflow: 'hidden', height: { xs: 320, md: 460 }, background: '#0c0f14', border: '1px solid #1de9b6' }}>
           <GlobeMap
             latitude={place?.latitude}
             longitude={place?.longitude}

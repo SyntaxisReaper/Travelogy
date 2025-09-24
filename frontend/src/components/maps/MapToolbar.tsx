@@ -20,6 +20,8 @@ const btn = (active: boolean) => ({
   background: active ? '#1de9b6' : 'transparent',
   color: active ? '#0c0f14' : '#e6f8ff',
   fontWeight: 700,
+  cursor: 'pointer',
+  textShadow: active ? 'none' : '0 0 6px #1de9b6',
 });
 
 const selectStyle: React.CSSProperties = {

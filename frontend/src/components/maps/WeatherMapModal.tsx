@@ -27,7 +27,7 @@ const WeatherMapModal: React.FC<WeatherMapModalProps> = ({ open, onClose, useMap
         <Box sx={{ mb: 2 }}>
           <PlaceSearch onSelect={onSelectPlace} placeholder="Search city, place…" />
         </Box>
-        <Box sx={{ height: '70vh', border: '1px solid #1de9b6' }}>
+        <Box sx={{ height: { xs: '60vh', md: '70vh' }, border: '1px solid #1de9b6' }}>
           {useMapbox ? (
             <GlobeMap
               latitude={place?.latitude}
