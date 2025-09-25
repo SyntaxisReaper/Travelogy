@@ -237,40 +237,43 @@ const LoginPage: React.FC = () => {
 
                 <Divider sx={{ my: 3, borderColor: colors.neonCyan + '30' }} />
 
-                {/* Social Login Buttons */}
-                <Typography variant="body2" sx={{ textAlign: 'center', mb: 2, opacity: 0.8 }}>
-                  Or continue with
-                </Typography>
-                
-                <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading}
-                    glowColor={colors.glitchRed}
-                    size="medium"
-                    onClick={handleGoogleSignIn}
-                  >
-                    🌐 Google
-                  </NeonButton>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading}
-                    glowColor={colors.neonBlue}
-                    size="medium"
-                    onClick={handleFacebookSignIn}
-                  >
-                    📘 Facebook
-                  </NeonButton>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading}
-                    glowColor={colors.neonCyan}
-                    size="medium"
-                    onClick={handleTwitterSignIn}
-                  >
-                    🐦 Twitter
-                  </NeonButton>
-                </Box>
+                {/* Social Login Buttons (only when Firebase is configured) */}
+                {(auth as FirebaseAuth | null) && (
+                  <>
+                    <Typography variant="body2" sx={{ textAlign: 'center', mb: 2, opacity: 0.8 }}>
+                      Or continue with
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+                      <NeonButton
+                        fullWidth
+                        disabled={isLoading}
+                        glowColor={colors.glitchRed}
+                        size="medium"
+                        onClick={handleGoogleSignIn}
+                      >
+                        🌐 Google
+                      </NeonButton>
+                      <NeonButton
+                        fullWidth
+                        disabled={isLoading}
+                        glowColor={colors.neonBlue}
+                        size="medium"
+                        onClick={handleFacebookSignIn}
+                      >
+                        📘 Facebook
+                      </NeonButton>
+                      <NeonButton
+                        fullWidth
+                        disabled={isLoading}
+                        glowColor={colors.neonCyan}
+                        size="medium"
+                        onClick={handleTwitterSignIn}
+                      >
+                        🐦 Twitter
+                      </NeonButton>
+                    </Box>
+                  </>
+                )}
 
                 <Divider sx={{ my: 2, borderColor: colors.neonCyan + '30' }} />
 

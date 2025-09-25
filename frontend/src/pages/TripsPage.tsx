@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container, Typography, Paper, Box, Button, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider } from '@mui/material';
-import { MapContainer, TileLayer, Polyline, Circle, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Circle, useMap } from 'react-leaflet';import GlobeMap from '../components/maps/GlobeMap';
 import WeatherCard from '../components/maps/WeatherCard';
 import { useNotify } from '../contexts/NotifyContext';
 import type { LatLngExpression } from 'leaflet';
@@ -228,6 +228,12 @@ const TripsPage: React.FC = () => {
           <WeatherCard height={200} />
         </Box>
       </Box>
+      {/* Globe preview (if Mapbox token available) */}
+      {process.env.REACT_APP_MAPBOX_TOKEN && process.env.REACT_APP_MAPBOX_TOKEN.startsWith('pk.') && (
+        <Paper sx={{ height: 220, overflow: 'hidden', mb: 2 }}>
+          <GlobeMap latitude={currentPos?.lat || initialCenter?.[0]} longitude={currentPos?.lon || initialCenter?.[1]} label="Current Location" dark showRadar={false} styleName="dark" />
+        </Paper>
+      )}
       <Paper sx={{ height: 500, overflow: 'hidden' }}>
         <MapContainer center={center} zoom={16} style={{ height: '100%', width: '100%' }}>
           <TileLayer
