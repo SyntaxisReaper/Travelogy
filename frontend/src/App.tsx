@@ -456,7 +456,13 @@ const App: React.FC = () => {
             }
           }
         }
-      } catch {}
+      } catch (e) {
+        if (process.env.NODE_ENV !== 'production') {
+          // Ignore redirect init errors; helpful in dev for visibility
+          // eslint-disable-next-line no-console
+          console.debug('redirect init check error', e);
+        }
+      }
     })();
   }, []);
 

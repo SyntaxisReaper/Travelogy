@@ -117,7 +117,12 @@ const emojiFor = (subtype?: string) => {
             setNearby(res);
             lastNearbyRef.current = { lat: cur[0], lon: cur[1] };
             lastNearbyAtRef.current = now;
-          } catch {}
+          } catch (e) {
+            if (process.env.NODE_ENV !== 'production') {
+              // eslint-disable-next-line no-console
+              console.debug('nearby fetch error', e);
+            }
+          }
         }
       },
       (err) => {
@@ -347,9 +352,9 @@ const emojiFor = (subtype?: string) => {
         }}>Export GeoJSON</Button>
         <Button size="small" variant="outlined" onClick={() => {
           if (path.length < 2) return;
-          const header = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n`;
-          const open = `<gpx version=\"1.1\" creator=\"Travelogy\"><trk><name>Active Trip</name><trkseg>`;
-          const seg = path.map((p) => `<trkpt lat=\"${p[0]}\" lon=\"${p[1]}\"></trkpt>`).join('');
+          const header = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+          const open = `<gpx version="1.1" creator="Travelogy"><trk><name>Active Trip</name><trkseg>`;
+          const seg = path.map((p) => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('');
           const close = `</trkseg></trk></gpx>`;
           const gpx = header + open + seg + close;
           const blob = new Blob([gpx], { type: 'application/gpx+xml' });
@@ -373,7 +378,12 @@ const emojiFor = (subtype?: string) => {
               text: `I just tracked a trip of ${distanceKm} km with Travelogy!`,
               url: shareUrl,
             });
-          } catch (e) {}
+          } catch (e) {
+            if (process.env.NODE_ENV !== 'production') {
+              // eslint-disable-next-line no-console
+              console.debug('share cancelled or failed', e);
+            }
+          }
         }}>Share Trip</Button>
       </Stack>
 
