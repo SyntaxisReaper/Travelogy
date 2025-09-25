@@ -144,8 +144,8 @@ export const signInWithGoogle = async (): Promise<User> => {
       const code = err?.code || err?.message || '';
       if (String(code).includes('popup-blocked') || String(code).includes('popup-closed-by-user')) {
         await signInWithRedirect(auth!, googleProvider);
-        // The page will redirect; return a never-resolving Promise placeholder.
-        return new Promise<User>(() => { /* redirecting */ });
+        // The page will redirect; return a never-resolving Promise placeholder (typed without TS generics)
+        return new Promise(() => { /* redirecting */ }) as unknown as Promise<User>;
       }
       throw err;
     }
