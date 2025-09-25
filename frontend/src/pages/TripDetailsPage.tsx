@@ -4,7 +4,7 @@ import { Container, Typography, Paper, Box, Stack, Chip, Button, TextField } fro
 import { uploadTripPhotos } from '../services/storage';
 import { storage } from '../services/firebase';
 import { useNotify } from '../contexts/NotifyContext';
-import { MapContainer, TileLayer, Polyline, Circle } from 'react-leaflet';import GlobeMap from '../components/maps/GlobeMap';
+import { MapContainer, TileLayer, Polyline, Circle } from 'react-leaflet';
 import type { LatLngExpression } from 'leaflet';
 import { tripsAPI } from '../services/api';
 
@@ -105,12 +105,6 @@ const TripDetailsPage: React.FC = () => {
 
       {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
 
-      {/* Globe preview (if Mapbox token available) */}
-      {process.env.REACT_APP_MAPBOX_TOKEN && process.env.REACT_APP_MAPBOX_TOKEN.startsWith('pk.') && Array.isArray(center) && (
-        <Paper sx={{ height: 220, overflow: 'hidden', mb: 2 }}>
-          <GlobeMap latitude={(center as any)[0]} longitude={(center as any)[1]} label="Trip Start" dark showRadar={false} styleName="dark" />
-        </Paper>
-      )}
       <Paper sx={{ height: 400, overflow: 'hidden', mb: 2 }}>
         <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%' }}>
           <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

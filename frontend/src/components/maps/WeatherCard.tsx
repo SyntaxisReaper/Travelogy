@@ -48,11 +48,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ height = 320 }) => {
         )}
       </Box>
       <Box sx={{ height: { xs: Math.min(280, height), md: height } }}>
-        {hasMapbox ? (
-          <GlobeMap latitude={place?.latitude} longitude={place?.longitude} label={label} weather={weather} dark showRadar={!!process.env.REACT_APP_OWM_API_KEY} />
-        ) : (
-          <LeafletMap latitude={place?.latitude} longitude={place?.longitude} label={label} weather={weather} dark showRadar={!!process.env.REACT_APP_OWM_API_KEY} />
-        )}
+        <LeafletMap latitude={place?.latitude} longitude={place?.longitude} label={label} weather={weather} dark showRadar={!!process.env.REACT_APP_OWM_API_KEY} />
       </Box>
     </Paper>
   );

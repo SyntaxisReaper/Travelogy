@@ -180,16 +180,39 @@ const emojiFor = (subtype?: string) => {
   const notify = useNotify();
 
   const handleSaveDiary = async () => {
-    if (!activeTripId) return;
+    if (!note && files.length === 0) return;
     setSavingDiary(true);
     try {
-      if (storage) {
-        const urls = await uploadTripPhotos(activeTripId, files);
-        const photos = urls.map((u, i) => ({ url: u, caption: captions[i] }));
-        await tripsAPI.addDiaryUrls(activeTripId, note, photos);
-      } else {
-        await tripsAPI.addDiary(activeTripId, note, files, captions);
+      let tripId = activeTripId;
+      if (!tripId) {
+        // Create a trip on the fly to attach the diary
+        try {
+          const res = await tripsAPI.startTrip({
+            start_time: new Date().toISOString(),
+            lat: lastPointRef.current?.[0] ?? currentPos?.lat,
+            lon: lastPointRef.current?.[1] ?? currentPos?.lon,
+            meta: { created_for_diary: true }
+          });
+          tripId = (res?.id || res?.trip_id || res?.uuid)?.toString?.() || undefined;
+          if (tripId) setActiveTripId(tripId);
+        } catch (e) {
+          console.warn('Failed to create trip for diary, trying direct diary endpoint');
+        }
       }
+
+      if (!tripId) {
+        // If we still don't have a trip, try the diary endpoint that can create implicitly
+        await tripsAPI.addDiary('new', note, files, captions);
+      } else {
+        if (storage && files.length > 0) {
+          const urls = await uploadTripPhotos(tripId, files);
+          const photos = urls.map((u, i) => ({ url: u, caption: captions[i] }));
+          await tripsAPI.addDiaryUrls(tripId, note, photos);
+        } else {
+          await tripsAPI.addDiary(tripId, note, files, captions);
+        }
+      }
+
       notify('Diary saved');
       setNote('');
       setFiles([]);
@@ -265,12 +288,6 @@ const emojiFor = (subtype?: string) => {
           <WeatherCard height={200} />
         </Box>
       </Box>
-      {/* Globe preview (if Mapbox token available) */}
-      {process.env.REACT_APP_MAPBOX_TOKEN && process.env.REACT_APP_MAPBOX_TOKEN.startsWith('pk.') && (
-        <Paper sx={{ height: 220, overflow: 'hidden', mb: 2 }}>
-          <GlobeMap latitude={currentPos?.lat || initialCenter?.[0]} longitude={currentPos?.lon || initialCenter?.[1]} label="Current Location" dark showRadar={false} styleName="dark" />
-        </Paper>
-      )}
       <Paper sx={{ height: 500, overflow: 'hidden' }}>
         <MapContainer center={center} zoom={16} style={{ height: '100%', width: '100%' }}>
           <TileLayer
@@ -376,8 +393,8 @@ const emojiFor = (subtype?: string) => {
             onChange={(e) => setNote(e.target.value)}
             fullWidth
           />
-          <Button variant="contained" onClick={handleSaveDiary} disabled={!activeTripId || savingDiary}>
-            {savingDiary ? 'Saving…' : activeTripId ? 'Save Diary' : 'Start a trip to save'}
+          <Button variant="contained" onClick={handleSaveDiary} disabled={savingDiary || (!note && files.length === 0)}>
+            {savingDiary ? 'Saving…' : 'Save Diary'}
           </Button>
         </Stack>
         {previews.length > 0 && (

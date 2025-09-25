@@ -25,6 +25,8 @@ const WeatherPage: React.FC = () => {
   useEffect(() => {
     let cancelled = false;
     let timer: any;
+    // Clear previous data immediately to avoid stale display for new location
+    setWeather(null); setAQ(null); setFC(null); setRains(null);
     const run = async () => {
       if (!place) return;
       const [w, air, fore, rainpts] = await Promise.all([
@@ -129,7 +131,9 @@ const WeatherPage: React.FC = () => {
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Air Quality</Typography>
               {aq ? (
                 <Box sx={{ color: '#e6f8ff' }}>
-                  AQI: <b>{aq.aqi}</b>
+                  {(() => { const map: Record<number,string> = {1:'Good',2:'Fair',3:'Moderate',4:'Poor',5:'Very Poor'}; return (
+                    <>AQI: <b>{map[aq.aqi || 0] || 'Unknown'}</b>{aq.aqi ? ` (${aq.aqi}/5)` : ''}</>
+                  ); })()}
                   {aq.components?.pm2_5 !== undefined && (<><br/>PM2.5: {Math.round(aq.components.pm2_5)} µg/m³</>)}
                   {aq.components?.pm10 !== undefined && (<><br/>PM10: {Math.round(aq.components.pm10)} µg/m³</>)}
                   {aq.components?.no2 !== undefined && (<><br/>NO₂: {Math.round(aq.components.no2)} µg/m³</>)}

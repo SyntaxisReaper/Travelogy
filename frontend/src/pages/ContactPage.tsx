@@ -8,7 +8,7 @@ const ContactPage: React.FC = () => {
   const [message, setMessage] = useState('');
 
   const mailtoHref = useMemo(() => {
-    const to = 'mailto:team@skystack.dev';
+    const to = 'mailto:skystackofficial@gmail.com';
     const subject = encodeURIComponent('Contact Team SkyStack');
     const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
     return `${to}?subject=${subject}&body=${body}`;
@@ -25,7 +25,7 @@ const ContactPage: React.FC = () => {
           <TextField label="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
           <TextField label="Message" value={message} onChange={(e) => setMessage(e.target.value)} fullWidth multiline minRows={4} />
           <Box>
-            <Button variant="contained" color="primary" startIcon={<Email />} href={mailtoHref} target="_blank" rel="noopener noreferrer">
+            <Button variant="contained" color="primary" startIcon={<Email />} onClick={() => { window.location.href = mailtoHref; }}>
               Send Message
             </Button>
           </Box>
