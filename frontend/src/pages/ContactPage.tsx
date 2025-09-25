@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Container, Typography, Paper, Box, TextField, Button, Stack, Link, IconButton } from '@mui/material';
 import { LinkedIn, Instagram, GitHub, Email } from '@mui/icons-material';
+import FlipButton from '../components/ui/FlipButton';
 
 const ContactPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -25,9 +26,7 @@ const ContactPage: React.FC = () => {
           <TextField label="Your Email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
           <TextField label="Message" value={message} onChange={(e) => setMessage(e.target.value)} fullWidth multiline minRows={4} />
           <Box>
-            <Button variant="contained" color="primary" startIcon={<Email />} onClick={() => { window.location.href = mailtoHref; }}>
-              Send Message
-            </Button>
+            <FlipButton variant="contained" color="primary" startIcon={<Email />} onClick={() => { window.location.href = mailtoHref; }} front="Send Message" back="Open Mail" />
           </Box>
         </Stack>
       </Paper>

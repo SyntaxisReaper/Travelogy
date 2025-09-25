@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import './styles/ui.css';
 import 'leaflet/dist/leaflet.css';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';

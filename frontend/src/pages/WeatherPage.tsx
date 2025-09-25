@@ -61,7 +61,7 @@ const WeatherPage: React.FC = () => {
           <Box sx={{ flex: 1, minWidth: 280 }}>
             <PlaceSearch onSelect={setPlace} placeholder="Search city, place…" />
           </Box>
-          <Button variant="outlined" size="small" onClick={() => {
+          <Button variant="outlined" size="small" className="tilt-hover" onClick={() => {
             if (!navigator.geolocation) return;
             navigator.geolocation.getCurrentPosition((pos) => {
               const { latitude, longitude } = pos.coords as GeolocationCoordinates;
@@ -127,7 +127,7 @@ const WeatherPage: React.FC = () => {
       {place && (
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+            <Paper className="tilt-hover" sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Air Quality</Typography>
               {aq ? (
                 <Box sx={{ color: '#e6f8ff' }}>
@@ -147,7 +147,7 @@ const WeatherPage: React.FC = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6', height: { xs: 200, md: 240 } }}>
+            <Paper className="tilt-hover" sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6', height: { xs: 200, md: 240 } }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Forecast (next hours)</Typography>
               <Box sx={{ height: { xs: 140, md: 180 } }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -169,7 +169,7 @@ const WeatherPage: React.FC = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+            <Paper className="tilt-hover" sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>AI Insights</Typography>
               <Box sx={{ color: '#e6f8ff' }}>
                 {(() => {
@@ -188,7 +188,7 @@ const WeatherPage: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+            <Paper className="tilt-hover" sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Health & Safety</Typography>
               <Box sx={{ color: '#e6f8ff' }}>
                 {(() => {
@@ -207,7 +207,7 @@ const WeatherPage: React.FC = () => {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+            <Paper className="tilt-hover" sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Recommended Places</Typography>
               <Box sx={{ color: '#e6f8ff' }}>
                 {(() => {

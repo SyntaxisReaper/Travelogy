@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container, Typography, Paper, Box, Button, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider } from '@mui/material';
+import FlipButton from '../components/ui/FlipButton';
 import { MapContainer, TileLayer, Polyline, Circle, useMap, Marker, Popup } from 'react-leaflet';
 import WeatherCard from '../components/maps/WeatherCard';
 import { useNotify } from '../contexts/NotifyContext';
@@ -265,9 +266,9 @@ const emojiFor = (subtype?: string) => {
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }}>
           {!isTracking ? (
-            <Button variant="contained" onClick={handleStart}>Start Trip</Button>
+            <FlipButton variant="contained" onClick={handleStart} front="Start Trip" back="Go!" />
           ) : (
-            <Button variant="contained" color="secondary" onClick={handleStop}>Stop & Save Trip</Button>
+            <FlipButton variant="contained" color="secondary" onClick={handleStop} front="Stop & Save Trip" back="Stop" />
           )}
           <Chip label={`Distance: ${totalDistanceKm.toFixed(2)} km`} />
           <Chip label={`Duration: ${durationMin.toFixed(1)} min`} />
@@ -276,7 +277,13 @@ const emojiFor = (subtype?: string) => {
             {follow ? 'Following' : 'Follow me'}
           </Button>
           {currentPos && (
-            <Chip label={`${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)} ±${Math.round(currentPos.accuracy || 0)}m`} />
+            <>
+              <Chip label={`${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)} ±${Math.round(currentPos.accuracy || 0)}m`} />
+              <Button size="small" onClick={() => {
+                const txt = `${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)}`;
+                navigator.clipboard?.writeText(txt).then(() => notify('Coordinates copied')); 
+              }}>Copy Coords</Button>
+            </>
           )}
         </Stack>
       </Paper>
@@ -338,11 +345,11 @@ const emojiFor = (subtype?: string) => {
           a.click();
           URL.revokeObjectURL(url);
         }}>Export GeoJSON</Button>
-          <Button size="small" variant="outlined" onClick={() => {
+        <Button size="small" variant="outlined" onClick={() => {
           if (path.length < 2) return;
-          const header = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-          const open = `<gpx version="1.1" creator="Travelogy"><trk><name>Active Trip</name><trkseg>`;
-          const seg = path.map((p) => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('');
+          const header = `<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n`;
+          const open = `<gpx version=\"1.1\" creator=\"Travelogy\"><trk><name>Active Trip</name><trkseg>`;
+          const seg = path.map((p) => `<trkpt lat=\"${p[0]}\" lon=\"${p[1]}\"></trkpt>`).join('');
           const close = `</trkseg></trk></gpx>`;
           const gpx = header + open + seg + close;
           const blob = new Blob([gpx], { type: 'application/gpx+xml' });
@@ -353,6 +360,21 @@ const emojiFor = (subtype?: string) => {
           a.click();
           URL.revokeObjectURL(url);
         }}>Export GPX</Button>
+        <Button size="small" variant="outlined" onClick={async () => {
+          if (!navigator.share) {
+            alert('Sharing is not supported on this device.');
+            return;
+          }
+          const distanceKm = (distanceMeters / 1000).toFixed(2);
+          const shareUrl = window.location.href;
+          try {
+            await navigator.share({
+              title: 'My Trip',
+              text: `I just tracked a trip of ${distanceKm} km with Travelogy!`,
+              url: shareUrl,
+            });
+          } catch (e) {}
+        }}>Share Trip</Button>
       </Stack>
 
       {/* My Trips */}
