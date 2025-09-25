@@ -120,6 +120,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
   ];
 
   return (
+    <>
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         {/* Mobile menu button (left) */}
@@ -268,6 +269,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
           <Button color="warning" variant="contained" onClick={() => { setConfirmOpen(false); doLogout(); }}>Logout</Button>
         </DialogActions>
       </Dialog>
+    </>
   );
 };
 
