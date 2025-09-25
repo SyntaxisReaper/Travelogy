@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
   updateProfile,
   signInWithPopup,
+  signInWithRedirect,
   User 
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -135,8 +136,22 @@ const syncProfileToBackend = async (user: User) => {
 export const signInWithGoogle = async (): Promise<User> => {
   try {
     ensureFirebase();
-    const result = await signInWithPopup(auth!, googleProvider);
-    const user = result.user;
+    try {
+      const result = await signInWithPopup(auth!, googleProvider);
+      const user = result.user;
+      // Best-effort sync & profile setup
+      await syncProfileToBackend(user);
+      return user;
+    } catch (err: any) {
+      // Fallback to redirect if popup is blocked
+      const code = err?.code || err?.message || '';
+      if (String(code).includes('popup-blocked')) {
+        await signInWithRedirect(auth!, googleProvider);
+        // The page will redirect; return a dummy Promise
+        return new Promise<User>(() => {} as any);
+      }
+      throw err;
+    }
     
     // Check/create profile (best-effort)
     try {
