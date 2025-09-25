@@ -21,6 +21,8 @@ import { dynamicTheme } from './styles/dynamicTheme';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './services/firebase';
 import type { Auth as FirebaseAuth } from 'firebase/auth';
+import ThemePanel from './components/ThemePanel';
+import ThemeFab from './components/ThemeFab';
 // IMPORTANT: Lazy-load ProtectedRoute so Firebase isn't initialized at startup
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 // Lazy load pages for better performance
@@ -39,6 +41,7 @@ const BookingsPage = lazy(() => import('./pages/BookingsPage'));
 const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage'));
 const JournalPage = lazy(() => import('./pages/JournalPage'));
 const StoresPage = lazy(() => import('./pages/StoresPage'));
+const FeedbackAdminPage = lazy(() => import('./pages/FeedbackAdminPage'));
 
 // Google Fonts for tech typography
 const googleFontsLink = document.createElement('link');
@@ -319,6 +322,7 @@ const App: React.FC = () => {
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => (localStorage.getItem('themeMode') as 'light' | 'dark') || 'dark');
   const [themeFont, setThemeFont] = useState<'tech' | 'system' | 'mono' | 'grotesk'>(() => (localStorage.getItem('themeFont') as any) || 'tech');
   const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber'>(() => (localStorage.getItem('accent') as any) || 'cyan');
+  const [themePanelOpen, setThemePanelOpen] = useState(false);
 
   const accentHex = useMemo(() => ({
     cyan: '#1de9b6',
@@ -529,6 +533,11 @@ const App: React.FC = () => {
                     <StoresPage />
                   </ProtectedRoute>
                 } />
+                <Route path="/admin/feedback" element={
+                  <ProtectedRoute>
+                    <FeedbackAdminPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/weather" element={<WeatherPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/" element={<LandingPage />} />
@@ -563,6 +572,9 @@ const App: React.FC = () => {
               onClose={() => setShowAnalytics(false)}
             />
 
+            {/* Theme floating button */}
+            <ThemeFab onClick={() => setThemePanelOpen(true)} />
+
             {/* Contact floating button */}
             <ContactFab />
 
@@ -575,6 +587,16 @@ const App: React.FC = () => {
           </>
         )}
       </Router>
+
+      {/* Theme Panel (app-level) */}
+      <ThemePanel
+        open={themePanelOpen}
+        onClose={() => setThemePanelOpen(false)}
+        themeMode={themeMode}
+        themeFont={themeFont}
+        onChangeThemeMode={handleChangeThemeMode}
+        onChangeThemeFont={handleChangeThemeFont}
+      />
     </ThemeProvider>
   );
 };

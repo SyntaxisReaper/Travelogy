@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Container, Paper, Typography, Box, Grid } from '@mui/material';
+import { Container, Paper, Typography, Box, Grid, Button } from '@mui/material';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import GlobeMap from '../components/maps/GlobeMap';
 import LeafletMap from '../components/maps/LeafletMap';
@@ -24,6 +24,7 @@ const WeatherPage: React.FC = () => {
 
   useEffect(() => {
     let cancelled = false;
+    let timer: any;
     const run = async () => {
       if (!place) return;
       const [w, air, fore, rainpts] = await Promise.all([
@@ -35,7 +36,11 @@ const WeatherPage: React.FC = () => {
       if (!cancelled) { setWeather(w); setAQ(air); setFC(fore); setRains(rainpts); }
     };
     run();
-    return () => { cancelled = true; };
+    // Live updates every 60 seconds
+    if (place) {
+      timer = setInterval(run, 60000);
+    }
+    return () => { cancelled = true; if (timer) clearInterval(timer); };
   }, [place]);
 
   const mapLabel = useMemo(() => {
@@ -54,6 +59,13 @@ const WeatherPage: React.FC = () => {
           <Box sx={{ flex: 1, minWidth: 280 }}>
             <PlaceSearch onSelect={setPlace} placeholder="Search city, place…" />
           </Box>
+          <Button variant="outlined" size="small" onClick={() => {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition((pos) => {
+              const { latitude, longitude } = pos.coords as GeolocationCoordinates;
+              setPlace({ name: 'Current Location', latitude, longitude } as any);
+            });
+          }}>Use My Location</Button>
           <MapToolbar
             hasMapbox={hasMapbox}
             provider={provider}
@@ -75,6 +87,10 @@ const WeatherPage: React.FC = () => {
               {typeof weather.tempC === 'number' && (
                 <Typography variant="h5" fontWeight={700}>{weather.tempC.toFixed(1)}°C</Typography>
               )}
+              {/* Real-time AI summary */}
+              <Typography variant="body2" sx={{ mt: 0.5, color: '#9fb6bf' }}>
+                {generateWeatherInsights(weather, aq).summary}
+              </Typography>
               <Grid container spacing={1} sx={{ mt: 1 }}>
                 {typeof weather.feelsLikeC === 'number' && (
                   <Grid item><Typography variant="caption">Feels: {weather.feelsLikeC.toFixed(1)}°C</Typography></Grid>

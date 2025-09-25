@@ -15,6 +15,10 @@ import {
   ListItemIcon,
   ListItemText,
   Divider as MDivider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Dashboard,
@@ -34,7 +38,6 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase';
 import type { Auth } from 'firebase/auth';
 import { signOutUser } from '../services/authService';
-import ThemePanel from './ThemePanel';
 
 interface NavbarProps {
   themeMode?: 'light' | 'dark';
@@ -54,7 +57,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [themeAnchor, setThemeAnchor] = React.useState<null | HTMLElement>(null);
-  const [themeOpen, setThemeOpen] = React.useState(false);
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const fallbackInitial = user?.first_name?.[0] || user?.email?.[0] || 'U';
 
@@ -87,16 +90,17 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
     setAnchorEl(null);
   };
 
-  const handleLogout = async () => {
+  const doLogout = async () => {
     try {
-      // Sign out from Firebase if authenticated there
       await signOutUser();
-    } catch (_) {
-      // ignore firebase signout errors
-    }
+    } catch (_) {}
     await dispatch(logout());
     handleClose();
     navigate('/login');
+  };
+
+  const handleLogout = () => {
+    setConfirmOpen(true);
   };
 
   const handleProfileNavigate = () => {
@@ -186,9 +190,6 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             Theme
           </Button>
           <Menu anchorEl={themeAnchor} open={Boolean(themeAnchor)} onClose={() => setThemeAnchor(null)}>
-            <MenuItem onClick={() => { setThemeOpen(true); setThemeAnchor(null); }}>
-              Advanced…
-            </MenuItem>
             <MenuItem disabled>Mode</MenuItem>
             <MenuItem selected={themeMode==='dark'} onClick={() => { onChangeThemeMode?.('dark'); setThemeAnchor(null); }}>Dark</MenuItem>
             <MenuItem selected={themeMode==='light'} onClick={() => { onChangeThemeMode?.('light'); setThemeAnchor(null); }}>Light</MenuItem>
@@ -197,15 +198,6 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             <MenuItem selected={themeFont==='system'} onClick={() => { onChangeThemeFont?.('system'); setThemeAnchor(null); }}>System</MenuItem>
             <MenuItem selected={themeFont==='mono'} onClick={() => { onChangeThemeFont?.('mono'); setThemeAnchor(null); }}>Mono</MenuItem>
             <MenuItem selected={themeFont==='grotesk'} onClick={() => { onChangeThemeFont?.('grotesk'); setThemeAnchor(null); }}>Grotesk</MenuItem>
-            <MenuItem disabled>Accent</MenuItem>
-            <MenuItem selected={accent==='cyan'} onClick={() => { onChangeAccent?.('cyan'); setThemeAnchor(null); }}>Cyan</MenuItem>
-            <MenuItem selected={accent==='pink'} onClick={() => { onChangeAccent?.('pink'); setThemeAnchor(null); }}>Pink</MenuItem>
-            <MenuItem selected={accent==='green'} onClick={() => { onChangeAccent?.('green'); setThemeAnchor(null); }}>Green</MenuItem>
-            <MenuItem selected={accent==='orange'} onClick={() => { onChangeAccent?.('orange'); setThemeAnchor(null); }}>Orange</MenuItem>
-            <MenuItem selected={accent==='purple'} onClick={() => { onChangeAccent?.('purple'); setThemeAnchor(null); }}>Purple</MenuItem>
-            <MenuItem selected={accent==='blue'} onClick={() => { onChangeAccent?.('blue'); setThemeAnchor(null); }}>Blue</MenuItem>
-            <MenuItem selected={accent==='teal'} onClick={() => { onChangeAccent?.('teal'); setThemeAnchor(null); }}>Teal</MenuItem>
-            <MenuItem selected={accent==='amber'} onClick={() => { onChangeAccent?.('amber'); setThemeAnchor(null); }}>Amber</MenuItem>
           </Menu>
 
           {isLoggedIn ? (
@@ -266,16 +258,16 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
       </Drawer>
 
     </AppBar>
-      <ThemePanel
-        open={themeOpen}
-        onClose={() => setThemeOpen(false)}
-        themeMode={themeMode}
-        themeFont={themeFont}
-        accent={accent}
-        onChangeThemeMode={(m) => onChangeThemeMode?.(m)}
-        onChangeThemeFont={(f) => onChangeThemeFont?.(f)}
-        onChangeAccent={(a) => onChangeAccent?.(a)}
-      />
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Confirm Logout</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">Are you sure you want to logout?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button color="warning" variant="contained" onClick={() => { setConfirmOpen(false); doLogout(); }}>Logout</Button>
+        </DialogActions>
+      </Dialog>
   );
 };
 
