@@ -93,7 +93,10 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
   const doLogout = async () => {
     try {
       await signOutUser();
-    } catch (_) {}
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('Firebase signOut failed', e);
+    }
     await dispatch(logout());
     handleClose();
     navigate('/login');
