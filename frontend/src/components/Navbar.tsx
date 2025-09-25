@@ -34,9 +34,8 @@ import {
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { logout } from '../store/slices/authSlice';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase';
-import type { Auth } from 'firebase/auth';
+import type { Auth, User } from 'firebase/auth';
 import { signOutUser } from '../services/authService';
 
 interface NavbarProps {
@@ -62,11 +61,15 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
   const fallbackInitial = user?.first_name?.[0] || user?.email?.[0] || 'U';
 
   const authInstance = auth as Auth | null;
-  const [fbUser] = useAuthState(auth as Auth);
+  const [fbUser, setFbUser] = React.useState<User | null>(null);
+  React.useEffect(() => {
+    if (!authInstance) { setFbUser(null); return; }
+    const unsub = authInstance.onAuthStateChanged((u) => setFbUser(u));
+    return () => unsub();
+  }, [authInstance]);
   const isLoggedIn = !!fbUser || !!user;
 
   const FirebaseAvatarWithAuth: React.FC<{ fallback: string }> = ({ fallback }) => {
-    const [fbUser] = useAuthState(auth as Auth);
     const src = fbUser?.photoURL || user?.photo_url || undefined;
     const letter = fbUser?.displayName?.[0] || fbUser?.email?.[0] || user?.first_name?.[0] || fallback;
     return (

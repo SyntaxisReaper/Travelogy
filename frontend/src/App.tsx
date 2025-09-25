@@ -18,7 +18,6 @@ import Navbar from './components/Navbar';
 import EmergencySOS from './components/EmergencySOS';
 import { useAppSelector } from './store/hooks';
 import { dynamicTheme } from './styles/dynamicTheme';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './services/firebase';
 import type { Auth as FirebaseAuth } from 'firebase/auth';
 import ThemePanel from './components/ThemePanel';
@@ -63,9 +62,8 @@ const LandingPageContentBase: React.FC<LandingPageContentProps> = ({
   handleViewAnalytics,
 }) => {
   const navigate = useNavigate();
-  // Prefer Firebase auth state for instantaneous UI visibility of auth-dependent buttons
-  const [fbUser] = useAuthState(auth as FirebaseAuth);
-  const isLoggedIn = !!fbUser;
+  // Compute login status without hooks to avoid issues when Firebase isn't configured
+  const isLoggedIn = Boolean((auth as FirebaseAuth | null)?.currentUser) || Boolean(localStorage.getItem('access_token'));
 
   return (
     <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 10 }}>
@@ -324,9 +322,8 @@ const App: React.FC = () => {
   const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber'>(() => (localStorage.getItem('accent') as any) || 'cyan');
   const [themePanelOpen, setThemePanelOpen] = useState(false);
 
-  // Auth visibility
-  const [fbUser] = useAuthState(auth as FirebaseAuth);
-  const isLoggedIn = !!fbUser;
+  // Auth visibility (avoid react-firebase-hooks in case Firebase is not configured)
+  const isLoggedIn = Boolean((auth as FirebaseAuth | null)?.currentUser) || Boolean(localStorage.getItem('access_token'));
 
   const accentHex = useMemo(() => ({
     cyan: '#1de9b6',
