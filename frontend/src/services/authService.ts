@@ -136,33 +136,30 @@ const syncProfileToBackend = async (user: User) => {
 export const signInWithGoogle = async (): Promise<User> => {
   try {
     ensureFirebase();
+    let user: User | null = null;
     try {
       const result = await signInWithPopup(auth!, googleProvider);
-      const user = result.user;
-      // Best-effort sync & profile setup
-      await syncProfileToBackend(user);
-      return user;
+      user = result.user;
     } catch (err: any) {
-      // Fallback to redirect if popup is blocked
       const code = err?.code || err?.message || '';
-      if (String(code).includes('popup-blocked')) {
+      if (String(code).includes('popup-blocked') || String(code).includes('popup-closed-by-user')) {
         await signInWithRedirect(auth!, googleProvider);
-        // The page will redirect; return a dummy Promise
-        return new Promise<User>(() => {} as any);
+        // The page will redirect; return a never-resolving Promise placeholder.
+        return new Promise<User>(() => { /* redirecting */ });
       }
       throw err;
     }
-    
-    // Check/create profile (best-effort)
+
+    // Check/create profile (best-effort) in Firestore
     try {
-      const userRef = doc(db!, 'users', user.uid);
+      const userRef = doc(db!, 'users', user!.uid);
       const userSnap = await getDoc(userRef);
       if (!userSnap.exists()) {
         const userProfile: UserProfile = {
-          uid: user.uid,
-          email: user.email!,
-          displayName: user.displayName || '',
-          photoURL: user.photoURL || '',
+          uid: user!.uid,
+          email: user!.email!,
+          displayName: user!.displayName || '',
+          photoURL: user!.photoURL || '',
           createdAt: new Date(),
           lastLoginAt: new Date(),
           travelStats: {
@@ -181,9 +178,8 @@ export const signInWithGoogle = async (): Promise<User> => {
     }
 
     // Best-effort sync to backend
-    await syncProfileToBackend(user);
-    
-    return user;
+    await syncProfileToBackend(user!);
+    return user!;
   } catch (error) {
     console.error('Error signing in with Google:', error);
     throw error;
