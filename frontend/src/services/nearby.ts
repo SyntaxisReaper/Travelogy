@@ -30,14 +30,16 @@ export async function fetchNearbyPlaces(lat: number, lon: number, radius = 800):
     });
     const json = await res.json();
     const elements = Array.isArray(json?.elements) ? json.elements : [];
-    const list: NearbyPlace[] = elements.map((el: any) => ({
-      id: String(el.id),
-      lat: el.lat,
-      lon: el.lon,
-      name: el.tags?.name,
-      type: el.tags?.amenity ? 'amenity' : (el.tags?.shop ? 'shop' : undefined),
-      subtype: el.tags?.amenity || el.tags?.shop,
-    })).filter(p => typeof p.lat === 'number' && typeof p.lon === 'number');
+    const list: NearbyPlace[] = elements
+      .map((el: any): NearbyPlace => ({
+        id: String(el.id),
+        lat: el.lat,
+        lon: el.lon,
+        name: el.tags?.name,
+        type: el.tags?.amenity ? 'amenity' : (el.tags?.shop ? 'shop' : undefined),
+        subtype: el.tags?.amenity || el.tags?.shop,
+      }))
+      .filter((p: NearbyPlace) => typeof p.lat === 'number' && typeof p.lon === 'number');
     return list;
   } catch (e) {
     return [];
