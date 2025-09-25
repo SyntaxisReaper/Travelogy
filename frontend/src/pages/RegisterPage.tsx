@@ -79,11 +79,22 @@ const RegisterPage: React.FC = () => {
       if (auth as FirebaseAuth | null) {
         await signUpWithEmail(formData.email, formData.password, formData.displayName);
       } else {
-        await dispatch(backendRegister({
+        const nameParts = (formData.displayName || '').trim().split(' ');
+        const first = nameParts[0] || '';
+        const last = nameParts.slice(1).join(' ') || '';
+        const payload = {
+          username: formData.displayName || formData.email.split('@')[0],
           email: formData.email,
           password: formData.password,
-          username: formData.displayName || formData.email.split('@')[0],
-        }) as any).unwrap();
+          password_confirm: formData.password,
+          first_name: first,
+          last_name: last,
+          location_tracking_consent: false,
+          data_sharing_consent: false,
+          analytics_consent: false,
+          marketing_consent: false,
+        } as any;
+        await dispatch(backendRegister(payload) as any).unwrap();
       }
       navigate('/dashboard');
     } catch (err: unknown) {
