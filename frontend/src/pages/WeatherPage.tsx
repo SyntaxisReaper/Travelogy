@@ -6,7 +6,7 @@ import LeafletMap from '../components/maps/LeafletMap';
 import WeatherMapModal from '../components/maps/WeatherMapModal';
 import MapToolbar from '../components/maps/MapToolbar';
 import PlaceSearch, { PlaceSuggestion } from '../components/maps/PlaceSearch';
-import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint, inferSeason, fetchRainNearby, RainPoint, generateWeatherInsights } from '../services/weather';
+import { fetchWeather, WeatherData, fetchAirQuality, fetchForecast, AirQualityData, ForecastPoint, inferSeason, fetchRainNearby, RainPoint, generateWeatherInsights, generateHealthInsights, recommendPlaces } from '../services/weather';
 
 const WeatherPage: React.FC = () => {
   const [place, setPlace] = useState<PlaceSuggestion | null>(null);
@@ -130,15 +130,12 @@ const WeatherPage: React.FC = () => {
               {aq ? (
                 <Box sx={{ color: '#e6f8ff' }}>
                   AQI: <b>{aq.aqi}</b>
-                  {aq.components?.pm2_5 !== undefined && (
-                    <><br/>PM2.5: {Math.round(aq.components.pm2_5)} µg/m³</>
-                  )}
-                  {aq.components?.pm10 !== undefined && (
-                    <><br/>PM10: {Math.round(aq.components.pm10)} µg/m³</>
-                  )}
-                  {aq.components?.no2 !== undefined && (
-                    <><br/>NO₂: {Math.round(aq.components.no2)} µg/m³</>
-                  )}
+                  {aq.components?.pm2_5 !== undefined && (<><br/>PM2.5: {Math.round(aq.components.pm2_5)} µg/m³</>)}
+                  {aq.components?.pm10 !== undefined && (<><br/>PM10: {Math.round(aq.components.pm10)} µg/m³</>)}
+                  {aq.components?.no2 !== undefined && (<><br/>NO₂: {Math.round(aq.components.no2)} µg/m³</>)}
+                  {aq.components?.o3 !== undefined && (<><br/>O₃: {Math.round(aq.components.o3)} µg/m³</>)}
+                  {aq.components?.so2 !== undefined && (<><br/>SO₂: {Math.round(aq.components.so2)} µg/m³</>)}
+                  {aq.components?.co !== undefined && (<><br/>CO: {Math.round(aq.components.co)} µg/m³</>)}
                 </Box>
               ) : (
                 <Typography variant="body2" sx={{ color: '#9fb6bf' }}>Unavailable</Typography>
@@ -180,6 +177,46 @@ const WeatherPage: React.FC = () => {
                         <Typography key={i} variant="caption" display="block" sx={{ color: '#9fb6bf' }}>• {t}</Typography>
                       ))}
                     </>
+                  );
+                })()}
+              </Box>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Health & Safety</Typography>
+              <Box sx={{ color: '#e6f8ff' }}>
+                {(() => {
+                  const hi = generateHealthInsights(weather, aq);
+                  return (
+                    <>
+                      <Typography variant="body2" sx={{ mb: 1 }}>Overall risk: <b>{hi.riskLevel}</b></Typography>
+                      {hi.notes.map((n, i) => (
+                        <Typography key={i} variant="caption" display="block" sx={{ color: '#9fb6bf' }}>• {n}</Typography>
+                      ))}
+                    </>
+                  );
+                })()}
+              </Box>
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
+              <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>Recommended Places</Typography>
+              <Box sx={{ color: '#e6f8ff' }}>
+                {(() => {
+                  const recs = recommendPlaces(weather, aq, place ? inferSeason(place.latitude, new Date()) : undefined);
+                  if (!recs.length) return <Typography variant="body2" sx={{ color: '#9fb6bf' }}>No suggestions available.</Typography>;
+                  return (
+                    <Grid container spacing={1}>
+                      {recs.map((r, i) => (
+                        <Grid key={i} item>
+                          <Typography variant="caption" sx={{ border: '1px solid #1de9b6', borderRadius: 1, px: 1, py: 0.25 }}>{r}</Typography>
+                        </Grid>
+                      ))}
+                    </Grid>
                   );
                 })()}
               </Box>

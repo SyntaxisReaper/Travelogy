@@ -24,6 +24,11 @@ export interface WeatherInsights {
   tips: string[];
 }
 
+export interface HealthInsights {
+  riskLevel: 'Low' | 'Moderate' | 'High';
+  notes: string[];
+}
+
 export interface ForecastPoint { dt: number; tempC: number; description?: string }
 
 export interface RainPoint { lat: number; lon: number; name?: string }
@@ -129,6 +134,80 @@ export function generateWeatherInsights(wx: WeatherData | null, aq: AirQualityDa
   if (wind > 12) tips.push('Secure loose items; cycling may be challenging.');
 
   return { summary: parts.join(' '), tips };
+}
+
+// Health risk assessment based on temp, humidity, wind, rain, and AQI/PM2.5
+export function generateHealthInsights(wx: WeatherData | null, aq: AirQualityData | null): HealthInsights {
+  if (!wx) return { riskLevel: 'Low', notes: ['No weather data available.'] };
+  const notes: string[] = [];
+  let score = 0;
+
+  const t = wx.tempC ?? 20;
+  const hum = wx.humidity ?? 50;
+  const wind = wx.windSpeedMs ?? 0;
+  const rain = (wx.rain1h ?? 0) + (wx.rain3h ?? 0);
+  const aqi = aq?.aqi ?? 2;
+  const pm25 = aq?.components?.pm2_5 ?? 0;
+
+  // Temperature stress
+  if (t >= 33) { score += 2; notes.push('Heat stress possible; hydrate and limit midday exertion.'); }
+  else if (t <= 0) { score += 2; notes.push('Risk of cold stress; dress warmly and protect extremities.'); }
+  else if (t <= 8) { score += 1; notes.push('Chilly conditions; wear layers.'); }
+
+  // Humidity modifies heat stress (simplified)
+  if (t >= 30 && hum >= 60) { score += 1; notes.push('High humidity increases perceived heat.'); }
+
+  // Wind hazards
+  if (wind >= 12) { score += 1; notes.push('Strong winds; secure loose items and caution for cyclists.'); }
+
+  // Precipitation
+  if (rain >= 2) { score += 1; notes.push('Rain may cause slippery surfaces; carry rain gear.'); }
+
+  // Air quality
+  if (aqi >= 4) { score += 2; notes.push('Poor air quality; consider a mask and reduce outdoor exertion.'); }
+  else if (pm25 >= 35) { score += 1; notes.push('Elevated PM2.5; sensitive groups should limit prolonged outdoor activity.'); }
+
+  let riskLevel: HealthInsights['riskLevel'] = 'Low';
+  if (score >= 4) riskLevel = 'High';
+  else if (score >= 2) riskLevel = 'Moderate';
+
+  return { riskLevel, notes };
+}
+
+// Place recommendations based on conditions
+export function recommendPlaces(wx: WeatherData | null, aq: AirQualityData | null, season?: string): string[] {
+  if (!wx) return [];
+  const t = wx.tempC ?? 20;
+  const rain = (wx.rain1h ?? 0) + (wx.rain3h ?? 0);
+  const aqi = aq?.aqi ?? 2;
+  const clouds = wx.clouds ?? 0;
+  const ideas: string[] = [];
+
+  const poorAir = aqi >= 4;
+  const rainy = rain >= 1;
+  const hot = t >= 30;
+  const cold = t <= 8;
+  const clear = clouds <= 40 && !rainy;
+
+  if (poorAir || rainy || cold) {
+    ideas.push('Museums', 'Art galleries', 'Aquariums', 'Indoor markets', 'Cafés', 'Malls');
+  }
+  if (clear && !poorAir && !hot) {
+    ideas.push('City parks', 'Waterfront walks', 'Botanical gardens', 'Viewpoints');
+  }
+  if (!poorAir && t >= 18 && t <= 28 && !rainy) {
+    ideas.push('Walking tours', 'Open-air plazas', 'Street food areas');
+  }
+  if (hot && !poorAir) {
+    ideas.push('Lakeside spots', 'Shaded parks', 'Evening markets');
+  }
+
+  // Season touches
+  if (season === 'Summer') ideas.push('Sunset viewpoints');
+  if (season === 'Winter') ideas.push('Cozy cafés');
+
+  // Deduplicate while preserving order
+  return Array.from(new Set(ideas)).slice(0, 8);
 }
 
 export async function fetchRainNearby(lat: number, lon: number): Promise<RainPoint[] | null> {
