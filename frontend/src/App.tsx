@@ -20,6 +20,7 @@ import { auth } from './services/firebase';
 import type { Auth as FirebaseAuth } from 'firebase/auth';
 import ThemePanel from './components/ThemePanel';
 import ThemeFab from './components/ThemeFab';
+import('firebase/auth');
 // IMPORTANT: Lazy-load ProtectedRoute so Firebase isn't initialized at startup
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 // Lazy load pages for better performance
@@ -434,6 +435,29 @@ const App: React.FC = () => {
 
   const clearAllNotifications = useCallback(() => {
     setNotifications([]);
+  }, []);
+
+  // Handle Firebase redirect result on load to avoid "missing initial state" fatal errors
+  useEffect(() => {
+    (async () => {
+      try {
+        const fb = auth as FirebaseAuth | null;
+        if (fb && typeof window !== 'undefined') {
+          const mod = await import('firebase/auth');
+          // getRedirectResult will throw if no redirect pending; ignore that case
+          try {
+            await mod.getRedirectResult(fb);
+          } catch (e: any) {
+            const msg = e?.message || '';
+            if (!String(msg).toLowerCase().includes('missing initial state') && !String(e?.code || '').includes('no-auth')) {
+              // Other errors can be logged but shouldn't break the app
+              // eslint-disable-next-line no-console
+              console.warn('redirect result check:', e);
+            }
+          }
+        }
+      } catch {}
+    })();
   }, []);
 
   if (loading) {

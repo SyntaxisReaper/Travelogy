@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Container, Typography, Paper, Box, Button, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider } from '@mui/material';
-import { MapContainer, TileLayer, Polyline, Circle, useMap } from 'react-leaflet';import GlobeMap from '../components/maps/GlobeMap';
+import { MapContainer, TileLayer, Polyline, Circle, useMap, Marker, Popup } from 'react-leaflet';
 import WeatherCard from '../components/maps/WeatherCard';
 import { useNotify } from '../contexts/NotifyContext';
 import type { LatLngExpression } from 'leaflet';
 import { tripsAPI } from '../services/api';
 import { uploadTripPhotos } from '../services/storage';
 import { storage } from '../services/firebase';
+import { fetchNearbyPlaces, NearbyPlace } from '../services/nearby';
+import L from 'leaflet';
 
 const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
   const R = 6371e3; // meters
@@ -29,6 +31,9 @@ const TripsPage: React.FC = () => {
   const [initialCenter, setInitialCenter] = useState<[number, number] | null>(null);
   const [currentPos, setCurrentPos] = useState<{ lat: number; lon: number; accuracy?: number } | null>(null);
   const [follow, setFollow] = useState(true);
+  const [nearby, setNearby] = useState<NearbyPlace[]>([]);
+  const lastNearbyRef = useRef<{ lat: number; lon: number } | null>(null);
+  const lastNearbyAtRef = useRef<number>(0);
 
   // Diary state
   const [note, setNote] = useState('');
@@ -40,7 +45,26 @@ const TripsPage: React.FC = () => {
   const lastPointRef = useRef<[number, number] | null>(null);
 
   const totalDistanceKm = useMemo(() => (distanceMeters / 1000), [distanceMeters]);
-  const durationMin = useMemo(() => (startTime ? (Date.now() - startTime) / 60000 : 0), [startTime]);
+const durationMin = useMemo(() => (startTime ? (Date.now() - startTime) / 60000 : 0), [startTime]);
+
+const emojiFor = (subtype?: string) => {
+  switch (subtype) {
+    case 'hospital': return '🏥';
+    case 'clinic': return '🏥';
+    case 'pharmacy': return '💊';
+    case 'police': return '👮';
+    case 'fire_station': return '🚒';
+    case 'fuel': return '⛽';
+    case 'atm': return '🏧';
+    case 'bank': return '🏦';
+    case 'cafe': return '☕';
+    case 'restaurant': return '🍽️';
+    case 'fast_food': return '🍔';
+    case 'supermarket': return '🛒';
+    case 'convenience': return '🛍️';
+    default: return '📍';
+  }
+};
 
   const handleStart = useCallback(async () => {
     setError(null);
@@ -63,7 +87,7 @@ const TripsPage: React.FC = () => {
           console.warn('Initial geolocation failed', err);
           resolve();
         },
-        { enableHighAccuracy: true, timeout: 10000 }
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 }
       );
     });
 
@@ -81,11 +105,24 @@ const TripsPage: React.FC = () => {
           lastPointRef.current = cur;
           return [...prev, cur];
         });
+
+        // Fetch nearby services when moved >150m or every 60s
+        const now = Date.now();
+        const last = lastNearbyRef.current;
+        const moved = last ? haversine(last.lat, last.lon, cur[0], cur[1]) : Infinity;
+        if (moved > 150 || now - lastNearbyAtRef.current > 60000) {
+          try {
+            const res = await fetchNearbyPlaces(cur[0], cur[1], 900);
+            setNearby(res);
+            lastNearbyRef.current = { lat: cur[0], lon: cur[1] };
+            lastNearbyAtRef.current = now;
+          } catch {}
+        }
       },
       (err) => {
         setError(err.message);
       },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 }
     );
 
     setWatchId(id);
@@ -252,6 +289,20 @@ const TripsPage: React.FC = () => {
               <Circle center={[currentPos.lat, currentPos.lon] as LatLngExpression} radius={5} pathOptions={{ color: '#ff4081' }} />
             </>
           )}
+          {/* Nearby services markers */}
+          {nearby.map((p) => {
+            const icon = new L.DivIcon({ className: 'nearby-ico', html: `<div style="font-size:16px">${emojiFor(p.subtype)}</div>` });
+            return (
+              <Marker key={p.id} position={[p.lat, p.lon] as any} icon={icon as any}>
+                <Popup>
+                  <div style={{ minWidth: 140 }}>
+                    <div style={{ fontWeight: 700 }}>{p.name || (p.subtype || 'Place')}</div>
+                    <div style={{ fontSize: 12, opacity: 0.8 }}>{p.type}/{p.subtype}</div>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </Paper>
 
