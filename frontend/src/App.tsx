@@ -16,8 +16,6 @@ import ScrollToTop from './components/ScrollToTop';
 import AnalyticsModal from './components/AnalyticsModal';
 import Navbar from './components/Navbar';
 import EmergencySOS from './components/EmergencySOS';
-import { useAppSelector } from './store/hooks';
-import { dynamicTheme } from './styles/dynamicTheme';
 import { auth } from './services/firebase';
 import type { Auth as FirebaseAuth } from 'firebase/auth';
 import ThemePanel from './components/ThemePanel';
@@ -459,20 +457,16 @@ const App: React.FC = () => {
     <ThemeProvider theme={activeTheme}>
       <CssBaseline />
       <Router>
-        {isLoggedIn && (
-          <>
-            <Navbar
-              themeMode={themeMode}
-              themeFont={themeFont}
-              accent={accent}
-              onChangeThemeMode={handleChangeThemeMode}
-              onChangeThemeFont={handleChangeThemeFont}
-              onChangeAccent={handleChangeAccent}
-            />
-            <ScrollToTop />
-            <Toolbar />
-          </>
-        )}
+        <Navbar
+          themeMode={themeMode}
+          themeFont={themeFont}
+          accent={accent}
+          onChangeThemeMode={handleChangeThemeMode}
+          onChangeThemeFont={handleChangeThemeFont}
+          onChangeAccent={handleChangeAccent}
+        />
+        <ScrollToTop />
+        <Toolbar />
         <Box sx={{ minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
           {/* Background effects */}
           <LightweightBackground />
@@ -487,106 +481,97 @@ const App: React.FC = () => {
               fullscreen
             />
           }>
-            {isLoggedIn ? (
-              <Routes>
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <DashboardPageWrapper />
-                  </ProtectedRoute>
-                } />
-                <Route path="/trips" element={
-                  <ProtectedRoute>
-                    <TripsPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/trips/list" element={
-                  <ProtectedRoute>
-                    <TripsListPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/trips/:id" element={
-                  <ProtectedRoute>
-                    <TripDetailsPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/analytics" element={
-                  <ProtectedRoute>
-                    <AnalyticsPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/journal" element={
-                  <ProtectedRoute>
-                    <JournalPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/book" element={
-                  <ProtectedRoute>
-                    <BookingsPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/stores" element={
-                  <ProtectedRoute>
-                    <StoresPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin/feedback" element={
-                  <ProtectedRoute>
-                    <FeedbackAdminPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/weather" element={<WeatherPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/" element={<LandingPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            ) : (
-              <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="*" element={<LoginPage />} />
-              </Routes>
-            )}
+            <Routes>
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPageWrapper />
+                </ProtectedRoute>
+              } />
+              <Route path="/trips" element={
+                <ProtectedRoute>
+                  <TripsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/trips/list" element={
+                <ProtectedRoute>
+                  <TripsListPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/trips/:id" element={
+                <ProtectedRoute>
+                  <TripDetailsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute>
+                  <AnalyticsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/journal" element={
+                <ProtectedRoute>
+                  <JournalPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              <Route path="/book" element={
+                <ProtectedRoute>
+                  <BookingsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/stores" element={
+                <ProtectedRoute>
+                  <StoresPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/feedback" element={
+                <ProtectedRoute>
+                  <FeedbackAdminPage />
+                </ProtectedRoute>
+              } />
+              {/* Public routes */}
+              <Route path="/weather" element={<WeatherPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
           </Suspense>
           </NotifyProvider>
         </Box>
         
-        {isLoggedIn && (
-          <>
-            {/* Notification System */}
-            <NotificationSystem
-              notifications={notifications}
-              onClearNotification={clearNotification}
-              onClearAll={clearAllNotifications}
-            />
+        {/* Notification System */}
+        <NotificationSystem
+          notifications={notifications}
+          onClearNotification={clearNotification}
+          onClearAll={clearAllNotifications}
+        />
 
-            {/* Emergency SOS floating button */}
-            <EmergencySOS />
-            
-            {/* Analytics Modal */}
-            <AnalyticsModal
-              open={showAnalytics}
-              onClose={() => setShowAnalytics(false)}
-            />
+        {/* Emergency SOS floating button */}
+        <EmergencySOS />
+        
+        {/* Analytics Modal */}
+        <AnalyticsModal
+          open={showAnalytics}
+          onClose={() => setShowAnalytics(false)}
+        />
 
-            {/* Theme floating button */}
-            <ThemeFab onClick={() => setThemePanelOpen(true)} />
+        {/* Theme floating button */}
+        <ThemeFab onClick={() => setThemePanelOpen(true)} />
 
-            {/* Contact floating button */}
-            <ContactFab />
+        {/* Contact floating button */}
+        <ContactFab />
 
-            {/* Footer */}
-            <Box component="footer" sx={{ textAlign: 'center', py: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
-              <Typography variant="body2">
-                © {new Date().getFullYear()} Travelogy — <a href="/contact" style={{ color: '#1de9b6', textDecoration: 'none' }}>Contact Team SkyStack</a>
-              </Typography>
-            </Box>
-          </>
-        )}
+        {/* Footer */}
+        <Box component="footer" sx={{ textAlign: 'center', py: 2, bgcolor: 'background.default', color: 'text.secondary' }}>
+          <Typography variant="body2">
+            © {new Date().getFullYear()} Travelogy — <a href="/contact" style={{ color: '#1de9b6', textDecoration: 'none' }}>Contact Team SkyStack</a>
+          </Typography>
+        </Box>
       </Router>
 
       {/* Theme Panel (app-level) */}
