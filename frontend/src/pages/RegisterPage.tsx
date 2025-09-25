@@ -12,7 +12,7 @@ import {
   Checkbox
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { signUpWithEmail, getAuthErrorMessage, signInWithGoogle, signInWithFacebook, signInWithTwitter } from '../services/authService';
+import { signUpWithEmail, getAuthErrorMessage, signInWithGoogle, signInWithFacebook, signInWithTwitter } from '../services/authService';import { auth } from '../services/firebase';import type { Auth as FirebaseAuth } from 'firebase/auth';import { useAppDispatch } from '../store/hooks';import { register as backendRegister } from '../store/slices/authSlice';
 import { motion } from 'framer-motion';
 import { colors } from '../styles/techTheme';
 import HolographicCard from '../components/HolographicCard';
@@ -32,6 +32,7 @@ const RegisterPage: React.FC = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   // If Firebase auth isn't available, skip auto-redirect logic and just render the page.
 
@@ -75,7 +76,15 @@ const RegisterPage: React.FC = () => {
     setError('');
 
     try {
-      await signUpWithEmail(formData.email, formData.password, formData.displayName);
+      if (auth as FirebaseAuth | null) {
+        await signUpWithEmail(formData.email, formData.password, formData.displayName);
+      } else {
+        await dispatch(backendRegister({
+          email: formData.email,
+          password: formData.password,
+          username: formData.displayName || formData.email.split('@')[0],
+        }) as any).unwrap();
+      }
       navigate('/dashboard');
     } catch (err: unknown) {
       setError(getAuthErrorMessage(extractErrorCode(err)));
@@ -85,6 +94,7 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
     setIsLoading(true);
     setError('');
     try {
@@ -98,6 +108,7 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleFacebookSignIn = async () => {
+    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
     setIsLoading(true);
     setError('');
     try {
@@ -111,6 +122,7 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleTwitterSignIn = async () => {
+    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
     setIsLoading(true);
     setError('');
     try {

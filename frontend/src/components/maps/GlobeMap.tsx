@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Map, { Marker, NavigationControl, Popup } from 'react-map-gl';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import LeafletMap from './LeafletMap';
 
 export interface GlobeMapProps {
   latitude?: number;
@@ -96,10 +97,18 @@ const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather
   }, [showRadar]);
 
   if (!MAPBOX_TOKEN || (MAPBOX_TOKEN && MAPBOX_TOKEN.startsWith('sk.'))) {
+    // Fallback to Leaflet with a fly-to animation to emulate globe zoom
     return (
-      <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0c0f14', color: '#e6f8ff', border: '1px solid #1de9b6', borderRadius: 12, textAlign: 'center', padding: 16 }}>
-        {(!MAPBOX_TOKEN) ? 'Add REACT_APP_MAPBOX_TOKEN to use globe map.' : 'Your Mapbox token starts with sk. Use a public token (pk.*) in the browser.'}
-      </div>
+      <LeafletMap
+        latitude={latitude}
+        longitude={longitude}
+        label={label}
+        weather={weather as any}
+        dark={dark}
+        showRadar={showRadar}
+        tileName={'dark'}
+        rainPoints={rainPoints as any}
+      />
     );
   }
 

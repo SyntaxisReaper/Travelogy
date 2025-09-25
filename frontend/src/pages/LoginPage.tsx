@@ -17,6 +17,10 @@ import HolographicCard from '../components/HolographicCard';
 import NeonButton from '../components/NeonButton';
 import GlitchText from '../components/GlitchText';
 import { extractErrorCode } from '../utils/error';
+import { auth } from '../services/firebase';
+import type { Auth as FirebaseAuth } from 'firebase/auth';
+import { useAppDispatch } from '../store/hooks';
+import { login as backendLogin } from '../store/slices/authSlice';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -25,6 +29,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   // If Firebase auth isn't available, skip auto-redirect logic and just render the page.
 
@@ -39,10 +44,16 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      await signInWithEmail(email, password);
+      if (auth as FirebaseAuth | null) {
+        await signInWithEmail(email, password);
+      } else {
+        // Backend login fallback (Django JWT)
+        await dispatch(backendLogin({ email, password }) as any).unwrap();
+      }
       navigate('/dashboard');
     } catch (err: unknown) {
-      setError(getAuthErrorMessage(extractErrorCode(err)));
+      const code = extractErrorCode(err);
+      setError(getAuthErrorMessage(code));
     } finally {
       setIsLoading(false);
     }
@@ -64,6 +75,7 @@ const LoginPage: React.FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
+    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
     setIsLoading(true);
     setError('');
     try {
@@ -77,6 +89,7 @@ const LoginPage: React.FC = () => {
   };
 
   const handleFacebookSignIn = async () => {
+    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
     setIsLoading(true);
     setError('');
     try {
@@ -90,6 +103,7 @@ const LoginPage: React.FC = () => {
   };
 
   const handleTwitterSignIn = async () => {
+    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
     setIsLoading(true);
     setError('');
     try {
