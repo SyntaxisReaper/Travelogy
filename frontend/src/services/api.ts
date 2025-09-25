@@ -211,6 +211,10 @@ export const bookingsAPI = {
 export const analyticsAPI = {
   getDashboard: () =>
     api.get('/analytics/dashboard/').then(res => res.data),
+  askGeminiWeather: (payload: { place?: any; weather?: any; aq?: any }) =>
+    api.post('/analytics/gemini/weather_insights/', payload).then(res => res.data as { insights: string }),
+  askGeminiTrip: (payload: { distance_km?: number; duration_min?: number; mode?: string; notes?: string }) =>
+    api.post('/analytics/gemini/trip_insights/', payload).then(res => res.data as { insights: string }),
 };
 
 // Emergency API

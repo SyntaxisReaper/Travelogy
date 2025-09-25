@@ -335,6 +335,22 @@ const emojiFor = (subtype?: string) => {
         </MapContainer>
       </Paper>
 
+      {/* Gemini Trip Insights */}
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="flex-start">
+          <Button size="small" variant="outlined" onClick={async () => {
+            const { analyticsAPI } = await import('../services/api');
+            const durationMin = startTime ? (Date.now() - startTime) / 60000 : 0;
+            try {
+              const res = await analyticsAPI.askGeminiTrip({ distance_km: +(totalDistanceKm.toFixed(2)), duration_min: +(durationMin.toFixed(1)) });
+              notify(res?.insights || 'Gemini did not return insights');
+            } catch {
+              notify('Gemini insights unavailable right now');
+            }
+          }}>Ask Gemini about my trip</Button>
+        </Stack>
+      </Paper>
+
       <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
         <Button size="small" variant="outlined" onClick={() => {
           if (path.length < 2) return;

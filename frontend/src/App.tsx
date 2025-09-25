@@ -339,16 +339,30 @@ const App: React.FC = () => {
     palette: {
       mode: themeMode,
       primary: { main: accentHex },
-      secondary: { main: themeMode === 'dark' ? '#90caf9' : '#7b1fa2' },
-      background: {
-        default: themeMode === 'dark' ? '#0b0f15' : '#f8fafc',
-        paper: themeMode === 'dark' ? '#10151d' : '#ffffff',
+      secondary: { main: themeMode === 'dark' ? '#90caf9' : '#8b5cf6' },
+      background: themeMode === 'dark' ? {
+        default: '#0b0f15',
+        paper: '#10151d',
+      } : {
+        default: '#f7fafc',
+        paper: '#ffffff',
       },
-      text: {
-        primary: themeMode === 'dark' ? '#e6f8ff' : '#0b0f15',
-        secondary: themeMode === 'dark' ? '#9fb6bf' : '#4b5563',
+      text: themeMode === 'dark' ? {
+        primary: '#e6f8ff',
+        secondary: '#9fb6bf',
+      } : {
+        primary: '#0f172a',
+        secondary: '#475569',
       },
+      divider: themeMode === 'dark' ? 'rgba(29,233,182,0.2)' : 'rgba(2,132,199,0.2)'
     },
+    components: themeMode === 'light' ? {
+      MuiPaper: { styleOverrides: { root: { border: '1px solid rgba(2,132,199,0.12)', backgroundImage: 'none' } } },
+      MuiCard: { styleOverrides: { root: { border: '1px solid rgba(2,132,199,0.16)', backgroundImage: 'none', boxShadow: '0 8px 24px rgba(2,132,199,0.06)' } } },
+      MuiAppBar: { styleOverrides: { root: { backgroundColor: '#ffffffcc', backdropFilter: 'blur(12px)', color: '#0f172a' } } },
+      MuiButton: { styleOverrides: { root: { borderRadius: 8 } } },
+      MuiTextField: { styleOverrides: { root: { '& .MuiOutlinedInput-root': { backgroundColor: '#ffffff' } } } },
+    } : {},
     typography: {
       fontFamily:
         themeFont === 'tech' ? '"Orbitron","Roboto Mono", monospace' :

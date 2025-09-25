@@ -16,6 +16,8 @@ const WeatherPage: React.FC = () => {
   const [rains, setRains] = useState<RainPoint[] | null>(null);
   const [showRadar, setShowRadar] = useState<boolean>(!!process.env.REACT_APP_OWM_API_KEY);
   const [maximized, setMaximized] = useState<boolean>(false);
+  const [geminiText, setGeminiText] = useState<string>('');
+  const [geminiLoading, setGeminiLoading] = useState<boolean>(false);
   const mapboxToken = process.env.REACT_APP_MAPBOX_TOKEN;
   const hasMapbox = !!mapboxToken && mapboxToken.startsWith('pk.');
   const [provider, setProvider] = useState<'mapbox' | 'leaflet' | 'both'>(() => (hasMapbox ? 'mapbox' : 'leaflet'));
@@ -80,6 +82,25 @@ const WeatherPage: React.FC = () => {
             onToggleRadar={() => setShowRadar(v => !v)}
             onMaximize={() => setMaximized(true)}
           />
+          <Button size="small" variant="outlined" sx={{ ml: 1 }} disabled={!place || geminiLoading}
+            onClick={async () => {
+              if (!place) return;
+              setGeminiLoading(true);
+              try {
+                const { analyticsAPI } = await import('../services/api');
+                const result = await analyticsAPI.askGeminiWeather({
+                  place: { name: place.name, city: place.city, country: place.country, lat: place.latitude, lon: place.longitude },
+                  weather, aq,
+                });
+                setGeminiText(result?.insights || '');
+              } catch (e) {
+                setGeminiText('Sorry, Gemini insights are unavailable right now.');
+              } finally {
+                setGeminiLoading(false);
+              }
+            }}>
+            {geminiLoading ? 'Asking Gemini…' : 'Ask Gemini'}
+          </Button>
         </Box>
         <Box sx={{ mt: 2, color: '#e6f8ff', opacity: 0.85 }}>
           {weather ? (
@@ -172,17 +193,21 @@ const WeatherPage: React.FC = () => {
             <Paper className="tilt-hover" sx={{ p: 2, background: '#0c0f14', border: '1px solid #1de9b6' }}>
               <Typography variant="h6" sx={{ color: '#e6f8ff', mb: 1 }}>AI Insights</Typography>
               <Box sx={{ color: '#e6f8ff' }}>
-                {(() => {
-                  const gi = generateWeatherInsights(weather, aq);
-                  return (
-                    <>
-                      <Typography variant="body2" sx={{ mb: 1 }}>{gi.summary}</Typography>
-                      {gi.tips.map((t, i) => (
-                        <Typography key={i} variant="caption" display="block" sx={{ color: '#9fb6bf' }}>• {t}</Typography>
-                      ))}
-                    </>
-                  );
-                })()}
+                {geminiText ? (
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{geminiText}</Typography>
+                ) : (
+                  (() => {
+                    const gi = generateWeatherInsights(weather, aq);
+                    return (
+                      <>
+                        <Typography variant="body2" sx={{ mb: 1 }}>{gi.summary}</Typography>
+                        {gi.tips.map((t, i) => (
+                          <Typography key={i} variant="caption" display="block" sx={{ color: '#9fb6bf' }}>• {t}</Typography>
+                        ))}
+                      </>
+                    );
+                  })()
+                )}
               </Box>
             </Paper>
           </Grid>
