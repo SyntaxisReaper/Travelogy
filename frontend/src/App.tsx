@@ -324,6 +324,10 @@ const App: React.FC = () => {
   const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber'>(() => (localStorage.getItem('accent') as any) || 'cyan');
   const [themePanelOpen, setThemePanelOpen] = useState(false);
 
+  // Auth visibility
+  const [fbUser] = useAuthState(auth as FirebaseAuth);
+  const isLoggedIn = !!fbUser;
+
   const accentHex = useMemo(() => ({
     cyan: '#1de9b6',
     pink: '#ff4081',
