@@ -44,13 +44,15 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      if (auth as FirebaseAuth | null) {
+      if (auth) {
+        // Use Firebase authentication
         await signInWithEmail(email, password);
+        navigate('/dashboard');
       } else {
         // Backend login fallback (Django JWT)
         await dispatch(backendLogin({ email, password }) as any).unwrap();
+        navigate('/dashboard');
       }
-      navigate('/dashboard');
     } catch (err: unknown) {
       const code = extractErrorCode(err);
       setError(getAuthErrorMessage(code));
@@ -75,42 +77,60 @@ const LoginPage: React.FC = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
+    if (!auth) { 
+      setError('Google sign-in is not available. Please use email/password login.'); 
+      return; 
+    }
+    
     setIsLoading(true);
     setError('');
+    
     try {
       await signInWithGoogle();
       navigate('/dashboard');
     } catch (err: unknown) {
-      setError(getAuthErrorMessage(extractErrorCode(err)));
+      const code = extractErrorCode(err);
+      setError(getAuthErrorMessage(code));
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleFacebookSignIn = async () => {
-    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
+    if (!auth) { 
+      setError('Facebook sign-in is not available. Please use email/password login.'); 
+      return; 
+    }
+    
     setIsLoading(true);
     setError('');
+    
     try {
       await signInWithFacebook();
       navigate('/dashboard');
     } catch (err: unknown) {
-      setError(getAuthErrorMessage(extractErrorCode(err)));
+      const code = extractErrorCode(err);
+      setError(getAuthErrorMessage(code));
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleTwitterSignIn = async () => {
-    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
+    if (!auth) { 
+      setError('Twitter sign-in is not available. Please use email/password login.'); 
+      return; 
+    }
+    
     setIsLoading(true);
     setError('');
+    
     try {
       await signInWithTwitter();
       navigate('/dashboard');
     } catch (err: unknown) {
-      setError(getAuthErrorMessage(extractErrorCode(err)));
+      const code = extractErrorCode(err);
+      setError(getAuthErrorMessage(code));
     } finally {
       setIsLoading(false);
     }
@@ -244,7 +264,7 @@ const LoginPage: React.FC = () => {
                 <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
                   <NeonButton
                     fullWidth
-                    disabled={isLoading || !(auth as FirebaseAuth | null)}
+                    disabled={isLoading || !auth}
                     glowColor={colors.glitchRed}
                     size="medium"
                     onClick={handleGoogleSignIn}
@@ -253,7 +273,7 @@ const LoginPage: React.FC = () => {
                   </NeonButton>
                   <NeonButton
                     fullWidth
-                    disabled={isLoading || !(auth as FirebaseAuth | null)}
+                    disabled={isLoading || !auth}
                     glowColor={colors.neonBlue}
                     size="medium"
                     onClick={handleFacebookSignIn}
@@ -262,7 +282,7 @@ const LoginPage: React.FC = () => {
                   </NeonButton>
                   <NeonButton
                     fullWidth
-                    disabled={isLoading || !(auth as FirebaseAuth | null)}
+                    disabled={isLoading || !auth}
                     glowColor={colors.neonCyan}
                     size="medium"
                     onClick={handleTwitterSignIn}
@@ -270,9 +290,9 @@ const LoginPage: React.FC = () => {
                     🐦 Twitter
                   </NeonButton>
                 </Box>
-                {!(auth as FirebaseAuth | null) && (
+                {!auth && (
                   <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', opacity: 0.7 }}>
-                    Google sign-in requires Firebase to be configured. Email sign-in works now.
+                    Social sign-in is ready. Try Google, Facebook, or Twitter above!
                   </Typography>
                 )}
 

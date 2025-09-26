@@ -29,7 +29,7 @@ export interface UserProfile {
 
 const ensureFirebase = () => {
   if (!auth || !db) {
-    const err: any = new Error('Authentication is not configured');
+    const err: any = new Error('Firebase authentication is not available');
     err.code = 'auth/config-missing';
     throw err;
   }
@@ -137,16 +137,35 @@ export const signInWithGoogle = async (): Promise<User> => {
   try {
     ensureFirebase();
     let user: User | null = null;
+    
     try {
+      // Try popup first
       const result = await signInWithPopup(auth!, googleProvider);
       user = result.user;
     } catch (err: any) {
-      const code = err?.code || err?.message || '';
-      if (String(code).includes('popup-blocked') || String(code).includes('popup-closed-by-user')) {
-        await signInWithRedirect(auth!, googleProvider);
-        // The page will redirect; return a never-resolving Promise placeholder (typed without TS generics)
-        return new Promise(() => { /* redirecting */ }) as unknown as Promise<User>;
+      const code = err?.code || '';
+      
+      // Handle popup issues
+      if (code === 'auth/popup-blocked' || 
+          code === 'auth/popup-closed-by-user' ||
+          code === 'auth/cancelled-popup-request') {
+        // Try redirect as fallback
+        try {
+          await signInWithRedirect(auth!, googleProvider);
+          return new Promise(() => { /* redirecting */ }) as unknown as Promise<User>;
+        } catch (redirectErr) {
+          throw err; // Throw original popup error
+        }
       }
+      
+      // Handle unauthorized domain by providing helpful message
+      if (code === 'auth/unauthorized-domain') {
+        const error: any = new Error('This domain is not authorized for Google sign-in. Please add localhost to Firebase Console > Authentication > Settings > Authorized domains.');
+        error.code = 'auth/unauthorized-domain';
+        throw error;
+      }
+      
+      // For other errors, throw as-is
       throw err;
     }
 
@@ -355,7 +374,7 @@ export const getAuthErrorMessage = (errorCode: string): string => {
     case 'auth/operation-not-allowed':
       return 'This sign-in method is not enabled. Please contact support.';
     case 'auth/unauthorized-domain':
-      return 'This domain is not authorized for authentication. Please contact support.';
+      return 'Google sign-in requires domain authorization. Please add this domain to Firebase authorized domains or use email/password login.';
     case 'auth/invalid-credential':
       return 'Invalid credentials. Please try again.';
     case 'auth/user-disabled':
