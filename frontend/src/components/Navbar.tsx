@@ -51,6 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
     { label: 'Analytics', path: '/analytics', icon: <Analytics /> },
     { label: 'Bookings', path: '/book', icon: <DirectionsWalk /> },
     { label: 'Stores', path: '/stores', icon: <DirectionsWalk /> },
+    { label: 'Profile', path: '/profile', icon: <AccountCircle /> },
     { label: 'Contact', path: '/contact', icon: <AccountCircle /> },
   ];
 
