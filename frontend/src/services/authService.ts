@@ -393,12 +393,13 @@ export const getAuthErrorMessage = (errorCode: string): string => {
       return 'Authentication configuration error. Please contact support.';
     case 'auth/operation-not-allowed':
       return 'This sign-in method is not enabled. Please contact support.';
-    case 'auth/unauthorized-domain':
+    case 'auth/unauthorized-domain': {
       const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'unknown';
       const isProduction = currentDomain.includes('vercel.app') || currentDomain.includes('netlify.app') || !currentDomain.includes('localhost');
       return isProduction 
         ? `Domain "${currentDomain}" not authorized. Add it to Firebase Console > Authentication > Settings > Authorized domains, then try again.`
         : 'Localhost not authorized. Add "localhost" to Firebase Console > Authentication > Settings > Authorized domains.';
+    }
     case 'auth/invalid-credential':
       return 'Invalid credentials. Please try again.';
     case 'auth/user-disabled':
