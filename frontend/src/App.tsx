@@ -59,8 +59,8 @@ const LandingPageContentBase: React.FC<LandingPageContentProps> = ({
   handleViewAnalytics,
 }) => {
   const navigate = useNavigate();
-  // Compute login status without hooks to avoid issues when Firebase isn't configured
-  const isLoggedIn = Boolean((auth as FirebaseAuth | null)?.currentUser) || Boolean(localStorage.getItem('access_token'));
+  // App is now fully public - no authentication required
+  const isLoggedIn = false; // Always false since we removed authentication
 
   return (
     <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 10 }}>
@@ -448,34 +448,7 @@ const App: React.FC = () => {
     setNotifications([]);
   }, []);
 
-  // Handle Firebase redirect result on load to avoid "missing initial state" fatal errors
-  useEffect(() => {
-    (async () => {
-      try {
-        const fb = auth as FirebaseAuth | null;
-        if (fb && typeof window !== 'undefined') {
-          const mod = await import('firebase/auth');
-          // getRedirectResult will throw if no redirect pending; ignore that case
-          try {
-            await mod.getRedirectResult(fb);
-          } catch (e: any) {
-            const msg = e?.message || '';
-            if (!String(msg).toLowerCase().includes('missing initial state') && !String(e?.code || '').includes('no-auth')) {
-              // Other errors can be logged but shouldn't break the app
-              // eslint-disable-next-line no-console
-              console.warn('redirect result check:', e);
-            }
-          }
-        }
-      } catch (e) {
-        if (process.env.NODE_ENV !== 'production') {
-          // Ignore redirect init errors; helpful in dev for visibility
-          // eslint-disable-next-line no-console
-          console.debug('redirect init check error', e);
-        }
-      }
-    })();
-  }, []);
+  // Firebase authentication removed - app is now fully public
 
   if (loading) {
     return (
