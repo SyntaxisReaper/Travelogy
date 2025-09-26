@@ -8,7 +8,7 @@ from .models import User, UserProfile, UserSettings, ConsentLog
 from .serializers import (
     UserRegistrationSerializer, UserLoginSerializer, UserProfileSerializer,
     UserSettingsSerializer, ExtendedUserProfileSerializer, ConsentUpdateSerializer,
-    ConsentLogSerializer, UserStatsSerializer
+    ConsentLogSerializer, UserStatsSerializer, ChangePasswordSerializer
 )
 
 
@@ -186,6 +186,16 @@ def user_stats_view(request):
     
     serializer = UserStatsSerializer(stats)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def change_password_view(request):
+    """Change password for the authenticated user"""
+    serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response({ 'message': 'Password changed successfully' }, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])

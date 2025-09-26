@@ -72,6 +72,8 @@ export const authAPI = {
     
   updateProfile: (data: Partial<User>): Promise<User> =>
     api.patch('/auth/profile/', data).then(res => res.data),
+  changePassword: (data: { old_password: string; new_password: string; new_password_confirm: string }) =>
+    api.post('/auth/password/change/', data).then(res => res.data),
     
   checkConsent: (): Promise<ConsentStatus> =>
     api.get('/auth/consent/check/').then(res => res.data),

@@ -140,6 +140,27 @@ class ConsentLogSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'user', 'timestamp']
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for changing password"""
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, validators=[validate_password])
+    new_password_confirm = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError("New passwords don't match.")
+        user = self.context['request'].user
+        if not user.check_password(attrs['old_password']):
+            raise serializers.ValidationError({ 'old_password': 'Incorrect current password.' })
+        return attrs
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.set_password(self.validated_data['new_password'])
+        user.save()
+        return user
+
+
 class UserStatsSerializer(serializers.Serializer):
     """User statistics serializer"""
     

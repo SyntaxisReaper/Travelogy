@@ -21,5 +21,6 @@ urlpatterns = [
     
     # User statistics and account management
     path('stats/', views.user_stats_view, name='user-stats'),
+    path('password/change/', views.change_password_view, name='change-password'),
     path('delete-account/', views.delete_account_view, name='delete-account'),
 ]

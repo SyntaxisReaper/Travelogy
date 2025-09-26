@@ -278,6 +278,14 @@ const ProfilePage: React.FC = () => {
         </Stack>
       </Paper>
 
+      {/* Change Password */}
+      <Paper sx={{ p: 3, mt: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Change Password
+        </Typography>
+        <ChangePasswordForm />
+      </Paper>
+
       <Paper sx={{ p: 3, mt: 3 }}>
         <Typography variant="h6" gutterBottom>
           Linked Accounts
@@ -460,6 +468,52 @@ const ProfilePage: React.FC = () => {
         }}>Download JSON</Button>
       </Paper>
     </Container>
+  );
+};
+
+const ChangePasswordForm: React.FC = () => {
+  const [oldPwd, setOldPwd] = useState('');
+  const [newPwd, setNewPwd] = useState('');
+  const [newPwd2, setNewPwd2] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const submit = async () => {
+    setError(null); setSuccess(null); setLoading(true);
+    try {
+      const { authAPI } = await import('../services/api');
+      await authAPI.changePassword({ old_password: oldPwd, new_password: newPwd, new_password_confirm: newPwd2 });
+      setSuccess('Password changed successfully');
+      setOldPwd(''); setNewPwd(''); setNewPwd2('');
+    } catch (e: any) {
+      setError(e?.response?.data ? JSON.stringify(e.response.data) : 'Failed to change password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box>
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={4}>
+          <TextField label="Current Password" type="password" fullWidth value={oldPwd} onChange={(e) => setOldPwd(e.target.value)} />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField label="New Password" type="password" fullWidth value={newPwd} onChange={(e) => setNewPwd(e.target.value)} />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField label="Confirm New Password" type="password" fullWidth value={newPwd2} onChange={(e) => setNewPwd2(e.target.value)} />
+        </Grid>
+      </Grid>
+      <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+        <Button variant="contained" onClick={submit} disabled={loading || !oldPwd || !newPwd || !newPwd2}>
+          {loading ? 'Updating…' : 'Update Password'}
+        </Button>
+      </Stack>
+    </Box>
   );
 };
 
