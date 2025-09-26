@@ -160,7 +160,13 @@ export const signInWithGoogle = async (): Promise<User> => {
       
       // Handle specific error codes
       if (code === 'auth/unauthorized-domain') {
-        const error: any = new Error('This domain is not authorized for Google sign-in. Please add localhost to Firebase Console > Authentication > Settings > Authorized domains.');
+        const currentDomain = window.location.hostname;
+        const isProduction = currentDomain.includes('vercel.app') || currentDomain.includes('netlify.app') || !currentDomain.includes('localhost');
+        const domainMessage = isProduction 
+          ? `This domain (${currentDomain}) is not authorized for Google sign-in. Please add "${currentDomain}" to Firebase Console > Authentication > Settings > Authorized domains.`
+          : 'This domain is not authorized for Google sign-in. Please add localhost to Firebase Console > Authentication > Settings > Authorized domains.';
+        
+        const error: any = new Error(domainMessage);
         error.code = 'auth/unauthorized-domain';
         throw error;
       }
@@ -388,7 +394,11 @@ export const getAuthErrorMessage = (errorCode: string): string => {
     case 'auth/operation-not-allowed':
       return 'This sign-in method is not enabled. Please contact support.';
     case 'auth/unauthorized-domain':
-      return 'Google sign-in requires domain authorization. Please add this domain to Firebase authorized domains or use email/password login.';
+      const currentDomain = typeof window !== 'undefined' ? window.location.hostname : 'unknown';
+      const isProduction = currentDomain.includes('vercel.app') || currentDomain.includes('netlify.app') || !currentDomain.includes('localhost');
+      return isProduction 
+        ? `Domain "${currentDomain}" not authorized. Add it to Firebase Console > Authentication > Settings > Authorized domains, then try again.`
+        : 'Localhost not authorized. Add "localhost" to Firebase Console > Authentication > Settings > Authorized domains.';
     case 'auth/invalid-credential':
       return 'Invalid credentials. Please try again.';
     case 'auth/user-disabled':

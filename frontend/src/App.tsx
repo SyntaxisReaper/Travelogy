@@ -17,6 +17,7 @@ import AnalyticsModal from './components/AnalyticsModal';
 
 // Import Firebase test for debugging
 import { testFirebaseConnection } from './utils/firebaseTest';
+import { logDeploymentInfo } from './utils/deploymentInfo';
 import { getRedirectResult } from 'firebase/auth';
 import { auth } from './services/firebase';
 import Navbar from './components/Navbar';
@@ -407,7 +408,8 @@ const App: React.FC = () => {
       }
     };
     
-    // Test Firebase connection on app load
+    // Log deployment info and test Firebase connection
+    logDeploymentInfo();
     testFirebaseConnection();
     handleGoogleRedirect();
     

@@ -172,6 +172,15 @@ const LoginPage: React.FC = () => {
               <Typography variant="body1" sx={{ mb: 4, opacity: 0.8 }}>
                 Access your neural travel dashboard
               </Typography>
+              
+              {/* Production deployment notice */}
+              {typeof window !== 'undefined' && window.location.hostname.includes('vercel.app') && (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  📱 <strong>Demo Mode:</strong> Google sign-in requires domain authorization.<br/>
+                  <strong>Demo Account:</strong> demo@travelogy.com / demo123<br/>
+                  Or contact admin to add this domain to Firebase.
+                </Alert>
+              )}
 
               <Box component="form" onSubmit={handleLogin} sx={{ textAlign: 'left' }}>
                 <TextField
