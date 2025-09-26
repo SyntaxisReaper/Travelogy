@@ -15,20 +15,12 @@ import { NotifyProvider } from './contexts/NotifyContext';
 import ScrollToTop from './components/ScrollToTop';
 import AnalyticsModal from './components/AnalyticsModal';
 
-// Import Firebase test for debugging
-import { testFirebaseConnection } from './utils/firebaseTest';
-import { logDeploymentInfo } from './utils/deploymentInfo';
-import { getRedirectResult } from 'firebase/auth';
-import { auth } from './services/firebase';
+// Removed Firebase and authentication dependencies
 import Navbar from './components/Navbar';
 import EmergencySOS from './components/EmergencySOS';
-import { auth } from './services/firebase';
-import type { Auth as FirebaseAuth } from 'firebase/auth';
 import ThemePanel from './components/ThemePanel';
 import ThemeFab from './components/ThemeFab';
-import('firebase/auth');
-// IMPORTANT: Lazy-load ProtectedRoute so Firebase isn't initialized at startup
-const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
+// Authentication removed - all routes are now public
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
@@ -327,8 +319,7 @@ const App: React.FC = () => {
   const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber'>(() => (localStorage.getItem('accent') as any) || 'cyan');
   const [themePanelOpen, setThemePanelOpen] = useState(false);
 
-  // Auth visibility (avoid react-firebase-hooks in case Firebase is not configured)
-  const isLoggedIn = Boolean((auth as FirebaseAuth | null)?.currentUser) || Boolean(localStorage.getItem('access_token'));
+  // Authentication removed - app is now fully public
 
   const accentHex = useMemo(() => ({
     cyan: '#1de9b6',
@@ -388,31 +379,6 @@ const App: React.FC = () => {
 
 
   useEffect(() => {
-    // Handle Google sign-in redirect result
-    const handleGoogleRedirect = async () => {
-      try {
-        if (auth) {
-          const result = await getRedirectResult(auth);
-          if (result && result.user) {
-            console.log('Google sign-in redirect successful:', result.user.email);
-            setNotifications(prev => [...prev, `🎉 Welcome ${result.user.email}! Google sign-in successful.`]);
-            // Optional: Navigate to dashboard
-            // window.location.href = '/dashboard';
-          }
-        }
-      } catch (error: any) {
-        console.error('Google redirect error:', error);
-        if (error.code !== 'auth/no-auth-event') {
-          setNotifications(prev => [...prev, `❌ Google sign-in failed: ${error.message}`]);
-        }
-      }
-    };
-    
-    // Log deployment info and test Firebase connection
-    logDeploymentInfo();
-    testFirebaseConnection();
-    handleGoogleRedirect();
-    
     // Simulate loading sequence
     const loadingSequence = [
       { type: 'circuit' as const, duration: 1000 },
@@ -557,61 +523,19 @@ const App: React.FC = () => {
             />
           }>
             <Routes>
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <DashboardPageWrapper />
-                </ProtectedRoute>
-              } />
-              <Route path="/trips" element={
-                <ProtectedRoute>
-                  <TripsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/trips/list" element={
-                <ProtectedRoute>
-                  <TripsListPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/trips/:id" element={
-                <ProtectedRoute>
-                  <TripDetailsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/analytics" element={
-                <ProtectedRoute>
-                  <AnalyticsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/journal" element={
-                <ProtectedRoute>
-                  <JournalPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
-              <Route path="/book" element={
-                <ProtectedRoute>
-                  <BookingsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/stores" element={
-                <ProtectedRoute>
-                  <StoresPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/feedback" element={
-                <ProtectedRoute>
-                  <FeedbackAdminPage />
-                </ProtectedRoute>
-              } />
-              {/* Public routes */}
+              {/* All routes are now public - no authentication required */}
+              <Route path="/dashboard" element={<DashboardPageWrapper />} />
+              <Route path="/trips" element={<TripsPage />} />
+              <Route path="/trips/list" element={<TripsListPage />} />
+              <Route path="/trips/:id" element={<TripDetailsPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/journal" element={<JournalPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/book" element={<BookingsPage />} />
+              <Route path="/stores" element={<StoresPage />} />
+              <Route path="/admin/feedback" element={<FeedbackAdminPage />} />
               <Route path="/weather" element={<WeatherPage />} />
               <Route path="/contact" element={<ContactPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
               <Route path="/" element={<LandingPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

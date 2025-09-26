@@ -6,7 +6,6 @@ import {
   Button,
   Box,
   IconButton,
-  Avatar,
   Menu,
   MenuItem,
   Drawer,
@@ -15,28 +14,18 @@ import {
   ListItemIcon,
   ListItemText,
   Divider as MDivider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from '@mui/material';
 import {
   Dashboard,
   DirectionsWalk,
   Analytics,
-  AccountCircle,
-  ExitToApp,
   ColorLens,
   Public,
   Menu as MenuIcon,
   MoreHoriz,
+  AccountCircle,
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { logout } from '../store/slices/authSlice';
-import { auth } from '../services/firebase';
-import type { Auth, User } from 'firebase/auth';
-import { signOutUser } from '../services/authService';
 
 interface NavbarProps {
   themeMode?: 'light' | 'dark';
@@ -50,69 +39,9 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech', accent = 'cyan', onChangeThemeMode, onChangeThemeFont, onChangeAccent }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
   
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [themeAnchor, setThemeAnchor] = React.useState<null | HTMLElement>(null);
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
-
-  const fallbackInitial = user?.first_name?.[0] || user?.email?.[0] || 'U';
-
-  const authInstance = auth as Auth | null;
-  const [fbUser, setFbUser] = React.useState<User | null>(null);
-  React.useEffect(() => {
-    if (!authInstance) { setFbUser(null); return; }
-    const unsub = authInstance.onAuthStateChanged((u) => setFbUser(u));
-    return () => unsub();
-  }, [authInstance]);
-  const isLoggedIn = !!fbUser || !!user;
-
-  const FirebaseAvatarWithAuth: React.FC<{ fallback: string }> = ({ fallback }) => {
-    const src = fbUser?.photoURL || user?.photo_url || undefined;
-    const letter = fbUser?.displayName?.[0] || fbUser?.email?.[0] || user?.first_name?.[0] || fallback;
-    return (
-      <Avatar src={src} alt={fbUser?.displayName || fbUser?.email || user?.full_name || 'User'} sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-        {!src ? letter : null}
-      </Avatar>
-    );
-  };
-
-  const FallbackAvatar: React.FC<{ fallback: string }> = ({ fallback }) => (
-    <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-      {fallback}
-    </Avatar>
-  );
-
-  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const doLogout = async () => {
-    try {
-      await signOutUser();
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn('Firebase signOut failed', e);
-    }
-    await dispatch(logout());
-    handleClose();
-    navigate('/login');
-  };
-
-  const handleLogout = () => {
-    setConfirmOpen(true);
-  };
-
-  const handleProfileNavigate = () => {
-    navigate('/profile');
-    handleClose();
-  };
 
   const navigationItems = [
     { label: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
@@ -207,44 +136,6 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             <MenuItem selected={themeFont==='grotesk'} onClick={() => { onChangeThemeFont?.('grotesk'); setThemeAnchor(null); }}>Grotesk</MenuItem>
           </Menu>
 
-          {isLoggedIn ? (
-            <>
-              <IconButton onClick={handleProfileClick} color="inherit">
-                {authInstance ? (
-                  <FirebaseAvatarWithAuth fallback={fallbackInitial} />
-                ) : (
-                  <FallbackAvatar fallback={fallbackInitial} />
-                )}
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-              >
-                <MenuItem onClick={handleProfileNavigate}>
-                  <AccountCircle sx={{ mr: 1 }} />
-                  Profile
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <ExitToApp sx={{ mr: 1 }} />
-                  Logout
-                </MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <>
-              <Button color="inherit" onClick={() => navigate('/login')} sx={{ textTransform: 'none' }}>
-                Login
-              </Button>
-              <Button color="inherit" variant="outlined" onClick={() => navigate('/register')} sx={{ textTransform: 'none', borderColor: 'rgba(255,255,255,0.5)' }}>
-                Sign Up
-              </Button>
-            </>
-          )}
         </Box>
       </Toolbar>
 
@@ -265,16 +156,6 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
       </Drawer>
 
     </AppBar>
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Confirm Logout</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2">Are you sure you want to logout?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button color="warning" variant="contained" onClick={() => { setConfirmOpen(false); doLogout(); }}>Logout</Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 };
