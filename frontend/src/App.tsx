@@ -509,6 +509,8 @@ const App: React.FC = () => {
               <Route path="/admin/feedback" element={<FeedbackAdminPage />} />
               <Route path="/weather" element={<WeatherPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
               <Route path="/" element={<LandingPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -110,7 +110,6 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             <MenuIcon />
           </IconButton>
         </Box>
-
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
           <Button
             color="inherit"
@@ -136,6 +135,32 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
             <MenuItem selected={themeFont==='grotesk'} onClick={() => { onChangeThemeFont?.('grotesk'); setThemeAnchor(null); }}>Grotesk</MenuItem>
           </Menu>
 
+          {/* Auth buttons (always visible in public app) */}
+          <Button
+            component={RouterLink}
+            to="/login"
+            color="inherit"
+            sx={{
+              ml: 1,
+              display: { xs: 'none', md: 'inline-flex' },
+              backgroundColor: 'transparent',
+              '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+            }}
+          >
+            Sign In
+          </Button>
+          <Button
+            component={RouterLink}
+            to="/register"
+            variant="contained"
+            color="secondary"
+            sx={{
+              ml: 1,
+              display: { xs: 'none', md: 'inline-flex' },
+            }}
+          >
+            Get Started
+          </Button>
         </Box>
       </Toolbar>
 
@@ -151,6 +176,15 @@ const Navbar: React.FC<NavbarProps> = ({ themeMode = 'dark', themeFont = 'tech',
                 <ListItemText primary={item.label} />
               </ListItemButton>
             ))}
+            <MDivider sx={{ my: 1 }} />
+            <ListItemButton onClick={() => navigate('/login')} selected={location.pathname === '/login'}>
+              <ListItemIcon><AccountCircle /></ListItemIcon>
+              <ListItemText primary="Sign In" />
+            </ListItemButton>
+            <ListItemButton onClick={() => navigate('/register')} selected={location.pathname === '/register'}>
+              <ListItemIcon><AccountCircle /></ListItemIcon>
+              <ListItemText primary="Get Started" />
+            </ListItemButton>
           </List>
         </Box>
       </Drawer>
