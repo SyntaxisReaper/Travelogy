@@ -10,7 +10,7 @@ import {
   Divider
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { signInWithEmail, resetPassword, getAuthErrorMessage, signInWithGoogle, signInWithFacebook, signInWithTwitter } from '../services/authService';
+import { signInWithEmail, resetPassword, getAuthErrorMessage, signInWithGoogle } from '../services/authService';
 import { motion } from 'framer-motion';
 import { colors } from '../styles/techTheme';
 import HolographicCard from '../components/HolographicCard';
@@ -18,8 +18,6 @@ import NeonButton from '../components/NeonButton';
 import GlitchText from '../components/GlitchText';
 import { extractErrorCode } from '../utils/error';
 import { auth } from '../services/firebase';
-import { useAppDispatch } from '../store/hooks';
-import { login as backendLogin } from '../store/slices/authSlice';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -28,7 +26,6 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   // If Firebase auth isn't available, skip auto-redirect logic and just render the page.
 
@@ -43,15 +40,8 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      if (auth) {
-        // Use Firebase authentication
-        await signInWithEmail(email, password);
-        navigate('/dashboard');
-      } else {
-        // Backend login fallback (Django JWT)
-        await dispatch(backendLogin({ email, password }) as any).unwrap();
-        navigate('/dashboard');
-      }
+      await signInWithEmail(email, password);
+      navigate('/dashboard');
     } catch (err: unknown) {
       const code = extractErrorCode(err);
       setError(getAuthErrorMessage(code));
@@ -99,47 +89,6 @@ const LoginPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  const handleFacebookSignIn = async () => {
-    if (!auth) { 
-      setError('Facebook sign-in is not available. Please use email/password login.'); 
-      return; 
-    }
-    
-    setIsLoading(true);
-    setError('');
-    
-    try {
-      await signInWithFacebook();
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      const code = extractErrorCode(err);
-      setError(getAuthErrorMessage(code));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleTwitterSignIn = async () => {
-    if (!auth) { 
-      setError('Twitter sign-in is not available. Please use email/password login.'); 
-      return; 
-    }
-    
-    setIsLoading(true);
-    setError('');
-    
-    try {
-      await signInWithTwitter();
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      const code = extractErrorCode(err);
-      setError(getAuthErrorMessage(code));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
 
   return (
     <Box sx={{
@@ -284,30 +233,7 @@ const LoginPage: React.FC = () => {
                   >
                     🌐 Google
                   </NeonButton>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading || !auth}
-                    glowColor={colors.neonBlue}
-                    size="medium"
-                    onClick={handleFacebookSignIn}
-                  >
-                    📘 Facebook
-                  </NeonButton>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading || !auth}
-                    glowColor={colors.neonCyan}
-                    size="medium"
-                    onClick={handleTwitterSignIn}
-                  >
-                    🐦 Twitter
-                  </NeonButton>
                 </Box>
-                {!auth && (
-                  <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', opacity: 0.7 }}>
-                    Social sign-in is ready. Try Google, Facebook, or Twitter above!
-                  </Typography>
-                )}
 
                 <Divider sx={{ my: 2, borderColor: colors.neonCyan + '30' }} />
 

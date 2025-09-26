@@ -1,23 +1,15 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDOeiar5dxHvmzruoiXWC9bUMi32RLza60",
-  authDomain: "travelogy-c645554.firebaseapp.com",
-  projectId: "travelogy-c645554",
-  storageBucket: "travelogy-c645554.firebasestorage.app",
-  messagingSenderId: "19390024183",
-  appId: "1:19390024183:web:932b3d40156f8cfb0346f2",
-  measurementId: "G-905E97MQG1"
-};
+// Your web app's Firebase configuration (from environment)
+import { FIREBASE_CONFIG } from '../config/env';
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(FIREBASE_CONFIG as any);
 
 // Initialize Firebase services
 export const auth = getAuth(app);
@@ -49,8 +41,6 @@ export { analytics };
 
 // Initialize Auth Providers (safe regardless of app init)
 export const googleProvider = new GoogleAuthProvider();
-export const facebookProvider = new FacebookAuthProvider();
-export const twitterProvider = new TwitterAuthProvider();
 
 // Configure Google provider
 googleProvider.addScope('profile');

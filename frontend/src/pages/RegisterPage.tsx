@@ -12,7 +12,7 @@ import {
   Checkbox
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { signUpWithEmail, getAuthErrorMessage, signInWithGoogle, signInWithFacebook, signInWithTwitter } from '../services/authService';import { auth } from '../services/firebase';import type { Auth as FirebaseAuth } from 'firebase/auth';import { useAppDispatch } from '../store/hooks';import { register as backendRegister } from '../store/slices/authSlice';
+import { signUpWithEmail, getAuthErrorMessage, signInWithGoogle } from '../services/authService';import { auth } from '../services/firebase';import type { Auth as FirebaseAuth } from 'firebase/auth';
 import { motion } from 'framer-motion';
 import { colors } from '../styles/techTheme';
 import HolographicCard from '../components/HolographicCard';
@@ -32,7 +32,6 @@ const RegisterPage: React.FC = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPrivacy, setAcceptPrivacy] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   // If Firebase auth isn't available, skip auto-redirect logic and just render the page.
 
@@ -76,26 +75,7 @@ const RegisterPage: React.FC = () => {
     setError('');
 
     try {
-      if (auth as FirebaseAuth | null) {
-        await signUpWithEmail(formData.email, formData.password, formData.displayName);
-      } else {
-        const nameParts = (formData.displayName || '').trim().split(' ');
-        const first = nameParts[0] || '';
-        const last = nameParts.slice(1).join(' ') || '';
-        const payload = {
-          username: formData.displayName || formData.email.split('@')[0],
-          email: formData.email,
-          password: formData.password,
-          password_confirm: formData.password,
-          first_name: first,
-          last_name: last,
-          location_tracking_consent: false,
-          data_sharing_consent: false,
-          analytics_consent: false,
-          marketing_consent: false,
-        } as any;
-        await dispatch(backendRegister(payload) as any).unwrap();
-      }
+      await signUpWithEmail(formData.email, formData.password, formData.displayName);
       navigate('/dashboard');
     } catch (err: unknown) {
       setError(getAuthErrorMessage(extractErrorCode(err)));
@@ -117,35 +97,6 @@ const RegisterPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  const handleFacebookSignIn = async () => {
-    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
-    setIsLoading(true);
-    setError('');
-    try {
-      await signInWithFacebook();
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      setError(getAuthErrorMessage(extractErrorCode(err)));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleTwitterSignIn = async () => {
-    if (!(auth as FirebaseAuth | null)) { setError('Social login unavailable. Please use email/password.'); return; }
-    setIsLoading(true);
-    setError('');
-    try {
-      await signInWithTwitter();
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      setError(getAuthErrorMessage(extractErrorCode(err)));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
 
   return (
     <Box sx={{
@@ -394,24 +345,6 @@ const RegisterPage: React.FC = () => {
                     onClick={handleGoogleSignIn}
                   >
                     🌐 Google
-                  </NeonButton>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading || !(auth as FirebaseAuth | null)}
-                    glowColor={colors.neonBlue}
-                    size="medium"
-                    onClick={handleFacebookSignIn}
-                  >
-                    📘 Facebook
-                  </NeonButton>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading || !(auth as FirebaseAuth | null)}
-                    glowColor={colors.neonCyan}
-                    size="medium"
-                    onClick={handleTwitterSignIn}
-                  >
-                    🐦 Twitter
                   </NeonButton>
                 </Box>
                 {!(auth as FirebaseAuth | null) && (

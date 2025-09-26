@@ -9,8 +9,7 @@ import {
   User 
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db, googleProvider, facebookProvider, twitterProvider } from './firebase';
-import { authAPI } from './api';
+import { auth, db, googleProvider } from './firebase';
 
 export interface UserProfile {
   uid: string;
@@ -107,30 +106,6 @@ export const signInWithEmail = async (
   }
 };
 
-// Best-effort backend sync of social profile
-const syncProfileToBackend = async (user: User) => {
-  try {
-    const display = user.displayName || '';
-    let first_name = '';
-    let last_name = '';
-    if (display) {
-      const parts = display.split(' ');
-      first_name = parts[0] || '';
-      last_name = parts.slice(1).join(' ') || '';
-    }
-    const payload: Partial<{ first_name: string; last_name: string; photo_url: string }> = {
-      ...(first_name ? { first_name } : {}),
-      ...(last_name ? { last_name } : {}),
-      ...(user.photoURL ? { photo_url: user.photoURL } : {}),
-    };
-    if (Object.keys(payload).length > 0) {
-      await authAPI.updateProfile(payload as any);
-    }
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.warn('Backend profile sync skipped', e);
-  }
-};
 
 // Sign in with Google
 export const signInWithGoogle = async (): Promise<User> => {
@@ -216,8 +191,6 @@ export const signInWithGoogle = async (): Promise<User> => {
       console.warn('google signIn: profile write skipped', e);
     }
 
-    // Best-effort sync to backend
-    await syncProfileToBackend(user!);
     return user!;
   } catch (error) {
     console.error('Error signing in with Google:', error);
@@ -225,89 +198,6 @@ export const signInWithGoogle = async (): Promise<User> => {
   }
 };
 
-// Sign in with Facebook
-export const signInWithFacebook = async (): Promise<User> => {
-  try {
-    ensureFirebase();
-    const result = await signInWithPopup(auth!, facebookProvider);
-    const user = result.user;
-    
-    try {
-      const userRef = doc(db!, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
-        const userProfile: UserProfile = {
-          uid: user.uid,
-          email: user.email!,
-          displayName: user.displayName || '',
-          photoURL: user.photoURL || '',
-          createdAt: new Date(),
-          lastLoginAt: new Date(),
-          travelStats: {
-            totalTrips: 0,
-            totalDistance: 0,
-            favoriteTransport: '',
-            sustainabilityScore: 100
-          }
-        };
-        await setDoc(userRef, userProfile);
-      } else {
-        await setDoc(userRef, { lastLoginAt: new Date() }, { merge: true });
-      }
-    } catch (e) {
-      console.warn('facebook signIn: profile write skipped', e);
-    }
-
-    await syncProfileToBackend(user);
-    
-    return user;
-  } catch (error) {
-    console.error('Error signing in with Facebook:', error);
-    throw error;
-  }
-};
-
-// Sign in with Twitter
-export const signInWithTwitter = async (): Promise<User> => {
-  try {
-    ensureFirebase();
-    const result = await signInWithPopup(auth!, twitterProvider);
-    const user = result.user;
-    
-    try {
-      const userRef = doc(db!, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) {
-        const userProfile: UserProfile = {
-          uid: user.uid,
-          email: user.email!,
-          displayName: user.displayName || '',
-          photoURL: user.photoURL || '',
-          createdAt: new Date(),
-          lastLoginAt: new Date(),
-          travelStats: {
-            totalTrips: 0,
-            totalDistance: 0,
-            favoriteTransport: '',
-            sustainabilityScore: 100
-          }
-        };
-        await setDoc(userRef, userProfile);
-      } else {
-        await setDoc(userRef, { lastLoginAt: new Date() }, { merge: true });
-      }
-    } catch (e) {
-      console.warn('twitter signIn: profile write skipped', e);
-    }
-
-    await syncProfileToBackend(user);
-    
-    return user;
-  } catch (error) {
-    console.error('Error signing in with Twitter:', error);
-    throw error;
-  }
-};
 
 // Sign out
 export const signOutUser = async (): Promise<void> => {
