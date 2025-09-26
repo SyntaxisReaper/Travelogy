@@ -18,7 +18,6 @@ import NeonButton from '../components/NeonButton';
 import GlitchText from '../components/GlitchText';
 import { extractErrorCode } from '../utils/error';
 import { auth } from '../services/firebase';
-import type { Auth as FirebaseAuth } from 'firebase/auth';
 import { useAppDispatch } from '../store/hooks';
 import { login as backendLogin } from '../store/slices/authSlice';
 
@@ -86,11 +85,16 @@ const LoginPage: React.FC = () => {
     setError('');
     
     try {
-      await signInWithGoogle();
+      console.log('Starting Google sign-in...');
+      const user = await signInWithGoogle();
+      console.log('Google sign-in successful:', user?.email);
       navigate('/dashboard');
     } catch (err: unknown) {
+      console.error('Google sign-in error:', err);
       const code = extractErrorCode(err);
-      setError(getAuthErrorMessage(code));
+      const errorMessage = getAuthErrorMessage(code);
+      console.error('Error code:', code, 'Message:', errorMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

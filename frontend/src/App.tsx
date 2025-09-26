@@ -14,6 +14,11 @@ import ContactFab from './components/ContactFab';
 import { NotifyProvider } from './contexts/NotifyContext';
 import ScrollToTop from './components/ScrollToTop';
 import AnalyticsModal from './components/AnalyticsModal';
+
+// Import Firebase test for debugging
+import { testFirebaseConnection } from './utils/firebaseTest';
+import { getRedirectResult } from 'firebase/auth';
+import { auth } from './services/firebase';
 import Navbar from './components/Navbar';
 import EmergencySOS from './components/EmergencySOS';
 import { auth } from './services/firebase';
@@ -382,6 +387,30 @@ const App: React.FC = () => {
 
 
   useEffect(() => {
+    // Handle Google sign-in redirect result
+    const handleGoogleRedirect = async () => {
+      try {
+        if (auth) {
+          const result = await getRedirectResult(auth);
+          if (result && result.user) {
+            console.log('Google sign-in redirect successful:', result.user.email);
+            setNotifications(prev => [...prev, `🎉 Welcome ${result.user.email}! Google sign-in successful.`]);
+            // Optional: Navigate to dashboard
+            // window.location.href = '/dashboard';
+          }
+        }
+      } catch (error: any) {
+        console.error('Google redirect error:', error);
+        if (error.code !== 'auth/no-auth-event') {
+          setNotifications(prev => [...prev, `❌ Google sign-in failed: ${error.message}`]);
+        }
+      }
+    };
+    
+    // Test Firebase connection on app load
+    testFirebaseConnection();
+    handleGoogleRedirect();
+    
     // Simulate loading sequence
     const loadingSequence = [
       { type: 'circuit' as const, duration: 1000 },

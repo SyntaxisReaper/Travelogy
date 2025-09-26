@@ -158,15 +158,29 @@ export const signInWithGoogle = async (): Promise<User> => {
         }
       }
       
-      // Handle unauthorized domain by providing helpful message
+      // Handle specific error codes
       if (code === 'auth/unauthorized-domain') {
         const error: any = new Error('This domain is not authorized for Google sign-in. Please add localhost to Firebase Console > Authentication > Settings > Authorized domains.');
         error.code = 'auth/unauthorized-domain';
         throw error;
       }
       
-      // For other errors, throw as-is
-      throw err;
+      if (code === 'auth/internal-error') {
+        const error: any = new Error('Google sign-in internal error. Please try again or use email/password login.');
+        error.code = 'auth/internal-error';
+        throw error;
+      }
+      
+      if (code === 'auth/network-request-failed') {
+        const error: any = new Error('Network error during Google sign-in. Please check your connection and try again.');
+        error.code = 'auth/network-request-failed';
+        throw error;
+      }
+      
+      // For other errors, add context
+      const error: any = new Error(`Google sign-in failed: ${err.message || 'Unknown error'}`);
+      error.code = code || 'auth/unknown-error';
+      throw error;
     }
 
     // Check/create profile (best-effort) in Firestore
@@ -380,8 +394,20 @@ export const getAuthErrorMessage = (errorCode: string): string => {
     case 'auth/user-disabled':
       return 'This account has been disabled. Please contact support.';
     case 'auth/config-missing':
-      return 'Authentication is not configured. Please try again later or contact support.';
+      return 'Firebase Authentication is not configured. Please check your environment variables.';
+    case 'auth/admin-restricted-operation':
+      return 'This operation is restricted by admin policy. Please contact support.';
+    case 'auth/credential-already-in-use':
+      return 'This Google account is already linked to another user.';
+    case 'auth/requires-recent-login':
+      return 'Please sign out and sign in again to perform this operation.';
+    case 'auth/internal-error':
+      return 'Google sign-in encountered an internal error. Please try again or use email/password login.';
+    case 'auth/unknown-error':
+      return 'An unknown authentication error occurred. Please try again.';
     default:
-      return 'An unexpected error occurred. Please try again.';
+      // Log unknown errors for debugging
+      console.error('[Auth Error] Unknown error code:', errorCode);
+      return `Authentication error: ${errorCode}. Please try email/password login or contact support.`;
   }
 };

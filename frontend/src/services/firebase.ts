@@ -1,8 +1,8 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
-import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, TwitterAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 // Your web app's Firebase configuration
@@ -25,7 +25,7 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Initialize Analytics (only if supported)
-let analytics: any = null;
+let analytics = null;
 try {
   if (typeof window !== 'undefined') {
     isSupported().then((supported) => {
