@@ -26,7 +26,7 @@ import {
   AccessibilityNew,
   TextIncrease,
   Animation,
-  Child,
+  ChildCare,
   School,
   Work,
   Elderly,
@@ -152,7 +152,7 @@ const AgeGroupThemePanel: React.FC<AgeGroupThemePanelProps> = ({ open, onClose }
   };
 
   const ageGroupIcons = {
-    children: <Child color="primary" />,
+    children: <ChildCare color="primary" />,
     teenagers: <School color="primary" />,
     young_adults: <Work color="primary" />,
     adults: <Work color="primary" />,
@@ -232,7 +232,7 @@ const AgeGroupThemePanel: React.FC<AgeGroupThemePanelProps> = ({ open, onClose }
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Child color="primary" />
+                    <ChildCare color="primary" />
                     Age Group Selection
                   </Typography>
                   
@@ -282,7 +282,7 @@ const AgeGroupThemePanel: React.FC<AgeGroupThemePanelProps> = ({ open, onClose }
                         variant="outlined"
                         onClick={() => handleQuickTheme('kids')}
                         disabled={loading}
-                        startIcon={<Child />}
+                        startIcon={<ChildCare />}
                         sx={{ mb: 1 }}
                       >
                         Kids Mode

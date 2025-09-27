@@ -21,11 +21,11 @@ import {
   Palette,
   AccessibilityNew,
   TravelExplore,
-  Emergency,
+  Warning,
   Analytics
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from 'recharts';
 import HolographicCard from './HolographicCard';
 import NeonButton from './NeonButton';
 import GlitchText from './GlitchText';
@@ -299,7 +299,7 @@ const TechDashboardBase: React.FC<TechDashboardProps> = ({ onClose }) => {
                   transition: 'all 0.2s ease'
                 }}
               >
-                <Emergency />
+                <Warning />
               </IconButton>
             </Tooltip>
             
@@ -462,7 +462,7 @@ const TechDashboardBase: React.FC<TechDashboardProps> = ({ onClose }) => {
                     <CartesianGrid strokeDasharray="3 3" stroke={colors.neonCyan} opacity={0.3} />
                     <XAxis dataKey="month" stroke={colors.neonCyan} />
                     <YAxis stroke={colors.neonCyan} />
-                    <Tooltip 
+                    <RechartsTooltip 
                       contentStyle={{ 
                         background: colors.darkCard, 
                         border: `1px solid ${colors.neonCyan}`,
@@ -600,7 +600,7 @@ const TechDashboardBase: React.FC<TechDashboardProps> = ({ onClose }) => {
                       fillOpacity={0.2}
                       strokeWidth={2}
                     />
-                    <Tooltip 
+                    <RechartsTooltip 
                       contentStyle={{ 
                         background: colors.darkCard, 
                         border: `1px solid ${colors.neonPurple}`,

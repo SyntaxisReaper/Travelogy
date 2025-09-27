@@ -5,7 +5,7 @@ import {
   Card, CardContent, IconButton, Divider, Fab
 } from '@mui/material';
 import {
-  Palette, Settings, Security, Download, Feedback, Emergency,
+  Palette, Settings, Security, Download, Feedback, Warning,
   Link as LinkIcon, LinkOff, Google, Edit, Visibility
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
@@ -297,7 +297,9 @@ const ProfilePage: React.FC = () => {
             </Stack>
           </Box>
         )}
-      </Paper>
+            </CardContent>
+          </Card>
+        </motion.div>
 
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
@@ -542,7 +544,7 @@ const ProfilePage: React.FC = () => {
           document.dispatchEvent(new CustomEvent('emergency-activate'));
         }}
       >
-        <Emergency />
+        <Warning />
       </Fab>
       </motion.div>
     </Container>

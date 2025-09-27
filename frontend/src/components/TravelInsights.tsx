@@ -27,7 +27,7 @@ import {
 import {
   Psychology,
   TrendingUp,
-  EcoFriendly,
+  Nature,
   Speed,
   Schedule,
   LocationOn,
@@ -224,7 +224,7 @@ const TravelInsights: React.FC<TravelInsightsProps> = ({ userId, onNavigate }) =
   const getInsightIcon = (type: string) => {
     const iconMap = {
       efficiency: <Speed color="primary" />,
-      sustainability: <EcoFriendly color="success" />,
+      sustainability: <Nature color="success" />,
       cost: <TrendingUp color="warning" />,
       time: <Schedule color="info" />,
       safety: <Warning color="error" />,
@@ -297,7 +297,7 @@ const TravelInsights: React.FC<TravelInsightsProps> = ({ userId, onNavigate }) =
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {[
           { label: 'Efficiency Score', value: '85%', color: 'primary.main', icon: <Analytics /> },
-          { label: 'CO₂ Saved', value: '2.3kg', color: 'success.main', icon: <EcoFriendly /> },
+          { label: 'CO₂ Saved', value: '2.3kg', color: 'success.main', icon: <Nature /> },
           { label: 'Monthly Savings', value: '$127', color: 'warning.main', icon: <TrendingUp /> },
           { label: 'Time Optimized', value: '23min', color: 'info.main', icon: <Schedule /> },
         ].map((stat, index) => (
