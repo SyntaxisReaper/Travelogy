@@ -136,10 +136,18 @@ export const signInWithGoogle = async (): Promise<User> => {
       // Handle specific error codes
       if (code === 'auth/unauthorized-domain') {
         const currentDomain = window.location.hostname;
+        const currentOrigin = window.location.origin;
         const isProduction = currentDomain.includes('vercel.app') || currentDomain.includes('netlify.app') || !currentDomain.includes('localhost');
+        
+        console.error('🚫 Firebase Auth Domain Error:');
+        console.error('Current domain:', currentDomain);
+        console.error('Current origin:', currentOrigin);
+        console.error('To fix: Go to Firebase Console → Authentication → Settings → Authorized domains');
+        console.error(`Add this domain: ${currentDomain}`);
+        
         const domainMessage = isProduction 
-          ? `This domain (${currentDomain}) is not authorized for Google sign-in. Please add "${currentDomain}" to Firebase Console > Authentication > Settings > Authorized domains.`
-          : 'This domain is not authorized for Google sign-in. Please add localhost to Firebase Console > Authentication > Settings > Authorized domains.';
+          ? `Domain "${currentDomain}" not authorized for Google sign-in.\n\nTo fix this:\n1. Go to Firebase Console\n2. Authentication → Settings → Authorized domains\n3. Add "${currentDomain}"\n4. Try again\n\nFor now, please use email/password login.`
+          : `Localhost not authorized for Google sign-in.\n\nTo fix this:\n1. Go to Firebase Console\n2. Authentication → Settings → Authorized domains\n3. Add "localhost"\n4. Try again\n\nFor now, please use email/password login.`;
         
         const error: any = new Error(domainMessage);
         error.code = 'auth/unauthorized-domain';

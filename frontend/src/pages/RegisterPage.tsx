@@ -12,7 +12,9 @@ import {
   Checkbox
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { signUpWithEmail, getAuthErrorMessage, signInWithGoogle } from '../services/authService';import { auth } from '../services/firebase';import type { Auth as FirebaseAuth } from 'firebase/auth';
+import { signUpWithEmail, getAuthErrorMessage, signInWithGoogle } from '../services/authService';
+import { auth } from '../services/firebase';
+import type { Auth as FirebaseAuth } from 'firebase/auth';
 import { motion } from 'framer-motion';
 import { colors } from '../styles/techTheme';
 import HolographicCard from '../components/HolographicCard';

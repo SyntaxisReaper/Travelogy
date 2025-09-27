@@ -45,6 +45,19 @@ export const googleProvider = new GoogleAuthProvider();
 // Configure Google provider
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
-googleProvider.setCustomParameters({ prompt: 'select_account' });
+googleProvider.setCustomParameters({ 
+  prompt: 'select_account',
+  // Add additional parameters that might help with domain issues
+  hd: '' // Allow any hosted domain
+});
+
+// Debug: Log current domain for troubleshooting
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('🔧 Firebase Debug Info:');
+  console.log('Current domain:', window.location.hostname);
+  console.log('Current origin:', window.location.origin);
+  console.log('Firebase auth domain:', process.env.REACT_APP_FIREBASE_AUTH_DOMAIN);
+  console.log('If Google sign-in fails, add this domain to Firebase Console > Authentication > Settings > Authorized domains');
+}
 
 export default app;
