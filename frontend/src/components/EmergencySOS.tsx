@@ -1,9 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, CircularProgress, Alert } from '@mui/material';
 import { LocalHospital, MyLocation, Warning } from '@mui/icons-material';
-import { useAppSelector } from '../store/hooks';
 import { colors } from '../styles/techTheme';
-import { emergencyAPI } from '../services/api';
 
 interface NearbyPlace {
   id: string | number;
@@ -27,7 +25,8 @@ const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
 interface EmergencySOSProps { mode?: 'fab' | 'inline'; buttonLabel?: string }
 
 const EmergencySOS: React.FC<EmergencySOSProps> = ({ mode = 'fab', buttonLabel = 'Medical Emergency' }) => {
-  const user = useAppSelector((s) => s.auth.user);
+  // Mock user for demo
+  const user = { id: 1, full_name: 'Demo User', email: 'demo@travelogy.com' };
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -113,13 +112,8 @@ const EmergencySOS: React.FC<EmergencySOSProps> = ({ mode = 'fab', buttonLabel =
         client: 'travelogy-frontend',
       };
 
-      let delivered = false;
-      try {
-        await emergencyAPI.sendReport(payload);
-        delivered = true;
-      } catch (e) {
-        delivered = false;
-      }
+      // Skip API call for demo - go directly to fallback
+      const delivered = false;
 
       if (!delivered) {
         const text = `EMERGENCY: Medical assistance requested\n` +

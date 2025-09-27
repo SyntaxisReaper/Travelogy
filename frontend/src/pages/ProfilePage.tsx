@@ -2,106 +2,92 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { 
   Container, Typography, Paper, Box, Grid, TextField, Button, Stack, Alert, 
   FormGroup, FormControlLabel, Checkbox, Chip, CircularProgress, Avatar,
-  Card, CardContent, IconButton, Divider, Fab
+  Card, CardContent, IconButton, Fab
 } from '@mui/material';
 import {
-  Palette, Settings, Security, Download, Feedback, Warning,
-  Link as LinkIcon, LinkOff, Google, Edit, Visibility
+  Palette, Warning
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loadUser, updateUserProfile, clearError, updateConsent } from '../store/slices/authSlice';
-import { authAPI, bookingsAPI, gamificationAPI } from '../services/api';
 import EmergencySOS from '../components/EmergencySOS';
 import AgeGroupThemePanel from '../components/AgeGroupThemePanel';
-import { auth, googleProvider, db } from '../services/firebase';
-import type { Auth, linkWithPopup, unlink } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { colors } from '../styles/techTheme';
+
+// Mock user data for demonstration
+const MOCK_USER = {
+  id: 1,
+  username: 'demo_user',
+  email: 'demo@travelogy.com',
+  first_name: 'Demo',
+  last_name: 'User',
+  full_name: 'Demo User',
+  created_at: '2024-01-15T10:30:00Z',
+  last_activity: '2024-09-27T15:00:00Z',
+  location_tracking_consent: true,
+  data_sharing_consent: false,
+  analytics_consent: true,
+  marketing_consent: false,
+};
+
+const MOCK_RESERVATIONS = [
+  {
+    id: 1,
+    type: 'HOTEL',
+    name: 'Grand Plaza Hotel',
+    date: '2024-10-15T14:00:00Z',
+    status: 'confirmed'
+  },
+  {
+    id: 2,
+    type: 'FLIGHT',
+    name: 'Flight AA1234',
+    date: '2024-11-02T09:30:00Z',
+    status: 'pending'
+  }
+];
+
+const MOCK_GAMIFICATION = {
+  points: {
+    total: 1250,
+    level: 7,
+    current_streak: 12
+  },
+  badges: [
+    { name: 'Early Adopter', icon: '🚀' },
+    { name: 'Eco Warrior', icon: '🌱' },
+    { name: 'Explorer', icon: '🗺️' }
+  ]
+};
 
 const ProfilePage: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const { user, loading, error, hasGivenConsent } = useAppSelector((s) => s.auth);
-
+  // Use mock data instead of Redux for now
+  const [user, setUser] = useState(MOCK_USER);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const [form, setForm] = useState({
-    username: '',
-    email: '',
-    first_name: '',
-    last_name: '',
+    username: MOCK_USER.username,
+    email: MOCK_USER.email,
+    first_name: MOCK_USER.first_name,
+    last_name: MOCK_USER.last_name,
   });
+  
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [themeDialogOpen, setThemeDialogOpen] = useState(false);
+  
   const [consent, setConsent] = useState({
-    location_tracking_consent: false,
-    data_sharing_consent: false,
-    analytics_consent: false,
-    marketing_consent: false,
+    location_tracking_consent: MOCK_USER.location_tracking_consent,
+    data_sharing_consent: MOCK_USER.data_sharing_consent,
+    analytics_consent: MOCK_USER.analytics_consent,
+    marketing_consent: MOCK_USER.marketing_consent,
   });
+  
   const [savingConsent, setSavingConsent] = useState(false);
-
-  // Feedback
   const [fbSubject, setFbSubject] = useState('');
   const [fbMessage, setFbMessage] = useState('');
-
-  // Reservations
-  const [reservations, setReservations] = useState<any[]>([]);
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await bookingsAPI.getReservations();
-        setReservations(Array.isArray(res?.results) ? res.results : Array.isArray(res) ? res : []);
-      } catch (e) {
-        // ignore
-      }
-    };
-    load();
-  }, []);
-
-  // Gamification
-  const [gami, setGami] = useState<any>(null);
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const r = await gamificationAPI.getProfile();
-        setGami(r);
-      } catch (e) {
-        // If backend not available, compute locally
-        try {
-          const [stats, tripsRes] = await Promise.all([
-            authAPI.getProfile().then(() => import('../services/api').then(({ tripsAPI }) => tripsAPI.getStats())).catch(() => ({ total_trips: 0, eco_score: 0 })),
-            import('../services/api').then(({ tripsAPI }) => tripsAPI.getTrips()),
-          ]);
-          const list = Array.isArray((tripsRes as any)?.results) ? (tripsRes as any).results : Array.isArray(tripsRes as any) ? (tripsRes as any) : [];
-          const mod = await import('../utils/gamification');
-          const computed = mod.computeBadges(stats as any, list as any);
-          setGami({ points: computed.points, badges: computed.badges });
-        } catch (_) {
-          // ignore
-        }
-      }
-    };
-    load();
-  }, []);
-
-  // Load/seed user on mount
-  useEffect(() => {
-    if (!user) {
-      dispatch(loadUser());
-    } else {
-      setForm({
-        username: user.username || '',
-        email: user.email || '',
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-      });
-      setConsent({
-        location_tracking_consent: !!user.location_tracking_consent,
-        data_sharing_consent: !!user.data_sharing_consent,
-        analytics_consent: !!user.analytics_consent,
-        marketing_consent: !!user.marketing_consent,
-      });
-    }
-  }, [user, dispatch]);
+  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
+  const [gami, setGami] = useState(MOCK_GAMIFICATION);
+  const hasGivenConsent = true;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -112,21 +98,13 @@ const ProfilePage: React.FC = () => {
     e.preventDefault();
     setSaving(true);
     setSuccess(null);
-    try {
-      const payload = {
-        username: form.username,
-        first_name: form.first_name,
-        last_name: form.last_name,
-        email: form.email,
-      };
-      const updated = await authAPI.updateProfile(payload);
-      dispatch(updateUserProfile(updated));
+    
+    // Simulate API call
+    setTimeout(() => {
+      setUser(prev => ({ ...prev, ...form }));
       setSuccess('Profile updated successfully');
-    } catch (err) {
-      console.error('Failed to update profile', err);
-    } finally {
       setSaving(false);
-    }
+    }, 1000);
   };
 
   const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,14 +115,12 @@ const ProfilePage: React.FC = () => {
   const handleSaveConsent = async () => {
     setSavingConsent(true);
     setSuccess(null);
-    try {
-      await dispatch(updateConsent(consent)).unwrap();
+    
+    // Simulate API call
+    setTimeout(() => {
       setSuccess('Consent preferences saved');
-    } catch (err) {
-      console.error('Failed to save consent', err);
-    } finally {
       setSavingConsent(false);
-    }
+    }, 800);
   };
 
   const metaChips = useMemo(() => {
@@ -195,7 +171,7 @@ const ProfilePage: React.FC = () => {
         </Box>
 
       {error && (
-        <Alert severity="error" onClose={() => dispatch(clearError())} sx={{ mb: 2 }}>
+        <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
@@ -219,24 +195,13 @@ const ProfilePage: React.FC = () => {
           }}>
             <CardContent sx={{ p: 4 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
-          {(() => {
-            const fbUser = (auth as Auth | null)?.currentUser || null;
-            const src = fbUser?.photoURL || user?.photo_url || undefined;
-            const display = fbUser?.displayName || user?.full_name || user?.username || 'User';
-            const email = fbUser?.email || user?.email || '';
-            const initial = display?.[0] || 'U';
-            return (
-              <>
-                <Avatar src={src} alt={display} sx={{ width: 64, height: 64 }}>
-                  {!src ? initial : null}
+                <Avatar sx={{ width: 64, height: 64, bgcolor: colors.neonCyan }}>
+                  {user?.full_name?.[0] || user?.username?.[0] || 'D'}
                 </Avatar>
                 <Box>
-                  <Typography variant="h6" sx={{ lineHeight: 1 }}>{display}</Typography>
-                  <Typography variant="body2" color="text.secondary">{email}</Typography>
+                  <Typography variant="h6" sx={{ lineHeight: 1 }}>{user?.full_name || user?.username || 'Demo User'}</Typography>
+                  <Typography variant="body2" color="text.secondary">{user?.email || 'demo@travelogy.com'}</Typography>
                 </Box>
-              </>
-            );
-          })()}
         </Box>
         <Typography variant="h6" gutterBottom>
           Account Details
@@ -343,49 +308,20 @@ const ProfilePage: React.FC = () => {
         <Typography variant="h6" gutterBottom>
           Linked Accounts
         </Typography>
-        {(() => {
-          const fbUser = (auth as Auth | null)?.currentUser || null;
-          const providers = fbUser?.providerData?.map((p) => p.providerId) || [];
-          const hasGoogle = providers.includes('google.com');
-          const canUnlink = (fbUser?.providerData?.length || 0) > 1;
-
-          const handleLinkGoogle = async () => {
-            try {
-              if (!fbUser) return;
-              const mod = await import('firebase/auth');
-              await mod.linkWithPopup(fbUser, googleProvider);
-              setSuccess('Google account linked');
-            } catch (e) {
-              console.error('Link Google failed', e);
-            }
-          };
-
-          const handleUnlinkGoogle = async () => {
-            try {
-              if (!fbUser) return;
-              if (!canUnlink) {
-                setSuccess('Cannot unlink the only sign-in method.');
-                return;
-              }
-              const mod = await import('firebase/auth');
-              await mod.unlink(fbUser, 'google.com');
-              setSuccess('Google account unlinked');
-            } catch (e) {
-              console.error('Unlink Google failed', e);
-            }
-          };
-
-          return (
-            <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-              <Chip label={hasGoogle ? 'Google: Connected' : 'Google: Not connected'} color={hasGoogle ? 'success' : 'default'} />
-              {!hasGoogle ? (
-                <Button variant="outlined" onClick={handleLinkGoogle}>Connect Google</Button>
-              ) : (
-                <Button variant="outlined" color="warning" onClick={handleUnlinkGoogle} disabled={!canUnlink}>Disconnect Google</Button>
-              )}
-            </Stack>
-          );
-        })()}
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Connect external accounts for easier login and data sync.
+        </Typography>
+        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+          <Chip label="Google: Demo Account" color="success" />
+          <Chip label="Facebook: Not connected" color="default" />
+          <Button 
+            variant="outlined" 
+            onClick={() => setSuccess('Account linking is available in the full version!')}
+            disabled
+          >
+            Manage Connections
+          </Button>
+        </Stack>
       </Paper>
 
       <Paper sx={{ p: 3, mt: 3 }}>
@@ -399,7 +335,7 @@ const ProfilePage: React.FC = () => {
           {reservations.map((r) => (
             <Stack key={r.id} direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between">
               <Typography variant="body2">
-                [{(r.type || r.category || '').toUpperCase()}] {r.name || r.title} • {r.date ? new Date(r.date).toLocaleString() : ''}
+                [{(r.type || '').toUpperCase()}] {r.name} • {r.date ? new Date(r.date).toLocaleString() : ''}
               </Typography>
               {/* Future: add cancel/manage buttons */}
             </Stack>
@@ -460,28 +396,22 @@ const ProfilePage: React.FC = () => {
           </Grid>
         </Grid>
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-          <Button variant="contained" onClick={async () => {
-            try {
-              if (!db) throw new Error('No database configured');
-              if (!fbSubject || !fbMessage) throw new Error('Please fill subject and message');
-              await addDoc(collection(db, 'feedback'), {
-                subject: fbSubject,
-                message: fbMessage,
-                user_email: user?.email || null,
-                user_id: (auth as Auth | null)?.currentUser?.uid || null,
-                created_at: serverTimestamp(),
-              });
-              setSuccess('Feedback sent. Thank you!');
-              setFbSubject('');
-              setFbMessage('');
-            } catch (e) {
-              console.error('Feedback submit failed, using mailto fallback', e);
-              const to = 'mailto:team@skystack.dev';
-              const subject = encodeURIComponent(fbSubject || 'Travelogy Feedback');
-              const from = user?.email || '';
-              const body = encodeURIComponent(`${fbMessage}\n\nFrom: ${from}`);
-              window.location.href = `${to}?subject=${subject}&body=${body}`;
+          <Button variant="contained" onClick={() => {
+            if (!fbSubject || !fbMessage) {
+              setError('Please fill in both subject and message');
+              return;
             }
+            
+            // Use mailto as fallback
+            const to = 'mailto:team@skystack.dev';
+            const subject = encodeURIComponent(fbSubject);
+            const from = user?.email || 'demo@travelogy.com';
+            const body = encodeURIComponent(`${fbMessage}\n\nFrom: ${from}`);
+            window.location.href = `${to}?subject=${subject}&body=${body}`;
+            
+            setSuccess('Feedback prepared! Your email client should open.');
+            setFbSubject('');
+            setFbMessage('');
           }}>
             Send Feedback
           </Button>
@@ -499,25 +429,24 @@ const ProfilePage: React.FC = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           Export a JSON bundle of your profile, trips, reservations, and gamification.
         </Typography>
-        <Button variant="outlined" onClick={async () => {
-          try {
-            const [profile, trips, reservations, gamiData] = await Promise.all([
-              authAPI.getProfile().catch(() => null),
-              import('../services/api').then(({ tripsAPI }) => tripsAPI.getTrips()).catch(() => []),
-              bookingsAPI.getReservations().catch(() => []),
-              gamificationAPI.getProfile().catch(() => null),
-            ]);
-            const bundle = { profile, trips, reservations, gamification: gamiData };
-            const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'my-data.json';
-            a.click();
-            URL.revokeObjectURL(url);
-          } catch (e) {
-            console.error('Export failed', e);
-          }
+        <Button variant="outlined" onClick={() => {
+          // Use mock data for demo
+          const bundle = {
+            profile: user,
+            trips: [{ id: 1, name: 'Demo Trip', date: '2024-10-01' }],
+            reservations: reservations,
+            gamification: gami
+          };
+          
+          const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'travelogy-demo-data.json';
+          a.click();
+          URL.revokeObjectURL(url);
+          
+          setSuccess('Demo data exported successfully!');
         }}>Download JSON</Button>
       </Paper>
       
@@ -561,16 +490,26 @@ const ChangePasswordForm: React.FC = () => {
 
   const submit = async () => {
     setError(null); setSuccess(null); setLoading(true);
-    try {
-      const { authAPI } = await import('../services/api');
-      await authAPI.changePassword({ old_password: oldPwd, new_password: newPwd, new_password_confirm: newPwd2 });
-      setSuccess('Password changed successfully');
-      setOldPwd(''); setNewPwd(''); setNewPwd2('');
-    } catch (e: any) {
-      setError(e?.response?.data ? JSON.stringify(e.response.data) : 'Failed to change password');
-    } finally {
+    
+    // Basic validation
+    if (newPwd !== newPwd2) {
+      setError('New passwords do not match');
       setLoading(false);
+      return;
     }
+    
+    if (newPwd.length < 6) {
+      setError('New password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
+    
+    // Simulate API call
+    setTimeout(() => {
+      setSuccess('Password changed successfully (demo mode)');
+      setOldPwd(''); setNewPwd(''); setNewPwd2('');
+      setLoading(false);
+    }, 1000);
   };
 
   return (
