@@ -5,7 +5,9 @@ import {
   Typography, 
   LinearProgress, 
   Chip,
-  IconButton
+  IconButton,
+  Badge,
+  Tooltip
 } from '@mui/material';
 import { 
   Speed,
@@ -15,7 +17,12 @@ import {
   Psychology,
   Refresh,
   Settings,
-  Notifications
+  Notifications,
+  Palette,
+  AccessibilityNew,
+  TravelExplore,
+  Emergency,
+  Analytics
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
@@ -23,6 +30,7 @@ import HolographicCard from './HolographicCard';
 import NeonButton from './NeonButton';
 import GlitchText from './GlitchText';
 import TechLoader from './TechLoader';
+import AgeGroupThemePanel from './AgeGroupThemePanel';
 import { colors } from '../styles/techTheme';
 import { signOutUser } from '../services/authService';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -63,6 +71,9 @@ const TechDashboardBase: React.FC<TechDashboardProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [isTraining, setIsTraining] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [themeDialogOpen, setThemeDialogOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(3);
+  const [currentView, setCurrentView] = useState<'dashboard' | 'maps' | 'insights' | 'emergency'>('dashboard');
   const authInstance = auth as Auth; // With configured Firebase, this is defined
   const [user] = useAuthState(authInstance);
   const [realTimeData, setRealTimeData] = useState({
@@ -134,6 +145,41 @@ const TechDashboardBase: React.FC<TechDashboardProps> = ({ onClose }) => {
     }
   };
 
+  const handleNotificationClick = () => {
+    setNotificationCount(0);
+    console.log('🔔 Neural notifications center opened');
+    // In a real app, this would open a notifications panel
+  };
+
+  const handleThemeSettings = () => {
+    setThemeDialogOpen(true);
+  };
+
+  const handleViewChange = (view: 'dashboard' | 'maps' | 'insights' | 'emergency') => {
+    setCurrentView(view);
+    console.log(`🌐 Switched to ${view} view`);
+    // In a real app, this would navigate or change the main content
+  };
+
+  const handleEmergencyMode = () => {
+    console.log('🚨 Emergency mode activated - getting location and finding nearest help');
+    // Would integrate with emergency SOS feature
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log('📍 Current position:', {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          // Find nearest hospital/emergency services
+        },
+        (error) => {
+          console.error('Location error:', error);
+        }
+      );
+    }
+  };
+
   if (loading) {
     return (
       <TechLoader
@@ -182,42 +228,114 @@ const TechDashboardBase: React.FC<TechDashboardProps> = ({ onClose }) => {
               glitchIntensity="low"
             />
             {user && (
-              <Typography variant="body2" sx={{ 
-                color: colors.neonCyan, 
-                opacity: 0.8,
-                fontFamily: '"Roboto Mono", monospace'
-              }}>
-                {user.displayName || user.email}
-              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <Typography variant="body2" sx={{ 
+                  color: colors.neonCyan, 
+                  opacity: 0.8,
+                  fontFamily: '"Roboto Mono", monospace'
+                }}>
+                  {user.displayName || user.email}
+                </Typography>
+                <Chip
+                  size="small"
+                  label={`Mode: ${currentView.toUpperCase()}`}
+                  sx={{
+                    mt: 0.5,
+                    backgroundColor: 'transparent',
+                    border: `1px solid ${colors.neonGreen}`,
+                    color: colors.neonGreen,
+                    fontSize: '0.7em',
+                    fontFamily: '"Roboto Mono", monospace'
+                  }}
+                />
+              </Box>
             )}
           </Box>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <IconButton 
-              onClick={() => console.log('🔔 Neural notifications activated')}
-              sx={{ 
-                color: colors.neonCyan,
-                border: `1px solid ${colors.neonCyan}40`,
-                '&:hover': { 
-                  boxShadow: `0 0 15px ${colors.neonCyan}`,
-                  border: `1px solid ${colors.neonCyan}`
-                }
-              }}
-            >
-              <Notifications />
-            </IconButton>
-            <IconButton 
-              onClick={() => console.log('⚙️ System configuration accessed')}
-              sx={{ 
-                color: colors.neonPink,
-                border: `1px solid ${colors.neonPink}40`,
-                '&:hover': { 
-                  boxShadow: `0 0 15px ${colors.neonPink}`,
-                  border: `1px solid ${colors.neonPink}`
-                }
-              }}
-            >
-              <Settings />
-            </IconButton>
+            {/* Quick Navigation Buttons */}
+            <Tooltip title="Travel Maps">
+              <IconButton 
+                onClick={() => handleViewChange('maps')}
+                sx={{ 
+                  color: currentView === 'maps' ? colors.neonGreen : colors.neonGreen + '80',
+                  border: `1px solid ${colors.neonGreen}40`,
+                  '&:hover': { 
+                    boxShadow: `0 0 15px ${colors.neonGreen}`,
+                    border: `1px solid ${colors.neonGreen}`
+                  }
+                }}
+              >
+                <TravelExplore />
+              </IconButton>
+            </Tooltip>
+            
+            <Tooltip title="AI Insights">
+              <IconButton 
+                onClick={() => handleViewChange('insights')}
+                sx={{ 
+                  color: currentView === 'insights' ? colors.neonPurple : colors.neonPurple + '80',
+                  border: `1px solid ${colors.neonPurple}40`,
+                  '&:hover': { 
+                    boxShadow: `0 0 15px ${colors.neonPurple}`,
+                    border: `1px solid ${colors.neonPurple}`
+                  }
+                }}
+              >
+                <Analytics />
+              </IconButton>
+            </Tooltip>
+            
+            <Tooltip title="Emergency SOS">
+              <IconButton 
+                onClick={handleEmergencyMode}
+                sx={{ 
+                  color: colors.neonOrange,
+                  border: `1px solid ${colors.neonOrange}40`,
+                  '&:hover': { 
+                    boxShadow: `0 0 20px ${colors.neonOrange}`,
+                    border: `1px solid ${colors.neonOrange}`,
+                    transform: 'scale(1.1)'
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <Emergency />
+              </IconButton>
+            </Tooltip>
+            
+            <Tooltip title="Notifications">
+              <IconButton 
+                onClick={handleNotificationClick}
+                sx={{ 
+                  color: colors.neonCyan,
+                  border: `1px solid ${colors.neonCyan}40`,
+                  '&:hover': { 
+                    boxShadow: `0 0 15px ${colors.neonCyan}`,
+                    border: `1px solid ${colors.neonCyan}`
+                  }
+                }}
+              >
+                <Badge badgeContent={notificationCount} color="error">
+                  <Notifications />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            
+            <Tooltip title="Age Group & Theme Settings">
+              <IconButton 
+                onClick={handleThemeSettings}
+                sx={{ 
+                  color: colors.neonPink,
+                  border: `1px solid ${colors.neonPink}40`,
+                  '&:hover': { 
+                    boxShadow: `0 0 15px ${colors.neonPink}`,
+                    border: `1px solid ${colors.neonPink}`
+                  }
+                }}
+              >
+                <Palette />
+              </IconButton>
+            </Tooltip>
             <NeonButton
               glowColor={colors.neonOrange}
               size="small"
@@ -612,6 +730,12 @@ const TechDashboardBase: React.FC<TechDashboardProps> = ({ onClose }) => {
           </NeonButton>
         </Box>
       </motion.div>
+      
+      {/* Theme Settings Dialog */}
+      <AgeGroupThemePanel 
+        open={themeDialogOpen}
+        onClose={() => setThemeDialogOpen(false)}
+      />
     </Box>
   );
 };

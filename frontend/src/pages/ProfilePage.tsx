@@ -1,9 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Container, Typography, Paper, Box, Grid, TextField, Button, Stack, Alert, FormGroup, FormControlLabel, Checkbox, Chip, CircularProgress, Avatar } from '@mui/material';
+import { 
+  Container, Typography, Paper, Box, Grid, TextField, Button, Stack, Alert, 
+  FormGroup, FormControlLabel, Checkbox, Chip, CircularProgress, Avatar,
+  Card, CardContent, IconButton, Divider, Fab
+} from '@mui/material';
+import {
+  Palette, Settings, Security, Download, Feedback, Emergency,
+  Link as LinkIcon, LinkOff, Google, Edit, Visibility
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { loadUser, updateUserProfile, clearError, updateConsent } from '../store/slices/authSlice';
 import { authAPI, bookingsAPI, gamificationAPI } from '../services/api';
 import EmergencySOS from '../components/EmergencySOS';
+import AgeGroupThemePanel from '../components/AgeGroupThemePanel';
 import { auth, googleProvider, db } from '../services/firebase';
 import type { Auth, linkWithPopup, unlink } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -20,6 +30,7 @@ const ProfilePage: React.FC = () => {
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const [themeDialogOpen, setThemeDialogOpen] = useState(false);
   const [consent, setConsent] = useState({
     location_tracking_consent: false,
     data_sharing_consent: false,
@@ -149,10 +160,39 @@ const ProfilePage: React.FC = () => {
   }, [user]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        👤 Profile
-      </Typography>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" sx={{ 
+            background: 'linear-gradient(45deg, #2196f3, #9c27b0)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontWeight: 'bold'
+          }}>
+            👤 Profile Dashboard
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <IconButton
+              onClick={() => setThemeDialogOpen(true)}
+              sx={{
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                  transform: 'scale(1.05)',
+                },
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Palette />
+            </IconButton>
+          </Stack>
+        </Box>
 
       {error && (
         <Alert severity="error" onClose={() => dispatch(clearError())} sx={{ mb: 2 }}>
@@ -165,9 +205,20 @@ const ProfilePage: React.FC = () => {
         </Alert>
       )}
 
-      {/* Header with Avatar and basic info */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        {/* Header with Avatar and basic info */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card sx={{ 
+            mb: 3, 
+            background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(156, 39, 176, 0.1))',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <CardContent sx={{ p: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
           {(() => {
             const fbUser = (auth as Auth | null)?.currentUser || null;
             const src = fbUser?.photoURL || user?.photo_url || undefined;
@@ -467,6 +518,33 @@ const ProfilePage: React.FC = () => {
           }
         }}>Download JSON</Button>
       </Paper>
+      
+      {/* Theme Settings Dialog */}
+      <AgeGroupThemePanel 
+        open={themeDialogOpen}
+        onClose={() => setThemeDialogOpen(false)}
+      />
+      
+      {/* Emergency Floating Action Button */}
+      <Fab
+        color="error"
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          '&:hover': {
+            transform: 'scale(1.1)',
+          },
+          transition: 'all 0.2s ease'
+        }}
+        onClick={() => {
+          // Trigger emergency SOS
+          document.dispatchEvent(new CustomEvent('emergency-activate'));
+        }}
+      >
+        <Emergency />
+      </Fab>
+      </motion.div>
     </Container>
   );
 };
