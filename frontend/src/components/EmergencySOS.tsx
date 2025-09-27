@@ -1,7 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { Fab, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, CircularProgress, Alert } from '@mui/material';
 import { LocalHospital, MyLocation, Warning } from '@mui/icons-material';
 import { colors } from '../styles/techTheme';
+import { auth, db } from '../services/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 interface NearbyPlace {
   id: string | number;
@@ -25,8 +28,7 @@ const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
 interface EmergencySOSProps { mode?: 'fab' | 'inline'; buttonLabel?: string }
 
 const EmergencySOS: React.FC<EmergencySOSProps> = ({ mode = 'fab', buttonLabel = 'Medical Emergency' }) => {
-  // Mock user for demo
-  const user = { id: 1, full_name: 'Demo User', email: 'demo@travelogy.com' };
+  const [user, setUser] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,14 @@ const EmergencySOS: React.FC<EmergencySOSProps> = ({ mode = 'fab', buttonLabel =
   const [nearest, setNearest] = useState<NearbyPlace | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+
+  // Set up Firebase auth listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const locateAndFindHospital = useCallback(async () => {
     setError(null);
@@ -102,38 +112,78 @@ const EmergencySOS: React.FC<EmergencySOSProps> = ({ mode = 'fab', buttonLabel =
     if (!position) return;
     setSending(true);
     setError(null);
+    
     try {
-      const payload = {
+      const emergencyData = {
         type: 'medical_emergency',
-        timestamp: new Date().toISOString(),
-        user: user ? { id: user.id, name: user.full_name, email: user.email } : null,
-        location: { lat: position.lat, lon: position.lon, accuracy: position.accuracy },
-        nearestHospital: nearest ? { name: nearest.name, lat: nearest.lat, lon: nearest.lon, distance_m: Math.round(nearest.distanceMeters) } : null,
+        timestamp: serverTimestamp(),
+        user_id: user?.uid || null,
+        user_email: user?.email || null,
+        user_name: user?.displayName || 'Anonymous',
+        location: { 
+          latitude: position.lat, 
+          longitude: position.lon, 
+          accuracy: position.accuracy || null 
+        },
+        nearest_hospital: nearest ? {
+          name: nearest.name,
+          latitude: nearest.lat,
+          longitude: nearest.lon,
+          distance_meters: Math.round(nearest.distanceMeters),
+          phone: nearest.phone || null
+        } : null,
         client: 'travelogy-frontend',
+        status: 'new'
       };
 
-      // Skip API call for demo - go directly to fallback
-      const delivered = false;
+      // Save emergency report to Firebase
+      let firebaseReportId = null;
+      try {
+        const docRef = await addDoc(collection(db, 'emergency_reports'), emergencyData);
+        firebaseReportId = docRef.id;
+        console.log('Emergency report saved to Firebase:', firebaseReportId);
+      } catch (fbError) {
+        console.warn('Failed to save to Firebase:', fbError);
+      }
 
-      if (!delivered) {
-        const text = `EMERGENCY: Medical assistance requested\n` +
-          `Location: ${position.lat.toFixed(6)}, ${position.lon.toFixed(6)}\n` +
-          (nearest ? `Nearest hospital: ${nearest.name} (~${Math.round(nearest.distanceMeters)} m)\n` : '') +
-          (user ? `User: ${user.full_name} (${user.email})\n` : '') +
-          `Map: https://www.openstreetmap.org/?mlat=${position.lat}&mlon=${position.lon}#map=18/${position.lat}/${position.lon}`;
+      // Prepare emergency text
+      const text = `🚨 MEDICAL EMERGENCY 🚨\n\n` +
+        `📍 Location: ${position.lat.toFixed(6)}, ${position.lon.toFixed(6)}\n` +
+        `🎯 Accuracy: ±${Math.round(position.accuracy || 0)} meters\n\n` +
+        (nearest ? `🏥 Nearest Hospital: ${nearest.name}\n` +
+                   `   Distance: ~${(nearest.distanceMeters / 1000).toFixed(2)} km\n` +
+                   (nearest.phone ? `   Phone: ${nearest.phone}\n` : '') + '\n' : '') +
+        (user ? `👤 User: ${user.displayName || 'Anonymous'}\n` +
+               `📧 Email: ${user.email}\n` +
+               `🆔 User ID: ${user.uid}\n\n` : '') +
+        `🗺️ Map: https://www.openstreetmap.org/?mlat=${position.lat}&mlon=${position.lon}#map=18/${position.lat}/${position.lon}\n` +
+        (firebaseReportId ? `📋 Report ID: ${firebaseReportId}\n` : '') +
+        `\n⏰ Time: ${new Date().toLocaleString()}`;
 
-        if (navigator.share) {
-          await navigator.share({ title: 'Medical Emergency', text });
-        } else {
-          // Fallback: mailto draft
-          const mailto = `mailto:?subject=${encodeURIComponent('Medical Emergency')}&body=${encodeURIComponent(text)}`;
-          window.location.href = mailto;
+      // Try to share or send via email
+      let shared = false;
+      if (navigator.share) {
+        try {
+          await navigator.share({ 
+            title: '🚨 Medical Emergency Alert',
+            text: text
+          });
+          shared = true;
+        } catch (shareError) {
+          console.log('Share failed, using mailto:', shareError);
         }
+      }
+      
+      if (!shared) {
+        // Fallback: open email client
+        const mailto = `mailto:emergency@local-services.com,911@emergency.com?subject=${encodeURIComponent('🚨 MEDICAL EMERGENCY ALERT')}&body=${encodeURIComponent(text)}`;
+        window.open(mailto, '_blank');
       }
 
       setSent(true);
     } catch (e) {
-      setError('Failed to send emergency report. Try calling the hospital directly.');
+      console.error('Emergency send failed:', e);
+      setError('Failed to send emergency report. Please call 911 or local emergency services directly.');
     } finally {
       setSending(false);
     }

@@ -32,7 +32,7 @@ import {
   Elderly,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import themeService, { ThemeConfig } from '../services/themeService';
+import firebaseThemeService, { ThemeConfig } from '../services/firebaseThemeService';
 import { colors } from '../styles/techTheme';
 
 interface AgeGroupThemePanelProps {
@@ -58,81 +58,81 @@ const AgeGroupThemePanel: React.FC<AgeGroupThemePanelProps> = ({ open, onClose }
     setLoading(true);
     try {
       const [config, options] = await Promise.all([
-        themeService.getThemeConfig(),
-        themeService.getAvailableOptions(),
+        firebaseThemeService.getThemeConfig().catch(() => null),
+        firebaseThemeService.getAvailableOptions(),
       ]);
-      setThemeConfig(config);
+      
+      if (config) {
+        setThemeConfig(config);
+      }
       setAvailableOptions(options);
     } catch (err: any) {
-      setError(err.message || 'Failed to load theme data');
+      console.error('Theme load error:', err);
+      setError(err.message || 'Failed to load theme data. Please make sure you are logged in.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleAgeGroupChange = async (ageGroup: string) => {
-    if (!themeConfig) return;
-
     setLoading(true);
     setError(null);
     try {
-      const result = await themeService.setAgeGroup(ageGroup);
+      const result = await firebaseThemeService.setAgeGroup(ageGroup);
       setThemeConfig(result.theme_config);
       setSuccess(`Age group updated to ${ageGroup}. Theme recommendations applied!`);
       
       // Auto-close success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
-      setError(err.message || 'Failed to update age group');
+      console.error('Age group update error:', err);
+      setError(err.message || 'Failed to update age group. Please make sure you are logged in.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleThemeChange = async (theme: string) => {
-    if (!themeConfig) return;
-
     setLoading(true);
     setError(null);
     try {
-      const config = await themeService.updateThemeConfig({ theme });
+      const config = await firebaseThemeService.updateThemeConfig({ theme });
       setThemeConfig(config);
       setSuccess(`Theme updated to ${theme}!`);
       setTimeout(() => setSuccess(null), 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to update theme');
+      console.error('Theme update error:', err);
+      setError(err.message || 'Failed to update theme. Please make sure you are logged in.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleColorSchemeChange = async (colorScheme: string) => {
-    if (!themeConfig) return;
-
     setLoading(true);
     setError(null);
     try {
-      const config = await themeService.updateThemeConfig({ color_scheme: colorScheme });
+      const config = await firebaseThemeService.updateThemeConfig({ color_scheme: colorScheme });
       setThemeConfig(config);
       setSuccess(`Color scheme updated!`);
       setTimeout(() => setSuccess(null), 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to update color scheme');
+      console.error('Color scheme update error:', err);
+      setError(err.message || 'Failed to update color scheme. Please make sure you are logged in.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleAccessibilityToggle = async (feature: 'accessibility_mode' | 'large_text' | 'reduced_motion', enabled: boolean) => {
-    if (!themeConfig) return;
-
     try {
-      const config = await themeService.toggleAccessibility(feature, enabled);
+      const config = await firebaseThemeService.toggleAccessibility(feature, enabled);
       setThemeConfig(config);
       setSuccess(`${feature.replace('_', ' ')} ${enabled ? 'enabled' : 'disabled'}!`);
       setTimeout(() => setSuccess(null), 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to toggle accessibility feature');
+      console.error('Accessibility toggle error:', err);
+      setError(err.message || 'Failed to toggle accessibility feature. Please make sure you are logged in.');
     }
   };
 
@@ -140,12 +140,13 @@ const AgeGroupThemePanel: React.FC<AgeGroupThemePanelProps> = ({ open, onClose }
     setLoading(true);
     setError(null);
     try {
-      const config = await themeService.quickTheme(scenario);
+      const config = await firebaseThemeService.quickTheme(scenario);
       setThemeConfig(config);
       setSuccess(`Applied ${scenario} theme!`);
       setTimeout(() => setSuccess(null), 2000);
     } catch (err: any) {
-      setError(err.message || 'Failed to apply quick theme');
+      console.error('Quick theme error:', err);
+      setError(err.message || 'Failed to apply quick theme. Please make sure you are logged in.');
     } finally {
       setLoading(false);
     }
@@ -483,12 +484,12 @@ const AgeGroupThemePanel: React.FC<AgeGroupThemePanelProps> = ({ open, onClose }
           Close
         </Button>
         <Button
-          onClick={() => themeService.resetTheme()}
+          onClick={() => handleQuickTheme('professional')}
           variant="outlined"
           color="warning"
           disabled={loading}
         >
-          Reset to Recommended
+          Reset to Default
         </Button>
       </DialogActions>
     </Dialog>

@@ -11,64 +11,22 @@ import { motion } from 'framer-motion';
 import EmergencySOS from '../components/EmergencySOS';
 import AgeGroupThemePanel from '../components/AgeGroupThemePanel';
 import { colors } from '../styles/techTheme';
-
-// Mock user data for demonstration
-const MOCK_USER = {
-  id: 1,
-  username: 'demo_user',
-  email: 'demo@travelogy.com',
-  first_name: 'Demo',
-  last_name: 'User',
-  full_name: 'Demo User',
-  created_at: '2024-01-15T10:30:00Z',
-  last_activity: '2024-09-27T15:00:00Z',
-  location_tracking_consent: true,
-  data_sharing_consent: false,
-  analytics_consent: true,
-  marketing_consent: false,
-};
-
-const MOCK_RESERVATIONS = [
-  {
-    id: 1,
-    type: 'HOTEL',
-    name: 'Grand Plaza Hotel',
-    date: '2024-10-15T14:00:00Z',
-    status: 'confirmed'
-  },
-  {
-    id: 2,
-    type: 'FLIGHT',
-    name: 'Flight AA1234',
-    date: '2024-11-02T09:30:00Z',
-    status: 'pending'
-  }
-];
-
-const MOCK_GAMIFICATION = {
-  points: {
-    total: 1250,
-    level: 7,
-    current_streak: 12
-  },
-  badges: [
-    { name: 'Early Adopter', icon: '🚀' },
-    { name: 'Eco Warrior', icon: '🌱' },
-    { name: 'Explorer', icon: '🗺️' }
-  ]
-};
+import { auth, db } from '../services/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { authAPI, bookingsAPI, gamificationAPI } from '../services/api';
 
 const ProfilePage: React.FC = () => {
-  // Use mock data instead of Redux for now
-  const [user, setUser] = useState(MOCK_USER);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const [form, setForm] = useState({
-    username: MOCK_USER.username,
-    email: MOCK_USER.email,
-    first_name: MOCK_USER.first_name,
-    last_name: MOCK_USER.last_name,
+    username: '',
+    email: '',
+    first_name: '',
+    last_name: '',
   });
   
   const [saving, setSaving] = useState(false);
@@ -76,18 +34,110 @@ const ProfilePage: React.FC = () => {
   const [themeDialogOpen, setThemeDialogOpen] = useState(false);
   
   const [consent, setConsent] = useState({
-    location_tracking_consent: MOCK_USER.location_tracking_consent,
-    data_sharing_consent: MOCK_USER.data_sharing_consent,
-    analytics_consent: MOCK_USER.analytics_consent,
-    marketing_consent: MOCK_USER.marketing_consent,
+    location_tracking_consent: false,
+    data_sharing_consent: false,
+    analytics_consent: false,
+    marketing_consent: false,
   });
   
   const [savingConsent, setSavingConsent] = useState(false);
   const [fbSubject, setFbSubject] = useState('');
   const [fbMessage, setFbMessage] = useState('');
-  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
-  const [gami, setGami] = useState(MOCK_GAMIFICATION);
-  const hasGivenConsent = true;
+  const [reservations, setReservations] = useState<any[]>([]);
+  const [gami, setGami] = useState<any>(null);
+  const [hasGivenConsent, setHasGivenConsent] = useState(false);
+
+  // Set up Firebase auth listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        // Load user profile from Firestore or API
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUserProfile(userData);
+            setForm({
+              username: userData.username || '',
+              email: firebaseUser.email || '',
+              first_name: userData.first_name || '',
+              last_name: userData.last_name || '',
+            });
+            setConsent({
+              location_tracking_consent: userData.location_tracking_consent || false,
+              data_sharing_consent: userData.data_sharing_consent || false,
+              analytics_consent: userData.analytics_consent || false,
+              marketing_consent: userData.marketing_consent || false,
+            });
+            setHasGivenConsent(userData.has_given_consent || false);
+          } else {
+            // Create user profile if it doesn't exist
+            const newUserData = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              username: firebaseUser.email?.split('@')[0] || '',
+              first_name: '',
+              last_name: '',
+              created_at: serverTimestamp(),
+              location_tracking_consent: false,
+              data_sharing_consent: false,
+              analytics_consent: false,
+              marketing_consent: false,
+              has_given_consent: false,
+            };
+            await updateDoc(doc(db, 'users', firebaseUser.uid), newUserData);
+            setUserProfile(newUserData);
+            setForm({
+              username: newUserData.username,
+              email: firebaseUser.email || '',
+              first_name: '',
+              last_name: '',
+            });
+          }
+          
+          // Load reservations and gamification data
+          loadUserData(firebaseUser.uid);
+        } catch (error) {
+          console.error('Error loading user data:', error);
+          setError('Failed to load user data');
+        }
+      } else {
+        setUser(null);
+        setUserProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const loadUserData = async (uid: string) => {
+    try {
+      // Try to load from API first, fallback to local data
+      const [reservationsRes, gamiRes] = await Promise.allSettled([
+        bookingsAPI.getReservations().catch(() => []),
+        gamificationAPI.getProfile().catch(() => null),
+      ]);
+      
+      setReservations(
+        reservationsRes.status === 'fulfilled' ? 
+        (Array.isArray(reservationsRes.value?.results) ? reservationsRes.value.results : 
+         Array.isArray(reservationsRes.value) ? reservationsRes.value : []) : []
+      );
+      
+      setGami(
+        gamiRes.status === 'fulfilled' && gamiRes.value ? gamiRes.value : {
+          points: { total: 0, level: 1, current_streak: 0 },
+          badges: []
+        }
+      );
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -96,15 +146,44 @@ const ProfilePage: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!user) return;
+    
     setSaving(true);
     setSuccess(null);
+    setError(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      setUser(prev => ({ ...prev, ...form }));
+    try {
+      // Update in Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      const updateData = {
+        username: form.username,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        updated_at: serverTimestamp(),
+      };
+      
+      await updateDoc(userDocRef, updateData);
+      
+      // Try to update via API as well (if backend is available)
+      try {
+        await authAPI.updateProfile({
+          username: form.username,
+          first_name: form.first_name,
+          last_name: form.last_name,
+          email: form.email,
+        });
+      } catch (apiError) {
+        console.log('API update failed, using Firestore only:', apiError);
+      }
+      
+      setUserProfile((prev: any) => ({ ...prev, ...updateData }));
       setSuccess('Profile updated successfully');
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      setError('Failed to update profile. Please try again.');
+    } finally {
       setSaving(false);
-    }, 1000);
+    }
   };
 
   const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,27 +192,52 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleSaveConsent = async () => {
+    if (!user) return;
+    
     setSavingConsent(true);
     setSuccess(null);
+    setError(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      setSuccess('Consent preferences saved');
+    try {
+      // Update in Firestore
+      const userDocRef = doc(db, 'users', user.uid);
+      const consentData = {
+        ...consent,
+        has_given_consent: Object.values(consent).some(v => v === true),
+        consent_updated_at: serverTimestamp(),
+      };
+      
+      await updateDoc(userDocRef, consentData);
+      
+      // Try to update via API as well
+      try {
+        await authAPI.updateProfile(consentData);
+      } catch (apiError) {
+        console.log('API consent update failed, using Firestore only:', apiError);
+      }
+      
+      setHasGivenConsent(consentData.has_given_consent);
+      setUserProfile((prev: any) => ({ ...prev, ...consentData }));
+      setSuccess('Consent preferences saved successfully');
+    } catch (error) {
+      console.error('Consent update failed:', error);
+      setError('Failed to save consent preferences. Please try again.');
+    } finally {
       setSavingConsent(false);
-    }, 800);
+    }
   };
 
   const metaChips = useMemo(() => {
-    if (!user) return null;
+    if (!user || !userProfile) return null;
     return (
       <Stack direction="row" spacing={1} flexWrap="wrap">
-        <Chip label={`User: ${user.full_name || user.username}`} />
+        <Chip label={`User: ${userProfile.username || user.displayName || 'Anonymous'}`} />
         <Chip label={`Email: ${user.email}`} />
-        {user.created_at && <Chip label={`Joined: ${new Date(user.created_at).toLocaleDateString()}`} />}
-        {user.last_activity && <Chip label={`Last active: ${new Date(user.last_activity).toLocaleString()}`} />}
+        {userProfile.created_at && <Chip label={`Joined: ${new Date(userProfile.created_at.toDate()).toLocaleDateString()}`} />}
+        {user.metadata?.lastSignInTime && <Chip label={`Last active: ${new Date(user.metadata.lastSignInTime).toLocaleString()}`} />}
       </Stack>
     );
-  }, [user]);
+  }, [user, userProfile]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -195,12 +299,19 @@ const ProfilePage: React.FC = () => {
           }}>
             <CardContent sx={{ p: 4 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
-                <Avatar sx={{ width: 64, height: 64, bgcolor: colors.neonCyan }}>
-                  {user?.full_name?.[0] || user?.username?.[0] || 'D'}
+                <Avatar 
+                  src={user?.photoURL || undefined}
+                  sx={{ width: 64, height: 64, bgcolor: colors.neonCyan }}
+                >
+                  {!user?.photoURL && (user?.displayName?.[0] || userProfile?.username?.[0] || user?.email?.[0] || 'U')}
                 </Avatar>
                 <Box>
-                  <Typography variant="h6" sx={{ lineHeight: 1 }}>{user?.full_name || user?.username || 'Demo User'}</Typography>
-                  <Typography variant="body2" color="text.secondary">{user?.email || 'demo@travelogy.com'}</Typography>
+                  <Typography variant="h6" sx={{ lineHeight: 1 }}>
+                    {user?.displayName || userProfile?.first_name + ' ' + userProfile?.last_name || userProfile?.username || 'User'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {user?.email || 'No email provided'}
+                  </Typography>
                 </Box>
         </Box>
         <Typography variant="h6" gutterBottom>
@@ -396,22 +507,49 @@ const ProfilePage: React.FC = () => {
           </Grid>
         </Grid>
         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-          <Button variant="contained" onClick={() => {
+          <Button variant="contained" onClick={async () => {
             if (!fbSubject || !fbMessage) {
               setError('Please fill in both subject and message');
               return;
             }
             
-            // Use mailto as fallback
-            const to = 'mailto:team@skystack.dev';
-            const subject = encodeURIComponent(fbSubject);
-            const from = user?.email || 'demo@travelogy.com';
-            const body = encodeURIComponent(`${fbMessage}\n\nFrom: ${from}`);
-            window.location.href = `${to}?subject=${subject}&body=${body}`;
+            if (!user) {
+              setError('Please log in to send feedback');
+              return;
+            }
             
-            setSuccess('Feedback prepared! Your email client should open.');
-            setFbSubject('');
-            setFbMessage('');
+            setSaving(true);
+            try {
+              // Save feedback to Firestore
+              await addDoc(collection(db, 'feedback'), {
+                subject: fbSubject,
+                message: fbMessage,
+                user_email: user.email,
+                user_id: user.uid,
+                user_name: user.displayName || userProfile?.username || 'Anonymous',
+                created_at: serverTimestamp(),
+                status: 'new'
+              });
+              
+              setSuccess('Feedback sent successfully! Thank you.');
+              setFbSubject('');
+              setFbMessage('');
+            } catch (error) {
+              console.error('Feedback submission failed:', error);
+              
+              // Fallback to mailto
+              const to = 'mailto:team@skystack.dev';
+              const subject = encodeURIComponent(fbSubject);
+              const from = user.email || 'unknown@user.com';
+              const body = encodeURIComponent(`${fbMessage}\n\nFrom: ${from}\nUser ID: ${user.uid}`);
+              window.location.href = `${to}?subject=${subject}&body=${body}`;
+              
+              setSuccess('Feedback prepared! Your email client should open.');
+              setFbSubject('');
+              setFbMessage('');
+            } finally {
+              setSaving(false);
+            }
           }}>
             Send Feedback
           </Button>
@@ -429,24 +567,50 @@ const ProfilePage: React.FC = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           Export a JSON bundle of your profile, trips, reservations, and gamification.
         </Typography>
-        <Button variant="outlined" onClick={() => {
-          // Use mock data for demo
-          const bundle = {
-            profile: user,
-            trips: [{ id: 1, name: 'Demo Trip', date: '2024-10-01' }],
-            reservations: reservations,
-            gamification: gami
-          };
+        <Button variant="outlined" onClick={async () => {
+          if (!user) {
+            setError('Please log in to download your data');
+            return;
+          }
           
-          const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'travelogy-demo-data.json';
-          a.click();
-          URL.revokeObjectURL(url);
-          
-          setSuccess('Demo data exported successfully!');
+          setSaving(true);
+          try {
+            // Collect all user data
+            const [tripsData] = await Promise.allSettled([
+              import('../services/api').then(({ tripsAPI }) => tripsAPI.getTrips()).catch(() => [])
+            ]);
+            
+            const bundle = {
+              profile: {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                emailVerified: user.emailVerified,
+                ...userProfile
+              },
+              trips: tripsData.status === 'fulfilled' ? tripsData.value : [],
+              reservations: reservations,
+              gamification: gami,
+              consent: consent,
+              exported_at: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `travelogy-data-${user.uid}-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            setSuccess('Your data has been exported successfully!');
+          } catch (error) {
+            console.error('Data export failed:', error);
+            setError('Failed to export data. Please try again.');
+          } finally {
+            setSaving(false);
+          }
         }}>Download JSON</Button>
       </Paper>
       
