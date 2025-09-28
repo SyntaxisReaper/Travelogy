@@ -5,6 +5,8 @@ import { CssBaseline, Container, Typography, Button } from '@mui/material';
 import { useSelector } from 'react-redux';
 import type { RootState } from './store/store';
 import { travelColors } from './styles/travelTheme';
+import { motion } from 'framer-motion';
+import TravelCard from './components/TravelCard';
 
 // Travel theme using actual theme colors
 const travelTheme = createTheme({
@@ -29,21 +31,48 @@ const SimpleLandingPage: React.FC = () => {
   
   return (
     <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
-      <Typography variant="h1" gutterBottom sx={{ color: 'primary.main' }}>
-        🌐 Travelogy
-      </Typography>
-      <Typography variant="h4" gutterBottom sx={{ color: 'text.secondary', mb: 4 }}>
-        Your Personal Travel Journal
-      </Typography>
-      <Typography variant="body1" sx={{ mb: 4 }}>
-        Step 3: Basic app + Redux + CSS imports + Travel theme test
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 2, color: 'primary.main' }}>
-        🧪 Theme Test: If you see ORANGE button/text, travel theme loaded!
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 4, opacity: 0.7 }}>
-        Redux Loading State: {loading ? 'true' : 'false'}
-      </Typography>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Typography variant="h1" gutterBottom sx={{ color: 'primary.main' }}>
+          🌐 Travelogy
+        </Typography>
+        <Typography variant="h4" gutterBottom sx={{ color: 'text.secondary', mb: 4 }}>
+          Your Personal Travel Journal
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 4 }}>
+          Step 4: Basic app + Redux + CSS + Travel theme + TravelCard + Framer Motion
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 2, color: 'primary.main' }}>
+          🧪 Theme Test: If you see ORANGE button/text, travel theme loaded!
+        </Typography>
+        <Typography variant="body2" sx={{ mb: 4, opacity: 0.7 }}>
+          Redux Loading State: {loading ? 'true' : 'false'}
+        </Typography>
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <TravelCard
+          cardVariant="ocean"
+          cardElevation="medium"
+          borderAccent
+          sx={{ p: 4, mb: 4, maxWidth: 500, mx: 'auto' }}
+        >
+          <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
+            🌊 Complex Component Test
+          </Typography>
+          <Typography variant="body2">
+            If you can see this styled card with animations, TravelCard and framer-motion are working!
+          </Typography>
+        </TravelCard>
+      </motion.div>
+      
       <Button variant="contained" color="primary" size="large">
         Get Started
       </Button>
