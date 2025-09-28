@@ -2,278 +2,443 @@ import React from 'react';
 import {
   Container,
   Typography,
-  Button,
   Box,
   Grid,
-  Paper,
-  Card,
-  CardContent,
-} from '@mui/material';import TypewriterText from '../components/TypewriterText';
+} from '@mui/material';
+import TypewriterText from '../components/TypewriterText';
 import {
   DirectionsWalk,
-  NaturePeople,
-  Analytics,
+  FlightTakeoff,
+  PhotoCamera,
+  Explore,
+  TravelExplore,
+  Public,
   Security,
-  TrendingUp,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { travelColors } from '../styles/travelTheme';
+import TravelText from '../components/TravelText';
+import TravelCard from '../components/TravelCard';
+import AdventureButton from '../components/AdventureButton';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   const features = [
     {
-      icon: <DirectionsWalk fontSize="large" />,
-      title: 'Smart Trip Tracking',
-      description: 'Automatically detect and log your trips with AI-powered mode detection.',
+      icon: <PhotoCamera fontSize="large" />,
+      title: 'Capture Every Moment',
+      description: 'Document your adventures with photos and create lasting memories of your journeys.',
     },
     {
-      icon: <NaturePeople fontSize="large" />,
-      title: 'Eco-Friendly Insights',
-      description: 'Track your carbon footprint and make sustainable transport choices.',
+      icon: <TravelExplore fontSize="large" />,
+      title: 'Discover New Places',
+      description: 'Find hidden gems and must-see destinations recommended by fellow travelers.',
     },
     {
-      icon: <Analytics fontSize="large" />,
-      title: 'Detailed Analytics',
-      description: 'Visualize your travel patterns and contribute to transport research.',
+      icon: <FlightTakeoff fontSize="large" />,
+      title: 'Plan Your Adventures',
+      description: 'Organize trips, track itineraries, and never miss a travel opportunity.',
     },
     {
       icon: <Security fontSize="large" />,
-      title: 'Privacy First',
-      description: 'Your data is secure with granular privacy controls and consent management.',
+      title: 'Safe & Secure',
+      description: 'Your travel data and memories are protected with industry-leading security.',
     },
   ];
 
   const stats = [
-    { label: 'Transport Modes', value: '6+', icon: <DirectionsWalk /> },
-    { label: 'CO₂ Saved', value: '12kg', icon: <NaturePeople /> },
-    { label: 'Active Users', value: '1k+', icon: <TrendingUp /> },
-    { label: 'Cities', value: '50+', icon: <Analytics /> },
+    { label: 'Countries', value: '120+', icon: <Public /> },
+    { label: 'Adventures', value: '50k+', icon: <Explore /> },
+    { label: 'Travelers', value: '10k+', icon: <DirectionsWalk /> },
+    { label: 'Photos', value: '1M+', icon: <PhotoCamera /> },
   ];
 
   return (
-    <Box>
-      {/* Hero Section */}
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 50%, ${travelColors.primary.sky}20 100%)`,
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decorative elements */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          py: 12,
-          textAlign: 'center',
+          position: 'absolute',
+          top: '10%',
+          right: '10%',
+          width: '200px',
+          height: '200px',
+          background: `radial-gradient(circle, ${travelColors.primary.sunset}20 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
         }}
-      >
-        <Container maxWidth="lg">
-          <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
-            🌍 TraveLogy
-          </Typography>
-          <Box sx={{ mb: 4 }}>
-            <TypewriterText
-              lines={[
-                'Your AI-Powered Smart Travel Diary',
-                'Track trips. Detect modes. Gain insights.',
-                'Privacy-first. Beautiful. Fast.'
-              ]}
-              variant="h5"
-              typingSpeedMs={28}
-              pauseMs={1400}
-            />
-          </Box>
-          <Typography variant="h6" sx={{ mb: 6, maxWidth: 600, mx: 'auto' }}>
-            Track your journeys, understand your impact, and contribute to sustainable transport research
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button
-              variant="contained"
-              size="large"
-              sx={{ bgcolor: 'white', color: 'primary.main', px: 4, py: 1.5 }}
-              onClick={() => navigate('/register')}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '20%',
+          left: '5%',
+          width: '150px',
+          height: '150px',
+          background: `radial-gradient(circle, ${travelColors.primary.ocean}15 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      
+      {/* Hero Section */}
+      <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            textAlign: 'center',
+            py: 4
+          }}>
+            {/* Main Title */}
+            <motion.div
+              initial={{ y: -30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
             >
-              Get Started
-            </Button>
-            <Button
-              variant="outlined"
-              size="large"
-              sx={{ borderColor: 'white', color: 'white', px: 4, py: 1.5 }}
-              onClick={() => navigate('/login')}
-            >
-              Sign In
-            </Button>
-          </Box>
-        </Container>
-      </Box>
+              <TravelText
+                text="Travelogy"
+                textVariant="wanderlust"
+                animated
+                variant="h1"
+                sx={{ mb: 2, fontSize: { xs: '3rem', md: '4.5rem' } }}
+              />
+            </motion.div>
 
-      {/* Stats Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Grid container spacing={4}>
-          {stats.map((stat, index) => (
-            <Grid item xs={6} md={3} key={index}>
-              <Card sx={{ textAlign: 'center', p: 2 }}>
-                <CardContent>
-                  <Box sx={{ color: 'primary.main', mb: 1 }}>
-                    {stat.icon}
-                  </Box>
-                  <Typography variant="h4" fontWeight="bold">
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {stat.label}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+            {/* Subtitle */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.1, ease: "easeOut" }}
+            >
+              <TravelText
+                text="Your Personal Travel Journal"
+                textVariant="gradient"
+                animated
+                variant="h3"
+                sx={{ mb: 4 }}
+              />
+            </motion.div>
+
+            {/* Typewriter Effect */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+            >
+              <Box sx={{ mb: 6, maxWidth: 800, mx: 'auto' }}>
+                <TypewriterText
+                  lines={[
+                    'Capture memories from every adventure...',
+                    'Plan trips. Share stories. Inspire others.',
+                    'Your journey starts here.'
+                  ]}
+                  variant="h5"
+                  typingSpeedMs={50}
+                  pauseMs={2000}
+                  sx={{ color: travelColors.text.secondary, fontStyle: 'italic' }}
+                />
+              </Box>
+            </motion.div>
+
+            {/* Action Buttons */}
+            <motion.div
+              initial={{ y: 30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
+            >
+              <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center', mb: 4 }}>
+                <AdventureButton
+                  buttonVariant="sunset"
+                  adventure
+                  size="large"
+                  onClick={() => navigate('/register')}
+                  startIcon={<TravelExplore />}
+                >
+                  Start Your Journey
+                </AdventureButton>
+                <AdventureButton
+                  buttonVariant="ocean"
+                  size="large"
+                  onClick={() => navigate('/login')}
+                  startIcon={<DirectionsWalk />}
+                >
+                  Continue Adventure
+                </AdventureButton>
+              </Box>
+            </motion.div>
+          </Box>
+        </motion.div>
       </Container>
 
-      {/* Features Section */}
-      <Box sx={{ bgcolor: 'background.default', py: 8 }}>
-        <Container maxWidth="lg">
-          <Typography variant="h3" textAlign="center" fontWeight="bold" gutterBottom>
-            Why Choose TraveLogy?
-          </Typography>
-          <Typography variant="h6" textAlign="center" color="text.secondary" sx={{ mb: 6 }}>
-            Intelligent travel tracking with privacy and sustainability at its core
+      {/* Travel Stats Grid */}
+      <Container maxWidth="lg" sx={{ py: 8, position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Grid container spacing={4}>
+            {stats.map((stat, index) => (
+              <Grid item xs={6} md={3} key={index}>
+                <TravelCard
+                  cardVariant={['ocean', 'sunset', 'forest', 'paper'][index] as any}
+                  cardElevation="medium"
+                  borderAccent
+                  sx={{ textAlign: 'center', p: 3, height: '150px' }}
+                >
+                  <Box sx={{ position: 'relative', zIndex: 2 }}>
+                    <Box sx={{ 
+                      color: [travelColors.primary.ocean, travelColors.primary.sunset, travelColors.primary.forest, travelColors.primary.coral][index], 
+                      mb: 1, 
+                      fontSize: '2rem' 
+                    }}>
+                      {stat.icon}
+                    </Box>
+                    <Typography variant="h4" fontWeight="bold" sx={{ color: travelColors.text.primary }}>
+                      {stat.value}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: travelColors.text.secondary }}>
+                      {stat.label}
+                    </Typography>
+                  </Box>
+                </TravelCard>
+              </Grid>
+            ))}
+          </Grid>
+        </motion.div>
+      </Container>
+
+      {/* Travel Features */}
+      <Container maxWidth="lg" sx={{ py: 8, position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <TravelText
+            text="Explore Amazing Features"
+            textVariant="adventure"
+            animated
+            variant="h3"
+            sx={{ textAlign: 'center', mb: 2 }}
+          />
+          <Typography variant="h6" textAlign="center" sx={{ mb: 6, color: travelColors.text.secondary }}>
+            Everything you need to document and share your travel adventures
           </Typography>
           
           <Grid container spacing={4}>
             {features.map((feature, index) => (
               <Grid item xs={12} md={6} key={index}>
-                <Paper sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ color: 'primary.main', mb: 2 }}>
-                    {feature.icon}
-                  </Box>
-                  <Typography variant="h5" fontWeight="bold" gutterBottom>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ flexGrow: 1 }}>
-                    {feature.description}
-                  </Typography>
-                </Paper>
+                <motion.div
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                >
+                  <TravelCard
+                    cardVariant={['ocean', 'sunset', 'forest', 'coral'][index] as any}
+                    cardElevation="high"
+                    borderAccent
+                    sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}
+                  >
+                    <Box sx={{ position: 'relative', zIndex: 2 }}>
+                      <Box sx={{ 
+                        color: [travelColors.primary.ocean, travelColors.primary.sunset, travelColors.primary.forest, travelColors.primary.coral][index], 
+                        mb: 2, 
+                        fontSize: '3rem' 
+                      }}>
+                        {feature.icon}
+                      </Box>
+                      <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ color: travelColors.text.primary }}>
+                        {feature.title}
+                      </Typography>
+                      <Typography variant="body1" sx={{ flexGrow: 1, color: travelColors.text.secondary }}>
+                        {feature.description}
+                      </Typography>
+                    </Box>
+                  </TravelCard>
+                </motion.div>
               </Grid>
             ))}
           </Grid>
-        </Container>
-      </Box>
-
-      {/* How It Works */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h3" textAlign="center" fontWeight="bold" gutterBottom>
-          How It Works
-        </Typography>
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          <Grid item xs={12} md={4}>
-            <Box textAlign="center">
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 2,
-                  fontSize: '2rem',
-                  fontWeight: 'bold',
-                }}
-              >
-                1
-              </Box>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                Start Your Journey
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Simply start the app when you begin traveling. Our AI detects when you&apos;re on the move.
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box textAlign="center">
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  bgcolor: 'secondary.main',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 2,
-                  fontSize: '2rem',
-                  fontWeight: 'bold',
-                }}
-              >
-                2
-              </Box>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                AI Detection
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Our smart algorithms automatically detect your transport mode and trip purpose.
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Box textAlign="center">
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  bgcolor: 'success.main',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 2,
-                  fontSize: '2rem',
-                  fontWeight: 'bold',
-                }}
-              >
-                3
-              </Box>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
-                Get Insights
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                View your travel patterns, environmental impact, and contribute to transport research.
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
+        </motion.div>
       </Container>
 
-      {/* CTA Section */}
-      <Box
-        sx={{
-          bgcolor: 'primary.main',
-          color: 'white',
-          py: 8,
-          textAlign: 'center',
-        }}
-      >
-        <Container maxWidth="md">
-          <Typography variant="h3" fontWeight="bold" gutterBottom>
-            Ready to Start Your Journey?
-          </Typography>
-          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
-            Join thousands of users making smarter, more sustainable travel choices
-          </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            sx={{ bgcolor: 'white', color: 'primary.main', px: 4, py: 1.5 }}
-            onClick={() => navigate('/register')}
+      {/* How It Works */}
+      <Container maxWidth="lg" sx={{ py: 8, position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+        >
+          <TravelText
+            text="How It Works"
+            textVariant="adventure"
+            animated
+            variant="h3"
+            sx={{ textAlign: 'center', mb: 6 }}
+          />
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={4}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              >
+                <Box textAlign="center">
+                  <TravelCard
+                    cardVariant="ocean"
+                    cardElevation="high"
+                    borderAccent
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 3,
+                    }}
+                  >
+                    <Typography variant="h3" fontWeight="bold" sx={{ color: travelColors.primary.ocean, position: 'relative', zIndex: 2 }}>
+                      01
+                    </Typography>
+                  </TravelCard>
+                  <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ color: travelColors.text.primary }}>
+                    Plan Your Trip
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: travelColors.text.secondary }}>
+                    Create your travel itinerary and set your adventure goals. Plan destinations and activities.
+                  </Typography>
+                </Box>
+              </motion.div>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+              >
+                <Box textAlign="center">
+                  <TravelCard
+                    cardVariant="sunset"
+                    cardElevation="high"
+                    borderAccent
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 3,
+                    }}
+                  >
+                    <Typography variant="h3" fontWeight="bold" sx={{ color: travelColors.primary.sunset, position: 'relative', zIndex: 2 }}>
+                      02
+                    </Typography>
+                  </TravelCard>
+                  <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ color: travelColors.text.primary }}>
+                    Document Journey
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: travelColors.text.secondary }}>
+                    Capture photos, write diary entries, and record memories from every moment of your adventure.
+                  </Typography>
+                </Box>
+              </motion.div>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 1.0 }}
+              >
+                <Box textAlign="center">
+                  <TravelCard
+                    cardVariant="forest"
+                    cardElevation="high"
+                    borderAccent
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 3,
+                    }}
+                  >
+                    <Typography variant="h3" fontWeight="bold" sx={{ color: travelColors.primary.forest, position: 'relative', zIndex: 2 }}>
+                      03
+                    </Typography>
+                  </TravelCard>
+                  <Typography variant="h5" fontWeight="bold" gutterBottom sx={{ color: travelColors.text.primary }}>
+                    Share & Inspire
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: travelColors.text.secondary }}>
+                    Share your travel stories and inspire others to explore the world through your experiences.
+                  </Typography>
+                </Box>
+              </motion.div>
+            </Grid>
+          </Grid>
+        </motion.div>
+      </Container>
+
+      {/* Final CTA Section */}
+      <Container maxWidth="md" sx={{ py: 8, textAlign: 'center', position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 1.1 }}
+        >
+          <TravelCard
+            cardVariant="ocean"
+            cardElevation="high"
+            borderAccent
+            sx={{ p: 6, background: travelColors.gradients.sky }}
           >
-            Sign Up Now - It&apos;s Free!
-          </Button>
-        </Container>
-      </Box>
+            <Box sx={{ position: 'relative', zIndex: 2 }}>
+              <TravelText
+                text="Start Your Adventure Today"
+                textVariant="wanderlust"
+                animated
+                variant="h3"
+                sx={{ mb: 3 }}
+              />
+              <Typography variant="h6" sx={{ mb: 4, color: travelColors.text.primary }}>
+                Join thousands of travelers sharing their stories. Your next great adventure is just a click away...
+              </Typography>
+              <AdventureButton
+                buttonVariant="sunset"
+                adventure
+                size="large"
+                onClick={() => navigate('/register')}
+                startIcon={<FlightTakeoff />}
+              >
+                Begin Your Journey - Create Your Account
+              </AdventureButton>
+            </Box>
+          </TravelCard>
+        </motion.div>
+      </Container>
     </Box>
   );
 };

@@ -2,14 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
   Container,
   Grid,
-  Paper,
   Typography,
-  Card,
-  CardContent,
   Box,
-  Button,
   Chip,
   LinearProgress,
+  Alert,
 } from '@mui/material';
 import {
   DirectionsCar,
@@ -20,11 +17,23 @@ import {
   LocationOn,
   TrendingUp,
   Add as AddIcon,
+  FlightTakeoff,
+  PhotoCamera,
+  Explore,
+  Map,
+  EmojiEvents,
+  Timeline,
+  TravelExplore,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 import { tripsAPI, gamificationAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { travelColors } from '../styles/travelTheme';
+import TravelCard from '../components/TravelCard';
+import AdventureButton from '../components/AdventureButton';
+import TravelText from '../components/TravelText';
 
 interface DashboardStats {
   total_trips: number;
@@ -108,204 +117,437 @@ const DashboardPage: React.FC = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4" component="h1" fontWeight="bold">
-          Dashboard
-        </Typography>
-        {activeTrip ? (
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<LocationOn />}
-            onClick={handleCompleteTrip}
-            size="large"
-          >
-            Complete Active Trip
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleStartTrip}
-            size="large"
-          >
-            Start New Trip
-          </Button>
-        )}
-      </Box>
-
-      {/* Active Trip Alert */}
-      {activeTrip && (
-        <Paper 
-          sx={{ 
-            p: 3, 
-            mb: 4, 
-            bgcolor: 'primary.light', 
-            color: 'white',
-            background: 'linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)',
-          }}
+    <Box sx={{
+      minHeight: '100vh',
+      background: `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 50%, ${travelColors.primary.sky}10 100%)`,
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decorative elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '10%',
+          right: '5%',
+          width: '300px',
+          height: '300px',
+          background: `radial-gradient(circle, ${travelColors.primary.sunset}08 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '15%',
+          left: '3%',
+          width: '250px',
+          height: '250px',
+          background: `radial-gradient(circle, ${travelColors.primary.ocean}08 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      
+      <Container maxWidth="lg" sx={{ py: 4, position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
-          <Typography variant="h6" gutterBottom>
-            🚗 Active Trip in Progress
-          </Typography>
-          <Typography>
-            Started: {new Date(activeTrip.start_time).toLocaleTimeString()}
-          </Typography>
-          <Typography>
-            Mode: {activeTrip.transport_mode}
-          </Typography>
-        </Paper>
-      )}
-
-      <Grid container spacing={3}>
-        {/* Quick Stats */}
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={1}>
-                <TrendingUp color="primary" />
-                <Typography variant="h6" ml={1}>
-                  Total Trips
-                </Typography>
-              </Box>
-              <Typography variant="h3" component="div">
-                {stats?.total_trips || 0}
-              </Typography>
-              <Typography color="text.secondary">
-                {stats?.trips_this_week || 0} this week
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={1}>
-                <LocationOn color="primary" />
-                <Typography variant="h6" ml={1}>
-                  Distance
-                </Typography>
-              </Box>
-              <Typography variant="h3" component="div">
-                {Math.round(stats?.total_distance || 0)}
-              </Typography>
-              <Typography color="text.secondary">
-                kilometers traveled
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={1}>
-                <NaturePeople color="success" />
-                <Typography variant="h6" ml={1}>
-                  Eco Score
-                </Typography>
-              </Box>
-              <Typography variant="h3" component="div">
-                {stats?.eco_score || 0}
-              </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={stats?.eco_score || 0} 
-                sx={{ mt: 1 }}
-                color="success"
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Box>
+              <TravelText
+                text="Travel Dashboard"
+                textVariant="adventure"
+                animated
+                variant="h3"
+                sx={{ mb: 1 }}
               />
-            </CardContent>
-          </Card>
-        </Grid>
+              <Typography 
+                variant="subtitle1" 
+                sx={{ 
+                  color: travelColors.text.secondary,
+                  fontStyle: 'italic' 
+                }}
+              >
+                Your journey statistics and adventures await
+              </Typography>
+            </Box>
+            {activeTrip ? (
+              <AdventureButton
+                buttonVariant="coral"
+                startIcon={<LocationOn />}
+                onClick={handleCompleteTrip}
+                size="large"
+                adventure
+              >
+                Complete Active Trip
+              </AdventureButton>
+            ) : (
+              <AdventureButton
+                buttonVariant="ocean"
+                startIcon={<FlightTakeoff />}
+                onClick={handleStartTrip}
+                size="large"
+                adventure
+              >
+                Start New Adventure
+              </AdventureButton>
+            )}
+          </Box>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={1}>
-                <Typography variant="h6">
-                  Level {gamification?.points.level || 1}
+          {/* Active Trip Alert */}
+          {activeTrip && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <TravelCard 
+                cardVariant="sunset"
+                cardElevation="high"
+                borderAccent
+                sx={{ p: 3, mb: 4 }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <TravelExplore sx={{ fontSize: 40, color: travelColors.primary.sunset, mr: 2 }} />
+                  <TravelText
+                    text="Adventure in Progress!"
+                    textVariant="wanderlust"
+                    animated
+                    variant="h5"
+                  />
+                </Box>
+                <Typography 
+                  variant="body1" 
+                  sx={{ color: travelColors.text.primary, mb: 1 }}
+                >
+                  Started: {new Date(activeTrip.start_time).toLocaleTimeString()}
                 </Typography>
-              </Box>
-              <Typography variant="h3" component="div">
-                {gamification?.points.total || 0}
-              </Typography>
-              <Typography color="text.secondary">
-                points earned
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+                <Typography 
+                  variant="body1" 
+                  sx={{ color: travelColors.text.primary }}
+                >
+                  Mode: {activeTrip.transport_mode}
+                </Typography>
+              </TravelCard>
+            </motion.div>
+          )}
 
-        {/* Transport Mode Breakdown */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Transport Mode Breakdown
-            </Typography>
-            <Box>
-              {stats?.mode_breakdown && Object.entries(stats.mode_breakdown).map(([mode, count]) => (
-                <Box key={mode} display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-                  <Box display="flex" alignItems="center">
-                    {getModeIcon(mode)}
-                    <Typography variant="body1" ml={1} sx={{ textTransform: 'capitalize' }}>
-                      {mode}
+          <Grid container spacing={3}>
+            {/* Quick Stats */}
+            <Grid item xs={12} sm={6} md={3}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                <TravelCard cardVariant="ocean" cardElevation="medium" borderAccent>
+                  <Box sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Map sx={{ fontSize: 32, color: travelColors.primary.ocean, mr: 1 }} />
+                      <Typography 
+                        variant="h6" 
+                        sx={{ color: travelColors.text.primary, fontWeight: 'bold' }}
+                      >
+                        Total Adventures
+                      </Typography>
+                    </Box>
+                    <Typography 
+                      variant="h2" 
+                      component="div" 
+                      sx={{ 
+                        color: travelColors.primary.ocean, 
+                        fontWeight: 'bold',
+                        mb: 1 
+                      }}
+                    >
+                      {stats?.total_trips || 0}
+                    </Typography>
+                    <Typography sx={{ color: travelColors.text.secondary }}>
+                      {stats?.trips_this_week || 0} this week
                     </Typography>
                   </Box>
-                  <Chip label={count} size="small" />
-                </Box>
-              ))}
-              {!stats?.mode_breakdown && (
-                <Typography color="text.secondary">
-                  No trips recorded yet. Start your first trip to see your transport patterns!
-                </Typography>
-              )}
-            </Box>
-          </Paper>
-        </Grid>
+                </TravelCard>
+              </motion.div>
+            </Grid>
 
-        {/* Recent Achievements */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Recent Achievements
-            </Typography>
-            <Box>
-              {gamification?.badges && gamification.badges.slice(0, 3).map((badge, index) => (
-                <Box key={index} display="flex" alignItems="center" mb={2}>
-                  <Box 
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      bgcolor: badge.color,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mr: 2
-                    }}
-                  >
-                    <Typography variant="h6">{badge.icon}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="subtitle1">{badge.name}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {badge.description}
+            <Grid item xs={12} sm={6} md={3}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <TravelCard cardVariant="sunset" cardElevation="medium" borderAccent>
+                  <Box sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Timeline sx={{ fontSize: 32, color: travelColors.primary.sunset, mr: 1 }} />
+                      <Typography 
+                        variant="h6" 
+                        sx={{ color: travelColors.text.primary, fontWeight: 'bold' }}
+                      >
+                        Distance
+                      </Typography>
+                    </Box>
+                    <Typography 
+                      variant="h2" 
+                      component="div" 
+                      sx={{ 
+                        color: travelColors.primary.sunset, 
+                        fontWeight: 'bold',
+                        mb: 1 
+                      }}
+                    >
+                      {Math.round(stats?.total_distance || 0)}
+                    </Typography>
+                    <Typography sx={{ color: travelColors.text.secondary }}>
+                      kilometers traveled
                     </Typography>
                   </Box>
-                </Box>
-              ))}
-              {!gamification?.badges?.length && (
-                <Typography color="text.secondary">
-                  Complete more trips to earn achievements!
-                </Typography>
-              )}
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+                </TravelCard>
+              </motion.div>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <TravelCard cardVariant="forest" cardElevation="medium" borderAccent>
+                  <Box sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <NaturePeople sx={{ fontSize: 32, color: travelColors.primary.forest, mr: 1 }} />
+                      <Typography 
+                        variant="h6" 
+                        sx={{ color: travelColors.text.primary, fontWeight: 'bold' }}
+                      >
+                        Eco Score
+                      </Typography>
+                    </Box>
+                    <Typography 
+                      variant="h2" 
+                      component="div" 
+                      sx={{ 
+                        color: travelColors.primary.forest, 
+                        fontWeight: 'bold',
+                        mb: 1 
+                      }}
+                    >
+                      {stats?.eco_score || 0}
+                    </Typography>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={stats?.eco_score || 0} 
+                      sx={{ 
+                        mt: 1, 
+                        bgcolor: `${travelColors.primary.forest}20`,
+                        '& .MuiLinearProgress-bar': {
+                          bgcolor: travelColors.primary.forest
+                        }
+                      }}
+                    />
+                  </Box>
+                </TravelCard>
+              </motion.div>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <TravelCard cardVariant="default" cardElevation="medium" borderAccent>
+                  <Box sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <EmojiEvents sx={{ fontSize: 32, color: travelColors.primary.coral, mr: 1 }} />
+                      <Typography 
+                        variant="h6" 
+                        sx={{ color: travelColors.text.primary, fontWeight: 'bold' }}
+                      >
+                        Level {gamification?.points.level || 1}
+                      </Typography>
+                    </Box>
+                    <Typography 
+                      variant="h2" 
+                      component="div" 
+                      sx={{ 
+                        color: travelColors.primary.coral, 
+                        fontWeight: 'bold',
+                        mb: 1 
+                      }}
+                    >
+                      {gamification?.points.total || 0}
+                    </Typography>
+                    <Typography sx={{ color: travelColors.text.secondary }}>
+                      adventure points
+                    </Typography>
+                  </Box>
+                </TravelCard>
+              </motion.div>
+            </Grid>
+
+            {/* Transport Mode Breakdown */}
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <TravelCard cardVariant="ocean" cardElevation="medium" borderAccent>
+                  <Box sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                      <DirectionsTransit sx={{ fontSize: 28, color: travelColors.primary.sky, mr: 2 }} />
+                      <TravelText
+                        text="Travel Modes"
+                        textVariant="gradient"
+                        variant="h6"
+                      />
+                    </Box>
+                    <Box>
+                      {stats?.mode_breakdown && Object.entries(stats.mode_breakdown).map(([mode, count]) => (
+                        <Box key={mode} display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                          <Box display="flex" alignItems="center">
+                            <Box
+                              sx={{
+                                p: 1,
+                                borderRadius: '8px',
+                                bgcolor: `${travelColors.primary.ocean}15`,
+                                mr: 2,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              {getModeIcon(mode)}
+                            </Box>
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                textTransform: 'capitalize',
+                                color: travelColors.text.primary,
+                                fontWeight: 500
+                              }}
+                            >
+                              {mode}
+                            </Typography>
+                          </Box>
+                          <Chip 
+                            label={count} 
+                            size="small" 
+                            sx={{
+                              bgcolor: travelColors.primary.ocean,
+                              color: travelColors.text.white,
+                              fontWeight: 'bold'
+                            }}
+                          />
+                        </Box>
+                      ))}
+                      {!stats?.mode_breakdown && (
+                        <Box sx={{ textAlign: 'center', py: 3 }}>
+                          <Explore sx={{ fontSize: 48, color: travelColors.primary.sky, mb: 2 }} />
+                          <Typography 
+                            sx={{ 
+                              color: travelColors.text.secondary,
+                              fontStyle: 'italic'
+                            }}
+                          >
+                            No adventures recorded yet. Start your first journey to see your travel patterns!
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                </TravelCard>
+              </motion.div>
+            </Grid>
+
+            {/* Recent Achievements */}
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
+                <TravelCard cardVariant="sunset" cardElevation="medium" borderAccent>
+                  <Box sx={{ p: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                      <EmojiEvents sx={{ fontSize: 28, color: travelColors.primary.coral, mr: 2 }} />
+                      <TravelText
+                        text="Recent Achievements"
+                        textVariant="wanderlust"
+                        variant="h6"
+                      />
+                    </Box>
+                    <Box>
+                      {gamification?.badges && gamification.badges.slice(0, 3).map((badge, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: 0.7 + (index * 0.1) }}
+                        >
+                          <Box display="flex" alignItems="center" mb={3}>
+                            <Box 
+                              sx={{
+                                width: 50,
+                                height: 50,
+                                borderRadius: '50%',
+                                bgcolor: badge.color,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                mr: 3,
+                                boxShadow: travelColors.shadows.soft
+                              }}
+                            >
+                              <Typography variant="h5">{badge.icon}</Typography>
+                            </Box>
+                            <Box>
+                              <Typography 
+                                variant="subtitle1" 
+                                sx={{ 
+                                  color: travelColors.text.primary,
+                                  fontWeight: 'bold',
+                                  mb: 0.5
+                                }}
+                              >
+                                {badge.name}
+                              </Typography>
+                              <Typography 
+                                variant="body2" 
+                                sx={{ color: travelColors.text.secondary }}
+                              >
+                                {badge.description}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </motion.div>
+                      ))}
+                      {!gamification?.badges?.length && (
+                        <Box sx={{ textAlign: 'center', py: 3 }}>
+                          <PhotoCamera sx={{ fontSize: 48, color: travelColors.primary.coral, mb: 2 }} />
+                          <Typography 
+                            sx={{ 
+                              color: travelColors.text.secondary,
+                              fontStyle: 'italic'
+                            }}
+                          >
+                            Complete more adventures to unlock achievements!
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+                  </Box>
+                </TravelCard>
+              </motion.div>
+            </Grid>
+          </Grid>
+        </motion.div>
+      </Container>
+    </Box>
   );
 };
 

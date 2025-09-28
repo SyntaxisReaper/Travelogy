@@ -184,7 +184,9 @@ const glitchAnim2 = keyframes`
   }
 `;
 
-const GlitchContainer = styled(Box)<{ glitching: boolean; intensity: string }>(
+const GlitchContainer = styled(Box, {
+  shouldForwardProp: (prop) => !['glitching', 'intensity'].includes(prop as string),
+})<{ glitching: boolean; intensity: string }>(
   ({ theme, glitching, intensity }) => {
     const duration = intensity === 'low' ? '2s' : intensity === 'medium' ? '1s' : '0.5s';
     

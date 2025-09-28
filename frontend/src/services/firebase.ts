@@ -9,7 +9,18 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 import { FIREBASE_CONFIG } from '../config/env';
 
 // Initialize Firebase
-const app = initializeApp(FIREBASE_CONFIG as any);
+const app = initializeApp(FIREBASE_CONFIG);
+
+// Development debug info
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('🔧 Firebase Config Check:');
+  console.log('API Key:', process.env.REACT_APP_FIREBASE_API_KEY?.substring(0, 20) + '...');
+  console.log('Project ID:', process.env.REACT_APP_FIREBASE_PROJECT_ID);
+  console.log('App ID:', process.env.REACT_APP_FIREBASE_APP_ID);
+  console.log('Auth Domain:', process.env.REACT_APP_FIREBASE_AUTH_DOMAIN);
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('App Check: DISABLED for development');
+}
 
 // Initialize Firebase services
 export const auth = getAuth(app);
@@ -51,13 +62,5 @@ googleProvider.setCustomParameters({
   hd: '' // Allow any hosted domain
 });
 
-// Debug: Log current domain for troubleshooting
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  console.log('🔧 Firebase Debug Info:');
-  console.log('Current domain:', window.location.hostname);
-  console.log('Current origin:', window.location.origin);
-  console.log('Firebase auth domain:', process.env.REACT_APP_FIREBASE_AUTH_DOMAIN);
-  console.log('If Google sign-in fails, add this domain to Firebase Console > Authentication > Settings > Authorized domains');
-}
 
 export default app;

@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Container, Typography, Paper, Box, Tabs, Tab, Grid, TextField, Button, Stack, Alert, Divider, Chip, MenuItem } from '@mui/material';
+import { Container, Typography, Box, Tabs, Tab, Grid, TextField, Stack, Alert, Divider, Chip, MenuItem } from '@mui/material';
+import { motion } from 'framer-motion';
+import { FlightTakeoff, Hotel, Train } from '@mui/icons-material';
+import { travelColors } from '../styles/travelTheme';
+import TravelCard from '../components/TravelCard';
+import AdventureButton from '../components/AdventureButton';
+import TravelText from '../components/TravelText';
 import { bookingsAPI } from '../services/api';
 
 interface HotelResult { id: string; name: string; price: number; rating?: number; address?: string }
@@ -77,17 +83,78 @@ const BookingsPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        🧳 Bookings
-      </Typography>
+    <Box sx={{
+      minHeight: '100vh',
+      background: `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 50%, ${travelColors.primary.sunset}08 100%)`,
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decorative elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '8%',
+          right: '6%',
+          width: '180px',
+          height: '180px',
+          background: `radial-gradient(circle, ${travelColors.primary.coral}12 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '12%',
+          left: '4%',
+          width: '200px',
+          height: '200px',
+          background: `radial-gradient(circle, ${travelColors.primary.ocean}10 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      
+      <Container maxWidth="lg" sx={{ py: 4, position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 4 }}>
+            <FlightTakeoff sx={{ fontSize: 40, color: travelColors.primary.ocean, mr: 2 }} />
+            <TravelText
+              text="Travel Bookings"
+              textVariant="adventure"
+              animated
+              variant="h3"
+            />
+          </Box>
 
-      <Paper sx={{ p: 2 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)}>
-          <Tab label="Hotels" />
-          <Tab label="Trains" />
-        </Tabs>
-        <Divider sx={{ mb: 2 }} />
+          <TravelCard cardVariant="ocean" cardElevation="high" borderAccent>
+            <Box sx={{ p: 3 }}>
+              <Tabs 
+                value={tab} 
+                onChange={(_, v) => setTab(v)}
+                sx={{
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: travelColors.primary.sunset,
+                    height: 3,
+                  },
+                  '& .MuiTab-root': {
+                    color: travelColors.text.secondary,
+                    fontWeight: 600,
+                    '&.Mui-selected': {
+                      color: travelColors.primary.sunset,
+                    },
+                  },
+                  mb: 2,
+                }}
+              >
+                <Tab icon={<Hotel />} label="Hotels" />
+                <Tab icon={<Train />} label="Trains" />
+              </Tabs>
+              <Divider sx={{ mb: 3, borderColor: `${travelColors.primary.ocean}30` }} />
 
         {/* Hotels Tab */}
         {tab === 0 && (
@@ -120,28 +187,50 @@ const BookingsPage: React.FC = () => {
                 </TextField>
               </Grid>
             </Grid>
-            <Button variant="contained" onClick={searchHotels} disabled={searchingHotels}>
+            <AdventureButton 
+              buttonVariant="sunset" 
+              onClick={searchHotels} 
+              disabled={searchingHotels}
+              startIcon={<Hotel />}
+            >
               {searchingHotels ? 'Searching…' : 'Search Hotels'}
-            </Button>
+            </AdventureButton>
 
             <Box sx={{ mt: 3 }}>
               {hotelResults.map((h) => (
-                <Paper key={h.id} sx={{ p: 2, mb: 1 }}>
-                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-                    <Box>
-                      <Typography variant="subtitle1">{h.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">{h.address}</Typography>
-                      <Stack direction="row" spacing={1}>
-                        <Chip label={`$${h.price}`} />
-                        {h.rating ? <Chip label={`⭐ ${h.rating}`} /> : null}
-                      </Stack>
-                    </Box>
-                    <Button variant="outlined" onClick={() => bookHotel(h)}>Book</Button>
-                  </Stack>
-                </Paper>
+                <TravelCard key={h.id} cardVariant="paper" cardElevation="medium" sx={{ mb: 2 }}>
+                  <Box sx={{ p: 3 }}>
+                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="subtitle1" sx={{ color: travelColors.text.primary, fontWeight: 'bold' }}>{h.name}</Typography>
+                        <Typography variant="body2" sx={{ color: travelColors.text.secondary }}>{h.address}</Typography>
+                        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                          <Chip 
+                            label={`$${h.price}`} 
+                            sx={{ 
+                              backgroundColor: `${travelColors.primary.sunset}20`,
+                              color: travelColors.primary.sunset,
+                              fontWeight: 'bold'
+                            }}
+                          />
+                          {h.rating ? (
+                            <Chip 
+                              label={`⭐ ${h.rating}`} 
+                              sx={{ 
+                                backgroundColor: `${travelColors.primary.forest}20`,
+                                color: travelColors.primary.forest
+                              }}
+                            />
+                          ) : null}
+                        </Stack>
+                      </Box>
+                      <AdventureButton buttonVariant="ocean" size="small" onClick={() => bookHotel(h)}>Book Hotel</AdventureButton>
+                    </Stack>
+                  </Box>
+                </TravelCard>
               ))}
               {hotelResults.length === 0 && (
-                <Typography variant="body2" color="text.secondary">No hotels found. Try different dates or city.</Typography>
+                <Typography variant="body2" sx={{ color: travelColors.text.secondary, textAlign: 'center', py: 4 }}>No hotels found. Try different dates or city.</Typography>
               )}
             </Box>
           </Box>
@@ -175,33 +264,52 @@ const BookingsPage: React.FC = () => {
                 </TextField>
               </Grid>
             </Grid>
-            <Button variant="contained" onClick={searchTrains} disabled={searchingTrains}>
+            <AdventureButton 
+              buttonVariant="forest" 
+              onClick={searchTrains} 
+              disabled={searchingTrains}
+              startIcon={<Train />}
+            >
               {searchingTrains ? 'Searching…' : 'Search Trains'}
-            </Button>
+            </AdventureButton>
 
             <Box sx={{ mt: 3 }}>
               {trainResults.map((t) => (
-                <Paper key={t.id} sx={{ p: 2, mb: 1 }}>
-                  <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-                    <Box>
-                      <Typography variant="subtitle1">{t.name} {t.number ? `(${t.number})` : ''}</Typography>
-                      <Typography variant="body2" color="text.secondary">{t.departure} → {t.arrival} {t.class ? `• ${t.class}` : ''}</Typography>
-                      <Stack direction="row" spacing={1}>
-                        {t.price ? <Chip label={`$${t.price}`} /> : null}
-                      </Stack>
-                    </Box>
-                    <Button variant="outlined" onClick={() => bookTrain(t)}>Book</Button>
-                  </Stack>
-                </Paper>
+                <TravelCard key={t.id} cardVariant="paper" cardElevation="medium" sx={{ mb: 2 }}>
+                  <Box sx={{ p: 3 }}>
+                    <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="subtitle1" sx={{ color: travelColors.text.primary, fontWeight: 'bold' }}>{t.name} {t.number ? `(${t.number})` : ''}</Typography>
+                        <Typography variant="body2" sx={{ color: travelColors.text.secondary }}>{t.departure} → {t.arrival} {t.class ? `• ${t.class}` : ''}</Typography>
+                        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                          {t.price ? (
+                            <Chip 
+                              label={`$${t.price}`} 
+                              sx={{ 
+                                backgroundColor: `${travelColors.primary.coral}20`,
+                                color: travelColors.primary.coral,
+                                fontWeight: 'bold'
+                              }}
+                            />
+                          ) : null}
+                        </Stack>
+                      </Box>
+                      <AdventureButton buttonVariant="forest" size="small" onClick={() => bookTrain(t)}>Book Train</AdventureButton>
+                    </Stack>
+                  </Box>
+                </TravelCard>
               ))}
               {trainResults.length === 0 && (
-                <Typography variant="body2" color="text.secondary">No trains found. Try different route/date.</Typography>
+                <Typography variant="body2" sx={{ color: travelColors.text.secondary, textAlign: 'center', py: 4 }}>No trains found. Try different route/date.</Typography>
               )}
             </Box>
           </Box>
         )}
-      </Paper>
-    </Container>
+            </Box>
+          </TravelCard>
+        </motion.div>
+      </Container>
+    </Box>
   );
 };
 

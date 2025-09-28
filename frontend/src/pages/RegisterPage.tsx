@@ -9,17 +9,30 @@ import {
   Link,
   Divider,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Grid
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { signUpWithEmail, getAuthErrorMessage, signInWithGoogle } from '../services/authService';
 import { auth } from '../services/firebase';
 import type { Auth as FirebaseAuth } from 'firebase/auth';
 import { motion } from 'framer-motion';
-import { colors } from '../styles/techTheme';
-import HolographicCard from '../components/HolographicCard';
-import NeonButton from '../components/NeonButton';
-import GlitchText from '../components/GlitchText';
+import { travelColors } from '../styles/travelTheme';
+import TravelCard from '../components/TravelCard';
+import AdventureButton from '../components/AdventureButton';
+import TravelText from '../components/TravelText';
+import { 
+  PersonAdd, 
+  Explore, 
+  FlightTakeoff, 
+  PhotoCamera, 
+  TravelExplore,
+  AccountCircle,
+  Email,
+  Lock,
+  Person,
+  Google
+} from '@mui/icons-material';
 import { extractErrorCode } from '../utils/error';
 
 const RegisterPage: React.FC = () => {
@@ -103,282 +116,419 @@ const RegisterPage: React.FC = () => {
   return (
     <Box sx={{
       minHeight: '100vh',
-      background: `radial-gradient(ellipse at center, ${colors.deepSpace} 0%, ${colors.darkBg} 100%)`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      p: 2
+      background: `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 50%, ${travelColors.primary.sunset}15 100%)`,
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      <Container maxWidth="sm">
+      {/* Background decorative elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '15%',
+          right: '10%',
+          width: '200px',
+          height: '200px',
+          background: `radial-gradient(circle, ${travelColors.primary.coral}20 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '20%',
+          left: '8%',
+          width: '150px',
+          height: '150px',
+          background: `radial-gradient(circle, ${travelColors.primary.ocean}15 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, py: 4 }}>
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <HolographicCard
-            glowColor={colors.neonGreen}
-            intensity="high"
-            animated
-            sx={{ p: 4, mb: 4 }}
-          >
-            <Box textAlign="center" sx={{ position: 'relative', zIndex: 2 }}>
-              <GlitchText
-                text="🌟 Join Travelogy"
-                variant="h4"
-                glitchIntensity="low"
-                sx={{ mb: 2 }}
-              />
-              <Typography variant="body1" sx={{ mb: 4, opacity: 0.8 }}>
-                Create your neural travel profile
-              </Typography>
-
-              <Box component="form" onSubmit={handleRegister} sx={{ textAlign: 'left' }}>
-                <TextField
-                  fullWidth
-                  label="Display Name"
-                  name="displayName"
-                  value={formData.displayName}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        borderColor: colors.neonGreen + '40',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: colors.neonGreen + '80',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: colors.neonGreen,
-                        boxShadow: `0 0 10px ${colors.neonGreen}40`,
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: colors.neonGreen,
-                    },
-                  }}
-                />
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        borderColor: colors.neonGreen + '40',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: colors.neonGreen + '80',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: colors.neonGreen,
-                        boxShadow: `0 0 10px ${colors.neonGreen}40`,
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: colors.neonGreen,
-                    },
-                  }}
-                />
-                <TextField
-                  fullWidth
-                  label="Password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        borderColor: colors.neonGreen + '40',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: colors.neonGreen + '80',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: colors.neonGreen,
-                        boxShadow: `0 0 10px ${colors.neonGreen}40`,
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: colors.neonGreen,
-                    },
-                  }}
-                />
-                <TextField
-                  fullWidth
-                  label="Confirm Password"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  margin="normal"
-                  required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        borderColor: colors.neonGreen + '40',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: colors.neonGreen + '80',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: colors.neonGreen,
-                        boxShadow: `0 0 10px ${colors.neonGreen}40`,
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: colors.neonGreen,
-                    },
-                  }}
-                />
-
-                <Box sx={{ mt: 2 }}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={acceptTerms}
-                        onChange={(e) => setAcceptTerms(e.target.checked)}
-                        sx={{
-                          color: colors.neonGreen,
-                          '&.Mui-checked': {
-                            color: colors.neonGreen,
-                          },
-                        }}
-                      />
-                    }
-                    label={
-                      <Typography variant="body2">
-                        I accept the{' '}
-                        <Link
-                          href="#"
-                          sx={{
-                            color: colors.neonCyan,
-                            textDecoration: 'none',
-                            '&:hover': {
-                              textShadow: `0 0 5px ${colors.neonCyan}`,
-                            },
-                          }}
-                        >
-                          Terms of Service
-                        </Link>
-                      </Typography>
-                    }
+          <Grid container spacing={4} alignItems="center" sx={{ minHeight: '100vh' }}>
+            {/* Left side - Welcome content */}
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                <Box sx={{ textAlign: { xs: 'center', md: 'left' }, mb: { xs: 4, md: 0 } }}>
+                  <TravelText
+                    text="Begin Your Adventure!"
+                    textVariant="adventure"
+                    animated
+                    variant="h2"
+                    sx={{ mb: 3, fontSize: { xs: '2.5rem', md: '3.5rem' } }}
                   />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={acceptPrivacy}
-                        onChange={(e) => setAcceptPrivacy(e.target.checked)}
-                        sx={{
-                          color: colors.neonGreen,
-                          '&.Mui-checked': {
-                            color: colors.neonGreen,
-                          },
-                        }}
-                      />
-                    }
-                    label={
-                      <Typography variant="body2">
-                        I accept the{' '}
-                        <Link
-                          href="#"
-                          sx={{
-                            color: colors.neonCyan,
-                            textDecoration: 'none',
-                            '&:hover': {
-                              textShadow: `0 0 5px ${colors.neonCyan}`,
-                            },
-                          }}
-                        >
-                          Privacy Policy
-                        </Link>
-                      </Typography>
-                    }
-                  />
-                </Box>
-
-                {error && (
-                  <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
-                    {error}
-                  </Alert>
-                )}
-
-                <Box sx={{ mt: 3, mb: 2 }}>
-                  <NeonButton
-                    type="submit"
-                    fullWidth
-                    disabled={isLoading}
-                    glowColor={colors.neonGreen}
-                    pulseAnimation={isLoading}
-                    size="large"
-                  >
-                    {isLoading ? (
-                      <>
-                        <CircularProgress size={20} sx={{ mr: 1, color: colors.neonGreen }} />
-                        Creating Neural Profile...
-                      </>
-                    ) : (
-                      '🚀 Join Network'
-                    )}
-                  </NeonButton>
-                </Box>
-
-                <Divider sx={{ my: 3, borderColor: colors.neonGreen + '30' }} />
-
-                {/* Social Login Buttons */}
-                <Typography variant="body2" sx={{ textAlign: 'center', mb: 2, opacity: 0.8 }}>
-                  Or join with
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
-                  <NeonButton
-                    fullWidth
-                    disabled={isLoading || !(auth as FirebaseAuth | null)}
-                    glowColor={colors.glitchRed}
-                    size="medium"
-                    onClick={handleGoogleSignIn}
-                  >
-                    🌐 Google
-                  </NeonButton>
-                </Box>
-                {!(auth as FirebaseAuth | null) && (
-                  <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', opacity: 0.7 }}>
-                    Google sign-in requires Firebase to be configured. Email sign-up works now.
-                  </Typography>
-                )}
-
-                <Divider sx={{ my: 2, borderColor: colors.neonGreen + '30' }} />
-
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    Already have an account?
-                  </Typography>
-                  <Link
-                    component={RouterLink}
-                    to="/login"
-                    sx={{
-                      color: colors.neonCyan,
-                      textDecoration: 'none',
-                      fontWeight: 'bold',
-                      '&:hover': {
-                        textShadow: `0 0 5px ${colors.neonCyan}`,
-                      },
+                  
+                  <Typography 
+                    variant="h5" 
+                    sx={{ 
+                      color: travelColors.text.secondary,
+                      mb: 4,
+                      fontStyle: 'italic',
+                      lineHeight: 1.6
                     }}
                   >
-                    🔑 Access Dashboard
-                  </Link>
+                    Join thousands of travelers sharing their stories and discovering new adventures
+                  </Typography>
+                  
+                  {/* Features showcase */}
+                  <Grid container spacing={3} sx={{ mt: 2 }}>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <PhotoCamera sx={{ fontSize: 40, color: travelColors.primary.sunset, mb: 1 }} />
+                        <Typography variant="body2" sx={{ color: travelColors.text.primary }}>
+                          Capture Memories
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Explore sx={{ fontSize: 40, color: travelColors.primary.ocean, mb: 1 }} />
+                        <Typography variant="body2" sx={{ color: travelColors.text.primary }}>
+                          Discover Places
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <FlightTakeoff sx={{ fontSize: 40, color: travelColors.primary.forest, mb: 1 }} />
+                        <Typography variant="body2" sx={{ color: travelColors.text.primary }}>
+                          Plan Trips
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <TravelExplore sx={{ fontSize: 40, color: travelColors.primary.coral, mb: 1 }} />
+                        <Typography variant="body2" sx={{ color: travelColors.text.primary }}>
+                          Share Stories
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  </Grid>
                 </Box>
-              </Box>
-            </Box>
-          </HolographicCard>
+              </motion.div>
+            </Grid>
+            
+            {/* Right side - Registration form */}
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                <TravelCard
+                  cardVariant="ocean"
+                  cardElevation="high"
+                  borderAccent
+                  sx={{ p: 4 }}
+                >
+                  <Box sx={{ textAlign: 'center', mb: 3 }}>
+                    <PersonAdd sx={{ fontSize: 50, color: travelColors.primary.ocean, mb: 1 }} />
+                    <TravelText
+                      text="Create Your Travel Profile"
+                      textVariant="gradient"
+                      animated
+                      variant="h5"
+                    />
+                  </Box>
+
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Alert 
+                        severity="error" 
+                        sx={{ 
+                          mb: 3,
+                          bgcolor: `${travelColors.primary.coral}10`,
+                          border: `1px solid ${travelColors.primary.coral}50`,
+                          '& .MuiAlert-icon': { color: travelColors.primary.coral }
+                        }}
+                      >
+                        {error}
+                      </Alert>
+                    </motion.div>
+                  )}
+
+                  <Box component="form" onSubmit={handleRegister} sx={{ mt: 1 }}>
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
+                      id="displayName"
+                      label="Full Name"
+                      name="displayName"
+                      autoComplete="name"
+                      autoFocus
+                      value={formData.displayName}
+                      onChange={handleInputChange}
+                      InputProps={{
+                        startAdornment: (
+                          <Person sx={{ color: travelColors.primary.ocean, mr: 1 }} />
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '12px',
+                          '&:hover fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                            borderWidth: '2px',
+                          },
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: travelColors.primary.ocean,
+                        },
+                      }}
+                    />
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
+                      id="email"
+                      label="Email Address"
+                      name="email"
+                      autoComplete="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      InputProps={{
+                        startAdornment: (
+                          <Email sx={{ color: travelColors.primary.ocean, mr: 1 }} />
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '12px',
+                          '&:hover fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                            borderWidth: '2px',
+                          },
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: travelColors.primary.ocean,
+                        },
+                      }}
+                    />
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
+                      name="password"
+                      label="Password"
+                      type="password"
+                      id="password"
+                      autoComplete="new-password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      InputProps={{
+                        startAdornment: (
+                          <Lock sx={{ color: travelColors.primary.ocean, mr: 1 }} />
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '12px',
+                          '&:hover fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                            borderWidth: '2px',
+                          },
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: travelColors.primary.ocean,
+                        },
+                      }}
+                    />
+                    <TextField
+                      margin="normal"
+                      required
+                      fullWidth
+                      name="confirmPassword"
+                      label="Confirm Password"
+                      type="password"
+                      id="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      InputProps={{
+                        startAdornment: (
+                          <Lock sx={{ color: travelColors.primary.ocean, mr: 1 }} />
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '12px',
+                          '&:hover fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: travelColors.primary.ocean,
+                            borderWidth: '2px',
+                          },
+                        },
+                        '& .MuiInputLabel-root.Mui-focused': {
+                          color: travelColors.primary.ocean,
+                        },
+                      }}
+                    />
+
+                    <Box sx={{ mt: 2 }}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={acceptTerms}
+                            onChange={(e) => setAcceptTerms(e.target.checked)}
+                            sx={{
+                              color: travelColors.primary.ocean,
+                              '&.Mui-checked': {
+                                color: travelColors.primary.ocean,
+                              },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography variant="body2" sx={{ color: travelColors.text.primary }}>
+                            I accept the{' '}
+                            <Link
+                              href="#"
+                              sx={{
+                                color: travelColors.primary.coral,
+                                textDecoration: 'none',
+                                fontWeight: 'bold',
+                                '&:hover': {
+                                  textDecoration: 'underline',
+                                },
+                              }}
+                            >
+                              Terms of Service
+                            </Link>
+                          </Typography>
+                        }
+                      />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={acceptPrivacy}
+                            onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                            sx={{
+                              color: travelColors.primary.ocean,
+                              '&.Mui-checked': {
+                                color: travelColors.primary.ocean,
+                              },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography variant="body2" sx={{ color: travelColors.text.primary }}>
+                            I accept the{' '}
+                            <Link
+                              href="#"
+                              sx={{
+                                color: travelColors.primary.coral,
+                                textDecoration: 'none',
+                                fontWeight: 'bold',
+                                '&:hover': {
+                                  textDecoration: 'underline',
+                                },
+                              }}
+                            >
+                              Privacy Policy
+                            </Link>
+                          </Typography>
+                        }
+                      />
+                    </Box>
+
+                    <AdventureButton
+                      type="submit"
+                      fullWidth
+                      buttonVariant="ocean"
+                      disabled={isLoading}
+                      sx={{ mt: 3, mb: 2, py: 1.5 }}
+                    >
+                      {isLoading ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CircularProgress size={20} color="inherit" />
+                          Creating your travel profile...
+                        </Box>
+                      ) : (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <FlightTakeoff sx={{ fontSize: 20 }} />
+                          Start Your Adventure
+                        </Box>
+                      )}
+                    </AdventureButton>
+
+                    <Divider sx={{ my: 3 }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: travelColors.text.secondary,
+                          fontStyle: 'italic'
+                        }}
+                      >
+                        Or continue with
+                      </Typography>
+                    </Divider>
+
+                    <AdventureButton
+                      fullWidth
+                      buttonVariant="coral"
+                      onClick={handleGoogleSignIn}
+                      disabled={isLoading}
+                      startIcon={<Google />}
+                      sx={{ mb: 3 }}
+                    >
+                      Continue with Google
+                    </AdventureButton>
+
+                    <Box sx={{ textAlign: 'center', mt: 2 }}>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ color: travelColors.text.secondary }}
+                      >
+                        Already exploring with us?{' '}
+                        <Link
+                          component={RouterLink}
+                          to="/login"
+                          sx={{
+                            color: travelColors.primary.ocean,
+                            textDecoration: 'none',
+                            fontWeight: 'bold',
+                            '&:hover': {
+                              textDecoration: 'underline',
+                              color: travelColors.primary.sunset,
+                            },
+                          }}
+                        >
+                          Sign in to continue your journey
+                        </Link>
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TravelCard>
+              </motion.div>
+            </Grid>
+          </Grid>
         </motion.div>
       </Container>
     </Box>

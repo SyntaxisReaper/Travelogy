@@ -58,7 +58,9 @@ const ripple = keyframes`
   }
 `;
 
-const NeonButtonContainer = styled(Button)<NeonButtonProps>(
+const NeonButtonContainer = styled(Button, {
+  shouldForwardProp: (prop) => !['glowColor', 'pulseAnimation', 'borderAnimation', 'textColor', 'rippleEffect'].includes(prop as string),
+})<NeonButtonProps>(
   ({ glowColor = colors.neonCyan, pulseAnimation = false, borderAnimation = false, textColor = '#e6f8ff' }) => ({
     position: 'relative',
     padding: '12px 24px',

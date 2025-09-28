@@ -312,6 +312,10 @@ export const getAuthErrorMessage = (errorCode: string): string => {
       return 'Please sign out and sign in again to perform this operation.';
     case 'auth/internal-error':
       return 'Google sign-in encountered an internal error. Please try again or use email/password login.';
+    case 'auth/firebase-app-check-token-is-invalid':
+      return 'App Check token validation failed. This is usually a configuration issue. Please refresh the page and try again, or contact support if the problem persists.';
+    case 'auth/app-check-token-invalid':
+      return 'Security token validation failed. Please refresh the page and try again.';
     case 'auth/unknown-error':
       return 'An unknown authentication error occurred. Please try again.';
     default:

@@ -1,7 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Container, Typography, Paper, Box, Button, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider } from '@mui/material';
+import { Container, Typography, Box, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider } from '@mui/material';
+import { motion } from 'framer-motion';
+import { PlayArrow, Stop, PhotoCamera, Save, Explore } from '@mui/icons-material';
 import FlipButton from '../components/ui/FlipButton';
 import { MapContainer, TileLayer, Polyline, Circle, useMap, Marker, Popup } from 'react-leaflet';
+import { travelColors } from '../styles/travelTheme';
+import TravelCard from '../components/TravelCard';
+import AdventureButton from '../components/AdventureButton';
+import TravelText from '../components/TravelText';
 import WeatherCard from '../components/maps/WeatherCard';
 import { useNotify } from '../contexts/NotifyContext';
 import type { LatLngExpression } from 'leaflet';
@@ -261,46 +267,173 @@ const emojiFor = (subtype?: string) => {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        🚗 My Trips
-      </Typography>
+    <Box sx={{
+      minHeight: '100vh',
+      background: `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 50%, ${travelColors.primary.ocean}08 100%)`,
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Background decorative elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '8%',
+          right: '6%',
+          width: '220px',
+          height: '220px',
+          background: `radial-gradient(circle, ${travelColors.primary.sunset}12 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '12%',
+          left: '4%',
+          width: '180px',
+          height: '180px',
+          background: `radial-gradient(circle, ${travelColors.primary.forest}10 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      
+      <Container maxWidth="lg" sx={{ py: 4, position: 'relative', zIndex: 10 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 4 }}>
+            <Explore sx={{ fontSize: 40, color: travelColors.primary.ocean, mr: 2 }} />
+            <TravelText
+              text="Adventure Tracker"
+              textVariant="adventure"
+              animated
+              variant="h3"
+            />
+          </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }}>
-          {!isTracking ? (
-            <FlipButton variant="contained" onClick={handleStart} front="Start Trip" back="Go!" />
-          ) : (
-            <FlipButton variant="contained" color="secondary" onClick={handleStop} front="Stop & Save Trip" back="Stop" />
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 3,
+                backgroundColor: `${travelColors.primary.coral}15`,
+                border: `1px solid ${travelColors.primary.coral}40`,
+                color: travelColors.primary.coral,
+              }}
+            >
+              {error}
+            </Alert>
           )}
-          <Chip label={`Distance: ${totalDistanceKm.toFixed(2)} km`} />
-          <Chip label={`Duration: ${durationMin.toFixed(1)} min`} />
-          {activeTripId && <Chip label={`Trip ID: ${activeTripId}`} variant="outlined" />}
-          <Button size="small" variant={follow ? 'contained' : 'outlined'} onClick={() => setFollow((f) => !f)}>
-            {follow ? 'Following' : 'Follow me'}
-          </Button>
-          {currentPos && (
-            <>
-              <Chip label={`${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)} ±${Math.round(currentPos.accuracy || 0)}m`} />
-              <Button size="small" onClick={() => {
-                const txt = `${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)}`;
-                navigator.clipboard?.writeText(txt).then(() => notify('Coordinates copied')); 
-              }}>Copy Coords</Button>
-            </>
-          )}
-        </Stack>
-      </Paper>
 
-      <Box sx={{ mb: 2 }}>
-        {/* Quick Weather Map Section */}
-        <Typography variant="h6" sx={{ mb: 1 }}>Destination Weather</Typography>
-        <Box>
-          <WeatherCard height={200} />
-        </Box>
-      </Box>
-      <Paper sx={{ height: 500, overflow: 'hidden' }}>
+          <TravelCard cardVariant="ocean" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
+            <Box sx={{ p: 3 }}>
+              <TravelText
+                text="Trip Controls"
+                textVariant="gradient"
+                variant="h6"
+                sx={{ mb: 3 }}
+              />
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+                {!isTracking ? (
+                  <AdventureButton 
+                    buttonVariant="ocean" 
+                    startIcon={<PlayArrow />}
+                    onClick={handleStart}
+                    adventure
+                  >
+                    Start Adventure
+                  </AdventureButton>
+                ) : (
+                  <AdventureButton 
+                    buttonVariant="coral" 
+                    startIcon={<Stop />}
+                    onClick={handleStop}
+                    adventure
+                  >
+                    Stop & Save Trip
+                  </AdventureButton>
+                )}
+                <Chip 
+                  label={`Distance: ${totalDistanceKm.toFixed(2)} km`} 
+                  sx={{ 
+                    backgroundColor: `${travelColors.primary.sunset}20`,
+                    color: travelColors.primary.sunset,
+                    fontWeight: 'bold'
+                  }}
+                />
+                <Chip 
+                  label={`Duration: ${durationMin.toFixed(1)} min`} 
+                  sx={{ 
+                    backgroundColor: `${travelColors.primary.forest}20`,
+                    color: travelColors.primary.forest,
+                    fontWeight: 'bold'
+                  }}
+                />
+                {activeTripId && (
+                  <Chip 
+                    label={`Trip ID: ${activeTripId}`} 
+                    variant="outlined" 
+                    sx={{ 
+                      borderColor: travelColors.primary.ocean,
+                      color: travelColors.primary.ocean
+                    }}
+                  />
+                )}
+                <AdventureButton 
+                  size="small" 
+                  buttonVariant={follow ? 'forest' : 'sunset'}
+                  onClick={() => setFollow((f) => !f)}
+                >
+                  {follow ? 'Following' : 'Follow me'}
+                </AdventureButton>
+                {currentPos && (
+                  <>
+                    <Chip 
+                      label={`${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)} ±${Math.round(currentPos.accuracy || 0)}m`} 
+                      sx={{ 
+                        backgroundColor: `${travelColors.primary.sky}20`,
+                        color: travelColors.text.primary,
+                        fontSize: '0.75rem'
+                      }}
+                    />
+                    <AdventureButton 
+                      size="small" 
+                      buttonVariant="ocean"
+                      onClick={() => {
+                        const txt = `${currentPos.lat.toFixed(6)}, ${currentPos.lon.toFixed(6)}`;
+                        navigator.clipboard?.writeText(txt).then(() => notify('Coordinates copied')); 
+                      }}
+                    >
+                      Copy Coords
+                    </AdventureButton>
+                  </>
+                )}
+              </Stack>
+            </Box>
+          </TravelCard>
+
+          <TravelCard cardVariant="default" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
+            <Box sx={{ p: 3 }}>
+              <TravelText
+                text="Destination Weather"
+                textVariant="wanderlust"
+                variant="h6"
+                sx={{ mb: 2 }}
+              />
+              <WeatherCard height={200} />
+            </Box>
+          </TravelCard>
+          
+          <TravelCard cardVariant="forest" cardElevation="high" borderAccent sx={{ mb: 3 }}>
+            <Box sx={{ 
+              height: 500, 
+              overflow: 'hidden',
+              borderRadius: '12px'
+            }}>
         <MapContainer center={center} zoom={16} style={{ height: '100%', width: '100%' }}>
           <TileLayer
             attribution='&copy; OpenStreetMap contributors'
@@ -309,13 +442,13 @@ const emojiFor = (subtype?: string) => {
           <FollowMap center={currentPos ? [currentPos.lat, currentPos.lon] : initialCenter} enabled={follow} />
           {path.length > 0 && (
             <>
-              <Polyline positions={path as LatLngExpression[]} color="#00e5ff" weight={4} />
+              <Polyline positions={path as LatLngExpression[]} color={travelColors.primary.ocean} weight={4} />
             </>
           )}
           {currentPos && (
             <>
-              <Circle center={[currentPos.lat, currentPos.lon] as LatLngExpression} radius={Math.max(10, Math.min(200, currentPos.accuracy || 50))} pathOptions={{ color: '#2196f3', opacity: 0.3 }} />
-              <Circle center={[currentPos.lat, currentPos.lon] as LatLngExpression} radius={5} pathOptions={{ color: '#ff4081' }} />
+              <Circle center={[currentPos.lat, currentPos.lon] as LatLngExpression} radius={Math.max(10, Math.min(200, currentPos.accuracy || 50))} pathOptions={{ color: travelColors.primary.sky, opacity: 0.3 }} />
+              <Circle center={[currentPos.lat, currentPos.lon] as LatLngExpression} radius={5} pathOptions={{ color: travelColors.primary.coral }} />
             </>
           )}
           {/* Nearby services markers */}
@@ -332,144 +465,264 @@ const emojiFor = (subtype?: string) => {
               </Marker>
             );
           })}
-        </MapContainer>
-      </Paper>
+              </MapContainer>
+            </Box>
+          </TravelCard>
 
-      {/* Gemini Trip Insights */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="flex-start">
-          <Button size="small" variant="outlined" onClick={async () => {
-            const { analyticsAPI } = await import('../services/api');
-            const durationMin = startTime ? (Date.now() - startTime) / 60000 : 0;
-            try {
-              const res = await analyticsAPI.askGeminiTrip({ distance_km: +(totalDistanceKm.toFixed(2)), duration_min: +(durationMin.toFixed(1)) });
-              notify(res?.insights || 'Gemini did not return insights');
-            } catch {
-              notify('Gemini insights unavailable right now');
-            }
-          }}>Ask Gemini about my trip</Button>
-        </Stack>
-      </Paper>
+          {/* Gemini Trip Insights */}
+          <TravelCard cardVariant="sunset" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
+            <Box sx={{ p: 3 }}>
+              <TravelText
+                text="AI Trip Insights"
+                textVariant="adventure"
+                variant="h6"
+                sx={{ mb: 2 }}
+              />
+              <AdventureButton 
+                size="small" 
+                buttonVariant="sunset"
+                onClick={async () => {
+                  const { analyticsAPI } = await import('../services/api');
+                  const durationMin = startTime ? (Date.now() - startTime) / 60000 : 0;
+                  try {
+                    const res = await analyticsAPI.askGeminiTrip({ distance_km: +(totalDistanceKm.toFixed(2)), duration_min: +(durationMin.toFixed(1)) });
+                    notify(res?.insights || 'Gemini did not return insights');
+                  } catch {
+                    notify('Gemini insights unavailable right now');
+                  }
+                }}
+              >
+                Ask Gemini about my trip
+              </AdventureButton>
+            </Box>
+          </TravelCard>
 
-      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        <Button size="small" variant="outlined" onClick={() => {
-          if (path.length < 2) return;
-          const fc = {
-            type: 'FeatureCollection',
-            features: [{ type: 'Feature', geometry: { type: 'LineString', coordinates: path.map((p) => [p[1], p[0]]) }, properties: { activeTripId } }]
-          } as any;
-          const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `active-trip.geojson`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }}>Export GeoJSON</Button>
-        <Button size="small" variant="outlined" onClick={() => {
-          if (path.length < 2) return;
-          const header = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-          const open = `<gpx version="1.1" creator="Travelogy"><trk><name>Active Trip</name><trkseg>`;
-          const seg = path.map((p) => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('');
-          const close = `</trkseg></trk></gpx>`;
-          const gpx = header + open + seg + close;
-          const blob = new Blob([gpx], { type: 'application/gpx+xml' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `active-trip.gpx`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }}>Export GPX</Button>
-        <Button size="small" variant="outlined" onClick={async () => {
-          if (!navigator.share) {
-            alert('Sharing is not supported on this device.');
-            return;
-          }
-          const distanceKm = (distanceMeters / 1000).toFixed(2);
-          const shareUrl = window.location.href;
-          try {
-            await navigator.share({
-              title: 'My Trip',
-              text: `I just tracked a trip of ${distanceKm} km with Travelogy!`,
-              url: shareUrl,
-            });
-          } catch (e) {
-            if (process.env.NODE_ENV !== 'production') {
-              // eslint-disable-next-line no-console
-              console.debug('share cancelled or failed', e);
-            }
-          }
-        }}>Share Trip</Button>
-      </Stack>
+          <TravelCard cardVariant="paper" cardElevation="medium" sx={{ mb: 3 }}>
+            <Box sx={{ p: 3 }}>
+              <TravelText
+                text="Export & Share"
+                textVariant="gradient"
+                variant="h6"
+                sx={{ mb: 2 }}
+              />
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <AdventureButton 
+                  size="small" 
+                  buttonVariant="forest"
+                  onClick={() => {
+                    if (path.length < 2) return;
+                    const fc = {
+                      type: 'FeatureCollection',
+                      features: [{ type: 'Feature', geometry: { type: 'LineString', coordinates: path.map((p) => [p[1], p[0]]) }, properties: { activeTripId } }]
+                    } as any;
+                    const blob = new Blob([JSON.stringify(fc, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `active-trip.geojson`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  Export GeoJSON
+                </AdventureButton>
+                <AdventureButton 
+                  size="small" 
+                  buttonVariant="ocean"
+                  onClick={() => {
+                    if (path.length < 2) return;
+                    const header = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+                    const open = `<gpx version="1.1" creator="Travelogy"><trk><name>Active Trip</name><trkseg>`;
+                    const seg = path.map((p) => `<trkpt lat="${p[0]}" lon="${p[1]}"></trkpt>`).join('');
+                    const close = `</trkseg></trk></gpx>`;
+                    const gpx = header + open + seg + close;
+                    const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `active-trip.gpx`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  Export GPX
+                </AdventureButton>
+                <AdventureButton 
+                  size="small" 
+                  buttonVariant="coral"
+                  onClick={async () => {
+                    if (!navigator.share) {
+                      alert('Sharing is not supported on this device.');
+                      return;
+                    }
+                    const distanceKm = (distanceMeters / 1000).toFixed(2);
+                    const shareUrl = window.location.href;
+                    try {
+                      await navigator.share({
+                        title: 'My Trip',
+                        text: `I just tracked a trip of ${distanceKm} km with Travelogy!`,
+                        url: shareUrl,
+                      });
+                    } catch (e) {
+                      if (process.env.NODE_ENV !== 'production') {
+                        // eslint-disable-next-line no-console
+                        console.debug('share cancelled or failed', e);
+                      }
+                    }
+                  }}
+                >
+                  Share Trip
+                </AdventureButton>
+              </Stack>
+            </Box>
+          </TravelCard>
 
-      {/* My Trips */}
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="h6" gutterBottom>My Trips</Typography>
-          <Button size="small" onClick={() => window.location.assign('/trips/list')}>View All</Button>
-        </Stack>
-        {!trips.length && (
-          <Typography variant="body2" color="text.secondary">No trips yet. Start tracking to record your first trip.</Typography>
-        )}
-        <Stack spacing={1}>
-          {trips.map((t) => (
-            <Stack key={t.id} direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between">
-              <Typography variant="body2">
-                {new Date(t.start_time).toLocaleString()} • {t.transport_mode} • {Math.round(t.distance_km || 0)} km
-              </Typography>
-              <Button size="small" variant="outlined" onClick={() => window.location.assign(`/trips/${t.id}`)}>Open</Button>
-            </Stack>
-          ))}
-        </Stack>
-      </Paper>
+          {/* My Trips */}
+          <TravelCard cardVariant="ocean" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
+            <Box sx={{ p: 3 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                <TravelText
+                  text="My Adventures"
+                  textVariant="wanderlust"
+                  variant="h6"
+                />
+                <AdventureButton 
+                  size="small" 
+                  buttonVariant="ocean"
+                  onClick={() => window.location.assign('/trips/list')}
+                >
+                  View All
+                </AdventureButton>
+              </Stack>
+              {!trips.length && (
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: travelColors.text.secondary,
+                    textAlign: 'center',
+                    py: 3,
+                    fontStyle: 'italic'
+                  }}
+                >
+                  No trips yet. Start tracking to record your first adventure!
+                </Typography>
+              )}
+              <Stack spacing={2}>
+                {trips.map((t) => (
+                  <Stack key={t.id} direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between">
+                    <Typography 
+                      variant="body2"
+                      sx={{ color: travelColors.text.primary }}
+                    >
+                      {new Date(t.start_time).toLocaleString()} • {t.transport_mode} • {Math.round(t.distance_km || 0)} km
+                    </Typography>
+                    <AdventureButton 
+                      size="small" 
+                      buttonVariant="sunset"
+                      onClick={() => window.location.assign(`/trips/${t.id}`)}
+                    >
+                      Open
+                    </AdventureButton>
+                  </Stack>
+                ))}
+              </Stack>
+            </Box>
+          </TravelCard>
 
-      {/* Trip Diary */}
-      <Paper sx={{ p: 2, mt: 2 }}>
-        <Typography variant="h6" gutterBottom>Trip Diary</Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
-          <Button variant="outlined" component="label">
-            Add Photos
-            <input hidden accept="image/*" type="file" multiple onChange={handleFileChange} />
-          </Button>
-          <TextField
-            label="What did you feel during your journey?"
-            placeholder="Write your experience..."
-            multiline
-            minRows={3}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            fullWidth
-          />
-          <Button variant="contained" onClick={handleSaveDiary} disabled={savingDiary || (!note && files.length === 0)}>
-            {savingDiary ? 'Saving…' : 'Save Diary'}
-          </Button>
-        </Stack>
-        {previews.length > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <ImageList cols={Math.min(4, previews.length)} rowHeight={160}>
-              {previews.map((src, i) => (
-                <ImageListItem key={i}>
-                  <img src={src} alt={`preview-${i}`} style={{ objectFit: 'cover', width: '100%', height: '120px' }} />
-                  <TextField
-                    placeholder="Caption"
-                    size="small"
-                    value={captions[i] || ''}
-                    onChange={(e) => setCaptions((c) => {
-                      const copy = [...c];
-                      copy[i] = e.target.value;
-                      return copy;
-                    })}
-                    fullWidth
-                  />
-                </ImageListItem>
-              ))}
-            </ImageList>
-          </Box>
-        )}
-      </Paper>
-
-    </Container>
+          {/* Trip Diary */}
+          <TravelCard cardVariant="sunset" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
+            <Box sx={{ p: 3 }}>
+              <TravelText
+                text="Trip Diary"
+                textVariant="adventure"
+                variant="h6"
+                sx={{ mb: 3 }}
+              />
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start">
+                <AdventureButton 
+                  buttonVariant="forest"
+                  component="label"
+                  startIcon={<PhotoCamera />}
+                >
+                  Add Photos
+                  <input hidden accept="image/*" type="file" multiple onChange={handleFileChange} />
+                </AdventureButton>
+                <TextField
+                  label="What did you feel during your journey?"
+                  placeholder="Write your experience..."
+                  multiline
+                  minRows={3}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '12px',
+                      '&:hover fieldset': {
+                        borderColor: travelColors.primary.sunset,
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: travelColors.primary.sunset,
+                        borderWidth: '2px',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: travelColors.primary.sunset,
+                    },
+                  }}
+                />
+                <AdventureButton 
+                  buttonVariant="sunset"
+                  startIcon={<Save />}
+                  onClick={handleSaveDiary} 
+                  disabled={savingDiary || (!note && files.length === 0)}
+                  adventure
+                >
+                  {savingDiary ? 'Saving…' : 'Save Diary'}
+                </AdventureButton>
+              </Stack>
+              {previews.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <ImageList cols={Math.min(4, previews.length)} rowHeight={160}>
+                    {previews.map((src, i) => (
+                      <ImageListItem key={i}>
+                        <img 
+                          src={src} 
+                          alt={`preview-${i}`} 
+                          style={{ 
+                            objectFit: 'cover', 
+                            width: '100%', 
+                            height: '120px',
+                            borderRadius: '8px'
+                          }} 
+                        />
+                        <TextField
+                          placeholder="Caption"
+                          size="small"
+                          value={captions[i] || ''}
+                          onChange={(e) => setCaptions((c) => {
+                            const copy = [...c];
+                            copy[i] = e.target.value;
+                            return copy;
+                          })}
+                          fullWidth
+                          sx={{
+                            mt: 1,
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                            },
+                          }}
+                        />
+                      </ImageListItem>
+                    ))}
+                  </ImageList>
+                </Box>
+              )}
+            </Box>
+          </TravelCard>
+        </motion.div>
+      </Container>
+    </Box>
   );
 };
 

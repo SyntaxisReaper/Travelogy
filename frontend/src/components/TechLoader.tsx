@@ -45,7 +45,9 @@ const pulse = keyframes`
   }
 `;
 
-const LoaderContainer = styled(Box)<{ fullscreen: boolean }>(({ fullscreen }) => ({
+const LoaderContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'fullscreen',
+})<{ fullscreen: boolean }>(({ fullscreen }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

@@ -55,7 +55,9 @@ const scanlineAnimation = keyframes`
   }
 `;
 
-const HolographicContainer = styled(Card)<HolographicCardProps>(
+const HolographicContainer = styled(Card, {
+  shouldForwardProp: (prop) => !['glowColor', 'intensity', 'animated', 'scanlines'].includes(prop as string),
+})<HolographicCardProps>(
   ({ theme, glowColor = colors.neonCyan, intensity = 'low', animated = false, scanlines = false }) => {
     const glowIntensity = intensity === 'low' ? 0.15 : intensity === 'medium' ? 0.3 : 0.45;
     

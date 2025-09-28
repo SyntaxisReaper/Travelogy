@@ -15,6 +15,7 @@ const colors = {
   glitchRed: '#dc2626',     // red-600 (softer)
   deepSpace: '#0b1220',
   carbonFiber: '#1f2937',
+  textSecondary: '#9ca3af', // gray-400
 };
 
 // Create tech theme

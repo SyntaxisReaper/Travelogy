@@ -12,10 +12,11 @@ import {
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { signInWithEmail, resetPassword, getAuthErrorMessage, signInWithGoogle } from '../services/authService';
 import { motion } from 'framer-motion';
-import { colors } from '../styles/techTheme';
-import HolographicCard from '../components/HolographicCard';
-import NeonButton from '../components/NeonButton';
-import GlitchText from '../components/GlitchText';
+import { travelColors } from '../styles/travelTheme';
+import TravelCard from '../components/TravelCard';
+import AdventureButton from '../components/AdventureButton';
+import TravelText from '../components/TravelText';
+import { Luggage } from '@mui/icons-material';
 import { extractErrorCode } from '../utils/error';
 import { auth } from '../services/firebase';
 
@@ -93,33 +94,70 @@ const LoginPage: React.FC = () => {
   return (
     <Box sx={{
       minHeight: '100vh',
-      background: `radial-gradient(ellipse at center, ${colors.deepSpace} 0%, ${colors.darkBg} 100%)`,
+      background: `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 50%, ${travelColors.primary.sky}20 100%)`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      p: 2
+      p: 2,
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      <Container maxWidth="sm">
+      {/* Background decorative elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '20%',
+          right: '15%',
+          width: '150px',
+          height: '150px',
+          background: `radial-gradient(circle, ${travelColors.primary.sunset}15 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '25%',
+          left: '10%',
+          width: '120px',
+          height: '120px',
+          background: `radial-gradient(circle, ${travelColors.primary.ocean}10 0%, transparent 70%)`,
+          borderRadius: '50%',
+          zIndex: 1,
+        }}
+      />
+      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 10 }}>
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <HolographicCard
-            glowColor={colors.neonCyan}
-            intensity="high"
-            animated
+          <TravelCard
+            cardVariant="ocean"
+            cardElevation="high"
+            borderAccent
             sx={{ p: 4, mb: 4 }}
           >
             <Box textAlign="center" sx={{ position: 'relative', zIndex: 2 }}>
-              <GlitchText
-                text="🌐 Travelogy Login"
-                variant="h4"
-                glitchIntensity="low"
-                sx={{ mb: 2 }}
-              />
-              <Typography variant="body1" sx={{ mb: 4, opacity: 0.8 }}>
-                Access your neural travel dashboard
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <Luggage sx={{ fontSize: 40, color: travelColors.primary.ocean, mr: 1 }} />
+                <TravelText
+                  text="Welcome Back, Traveler!"
+                  textVariant="adventure"
+                  animated
+                  variant="h4"
+                />
+              </Box>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  mb: 4, 
+                  color: travelColors.text.secondary,
+                  fontStyle: 'italic' 
+                }}
+              >
+                Continue your journey and explore new adventures
               </Typography>
               
               {/* Production deployment notice */}
@@ -142,19 +180,23 @@ const LoginPage: React.FC = () => {
                   required
                   sx={{
                     '& .MuiOutlinedInput-root': {
+                      backgroundColor: travelColors.backgrounds.paper,
                       '& fieldset': {
-                        borderColor: colors.neonCyan + '40',
+                        borderColor: travelColors.primary.ocean + '40',
                       },
                       '&:hover fieldset': {
-                        borderColor: colors.neonCyan + '80',
+                        borderColor: travelColors.primary.ocean + '80',
                       },
                       '&.Mui-focused fieldset': {
-                        borderColor: colors.neonCyan,
-                        boxShadow: `0 0 10px ${colors.neonCyan}40`,
+                        borderColor: travelColors.primary.ocean,
+                        boxShadow: travelColors.shadows.soft,
                       },
                     },
                     '& .MuiInputLabel-root': {
-                      color: colors.neonCyan,
+                      color: travelColors.primary.ocean,
+                    },
+                    '& .MuiOutlinedInput-input': {
+                      color: travelColors.text.primary,
                     },
                   }}
                 />
@@ -168,19 +210,23 @@ const LoginPage: React.FC = () => {
                   required
                   sx={{
                     '& .MuiOutlinedInput-root': {
+                      backgroundColor: travelColors.backgrounds.paper,
                       '& fieldset': {
-                        borderColor: colors.neonCyan + '40',
+                        borderColor: travelColors.primary.ocean + '40',
                       },
                       '&:hover fieldset': {
-                        borderColor: colors.neonCyan + '80',
+                        borderColor: travelColors.primary.ocean + '80',
                       },
                       '&.Mui-focused fieldset': {
-                        borderColor: colors.neonCyan,
-                        boxShadow: `0 0 10px ${colors.neonCyan}40`,
+                        borderColor: travelColors.primary.ocean,
+                        boxShadow: travelColors.shadows.soft,
                       },
                     },
                     '& .MuiInputLabel-root': {
-                      color: colors.neonCyan,
+                      color: travelColors.primary.ocean,
+                    },
+                    '& .MuiOutlinedInput-input': {
+                      color: travelColors.text.primary,
                     },
                   }}
                 />
@@ -198,44 +244,52 @@ const LoginPage: React.FC = () => {
                 )}
 
                 <Box sx={{ mt: 3, mb: 2 }}>
-                  <NeonButton
+                  <AdventureButton
                     type="submit"
                     fullWidth
                     disabled={isLoading}
-                    glowColor={colors.neonCyan}
-                    pulseAnimation={isLoading}
+                    buttonVariant="ocean"
+                    adventure={!isLoading}
                     size="large"
                   >
                     {isLoading ? (
                       <>
-                        <CircularProgress size={20} sx={{ mr: 1, color: colors.neonCyan }} />
-                        Accessing Neural Network...
+                        <CircularProgress size={20} sx={{ mr: 1, color: travelColors.text.white }} />
+                        Preparing your adventure...
                       </>
                     ) : (
-                      '🚀 Access Dashboard'
+                      '🧳 Continue Journey'
                     )}
-                  </NeonButton>
+                  </AdventureButton>
                 </Box>
 
-                <Divider sx={{ my: 3, borderColor: colors.neonCyan + '30' }} />
+                <Divider sx={{ my: 3, borderColor: travelColors.primary.ocean + '30' }} />
 
                 {/* Social Login Buttons */}
-                <Typography variant="body2" sx={{ textAlign: 'center', mb: 2, opacity: 0.8 }}>
-                  Or continue with
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    textAlign: 'center', 
+                    mb: 2, 
+                    color: travelColors.text.secondary,
+                    fontStyle: 'italic' 
+                  }}
+                >
+                  Or continue your journey with
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
-                  <NeonButton
+                  <AdventureButton
                     fullWidth
                     disabled={isLoading || !auth}
-                    glowColor={colors.glitchRed}
+                    buttonVariant="coral"
                     size="medium"
                     onClick={handleGoogleSignIn}
                   >
-                    🌐 Google
-                  </NeonButton>
+                    🌍 Google Travel
+                  </AdventureButton>
                 </Box>
 
-                <Divider sx={{ my: 2, borderColor: colors.neonCyan + '30' }} />
+                <Divider sx={{ my: 2, borderColor: travelColors.primary.ocean + '30' }} />
 
                 <Box sx={{ textAlign: 'center' }}>
                   <Link
@@ -243,39 +297,48 @@ const LoginPage: React.FC = () => {
                     type="button"
                     onClick={handleForgotPassword}
                     sx={{
-                      color: colors.neonPink,
+                      color: travelColors.primary.sunset,
                       textDecoration: 'none',
+                      fontWeight: 500,
                       '&:hover': {
-                        textShadow: `0 0 5px ${colors.neonPink}`,
+                        color: travelColors.primary.coral,
+                        textDecoration: 'underline',
                       },
                     }}
                   >
-                    Forgot Password?
+                    🗺️ Forgot Password?
                   </Link>
                 </Box>
 
                 <Box sx={{ textAlign: 'center', mt: 3 }}>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    Don&apos;t have an account?
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      mb: 1, 
+                      color: travelColors.text.secondary 
+                    }}
+                  >
+                    Ready to start your first adventure?
                   </Typography>
                   <Link
                     component={RouterLink}
                     to="/register"
                     sx={{
-                      color: colors.neonGreen,
+                      color: travelColors.primary.forest,
                       textDecoration: 'none',
                       fontWeight: 'bold',
                       '&:hover': {
-                        textShadow: `0 0 5px ${colors.neonGreen}`,
+                        color: travelColors.primary.ocean,
+                        textDecoration: 'underline',
                       },
                     }}
                   >
-                    🌟 Join the Network
+                    🌟 Join Fellow Travelers
                   </Link>
                 </Box>
               </Box>
             </Box>
-          </HolographicCard>
+          </TravelCard>
         </motion.div>
       </Container>
     </Box>
