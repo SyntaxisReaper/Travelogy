@@ -4,20 +4,21 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Typography, Button } from '@mui/material';
 import { useSelector } from 'react-redux';
 import type { RootState } from './store/store';
+import { travelColors } from './styles/travelTheme';
 
-// Test theme with travel colors
-const testTheme = createTheme({
+// Travel theme using actual theme colors
+const travelTheme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#2E86AB' }, // Ocean blue
-    secondary: { main: '#F18F01' }, // Sunset orange
+    primary: { main: travelColors.primary.ocean },
+    secondary: { main: travelColors.primary.sunset },
     background: {
-      default: '#FDF8F0', // Cream background
-      paper: '#F9F7F4', // Paper white
+      default: travelColors.backgrounds.cream,
+      paper: travelColors.backgrounds.paper,
     },
     text: {
-      primary: '#2C3E50',
-      secondary: '#5D6D7E',
+      primary: travelColors.text.primary,
+      secondary: travelColors.text.secondary,
     },
   },
 });
@@ -35,7 +36,7 @@ const SimpleLandingPage: React.FC = () => {
         Your Personal Travel Journal
       </Typography>
       <Typography variant="body1" sx={{ mb: 4 }}>
-        Step 2: Basic routing, theme, ErrorBoundary + Redux Store test
+        Step 3: Basic app + Redux + CSS imports + Travel theme test
       </Typography>
       <Typography variant="body2" sx={{ mb: 4, opacity: 0.7 }}>
         Redux Loading State: {loading ? 'true' : 'false'}
@@ -62,7 +63,7 @@ const SimpleDashboard: React.FC = () => (
 // Basic App with routing
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={testTheme}>
+    <ThemeProvider theme={travelTheme}>
       <CssBaseline />
       <Router>
         <Routes>
