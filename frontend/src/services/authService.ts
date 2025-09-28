@@ -155,7 +155,28 @@ export const signInWithGoogle = async (): Promise<User> => {
       }
       
       if (code === 'auth/internal-error') {
-        const error: any = new Error('Google sign-in internal error. Please try again or use email/password login.');
+        console.error('🔴 Google Sign-in Internal Error Details:');
+        console.error('Error object:', err);
+        console.error('Error message:', err?.message);
+        console.error('Error details:', err?.customData);
+        console.error('Current domain:', window.location.hostname);
+        console.error('Current origin:', window.location.origin);
+        console.error('Firebase config check:');
+        console.error('- Project ID:', process.env.REACT_APP_FIREBASE_PROJECT_ID);
+        console.error('- Auth Domain:', process.env.REACT_APP_FIREBASE_AUTH_DOMAIN);
+        console.error('- App ID present:', !!process.env.REACT_APP_FIREBASE_APP_ID);
+        
+        const detailedMessage = `Google sign-in internal error detected.\n\n` +
+          `This usually means:\n` +
+          `1. OAuth consent screen is not configured in Google Cloud Console\n` +
+          `2. OAuth client is not properly configured\n` +
+          `3. Firebase Authentication provider settings are incorrect\n\n` +
+          `Domain: ${window.location.hostname}\n` +
+          `Please check Firebase Console > Authentication > Sign-in method > Google\n` +
+          `and Google Cloud Console > APIs & Services > Credentials\n\n` +
+          `For now, please use email/password login.`;
+        
+        const error: any = new Error(detailedMessage);
         error.code = 'auth/internal-error';
         throw error;
       }
