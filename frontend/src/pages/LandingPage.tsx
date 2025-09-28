@@ -145,7 +145,8 @@ const LandingPage: React.FC = () => {
                   lines={[
                     'Capture memories from every adventure...',
                     'Plan trips. Share stories. Inspire others.',
-                    'Your journey starts here.'
+                    'Your journey starts here.',
+                    'Create your travelogue today!'
                   ]}
                   variant="h5"
                   typingSpeedMs={50}
