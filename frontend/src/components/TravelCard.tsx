@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { travelColors, travelStyles } from '../styles/travelTheme';
 
 interface TravelCardProps extends Omit<CardProps, 'variant' | 'elevation'> {
-  cardVariant?: 'default' | 'ocean' | 'sunset' | 'forest' | 'paper';
+  cardVariant?: 'default' | 'ocean' | 'sunset' | 'forest' | 'paper' | 'coral';
   cardElevation?: 'low' | 'medium' | 'high';
   borderAccent?: boolean;
   interactive?: boolean;
@@ -123,6 +123,21 @@ const getVariantStyles = (cardVariant: string, cardElevation: string) => {
           boxShadow: travelColors.shadows.paper,
         },
       };
+    case 'coral':
+      return {
+        ...baseStyles,
+        background: `
+          linear-gradient(135deg, 
+            ${travelColors.backgrounds.paper} 0%, 
+            ${travelColors.primary.coral}15 100%
+          )
+        `,
+        border: `1px solid ${travelColors.primary.coral}30`,
+        '&:hover': {
+          boxShadow: `0 8px 32px ${travelColors.primary.coral}20`,
+          border: `1px solid ${travelColors.primary.coral}50`,
+        },
+      };
     default:
       return {
         ...baseStyles,
@@ -169,7 +184,7 @@ const TravelCard: React.FC<TravelCardProps> = ({
     animate: { opacity: 1, y: 0 },
     whileHover: { 
       y: -4,
-      transition: { type: 'spring', stiffness: 300, damping: 20 }
+      transition: { type: 'spring' as const, stiffness: 300, damping: 20 }
     },
     transition: { duration: 0.4 }
   } : {
