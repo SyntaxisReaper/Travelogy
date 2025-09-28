@@ -253,6 +253,12 @@ const ProfilePage: React.FC = () => {
               {success}
             </Alert>
           )}
+          
+          {editing && (
+            <Alert severity="info" sx={{ mb: 3, backgroundColor: `${travelColors.primary.ocean}15` }}>
+              📝 Edit mode is active - you can now modify your profile information
+            </Alert>
+          )}
 
           <Grid container spacing={4}>
             {/* Profile Information */}
@@ -311,6 +317,16 @@ const ProfilePage: React.FC = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '12px',
                               backgroundColor: editing ? travelColors.backgrounds.paper : 'transparent',
+                              '&.Mui-disabled': {
+                                opacity: 0.7,
+                                '& .MuiOutlinedInput-input': {
+                                  color: travelColors.text.secondary,
+                                  WebkitTextFillColor: travelColors.text.secondary
+                                }
+                              }
+                            },
+                            '& .MuiInputLabel-root.Mui-disabled': {
+                              color: travelColors.text.secondary
                             }
                           }}
                         />
@@ -327,6 +343,16 @@ const ProfilePage: React.FC = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '12px',
                               backgroundColor: editing ? travelColors.backgrounds.paper : 'transparent',
+                              '&.Mui-disabled': {
+                                opacity: 0.7,
+                                '& .MuiOutlinedInput-input': {
+                                  color: travelColors.text.secondary,
+                                  WebkitTextFillColor: travelColors.text.secondary
+                                }
+                              }
+                            },
+                            '& .MuiInputLabel-root.Mui-disabled': {
+                              color: travelColors.text.secondary
                             }
                           }}
                         />
@@ -343,6 +369,16 @@ const ProfilePage: React.FC = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '12px',
                               backgroundColor: editing ? travelColors.backgrounds.paper : 'transparent',
+                              '&.Mui-disabled': {
+                                opacity: 0.7,
+                                '& .MuiOutlinedInput-input': {
+                                  color: travelColors.text.secondary,
+                                  WebkitTextFillColor: travelColors.text.secondary
+                                }
+                              }
+                            },
+                            '& .MuiInputLabel-root.Mui-disabled': {
+                              color: travelColors.text.secondary
                             }
                           }}
                         />
@@ -360,6 +396,16 @@ const ProfilePage: React.FC = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '12px',
                               backgroundColor: editing ? travelColors.backgrounds.paper : 'transparent',
+                              '&.Mui-disabled': {
+                                opacity: 0.7,
+                                '& .MuiOutlinedInput-input': {
+                                  color: travelColors.text.secondary,
+                                  WebkitTextFillColor: travelColors.text.secondary
+                                }
+                              }
+                            },
+                            '& .MuiInputLabel-root.Mui-disabled': {
+                              color: travelColors.text.secondary
                             }
                           }}
                         />
@@ -379,6 +425,16 @@ const ProfilePage: React.FC = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '12px',
                               backgroundColor: editing ? travelColors.backgrounds.paper : 'transparent',
+                              '&.Mui-disabled': {
+                                opacity: 0.7,
+                                '& .MuiOutlinedInput-input': {
+                                  color: travelColors.text.secondary,
+                                  WebkitTextFillColor: travelColors.text.secondary
+                                }
+                              }
+                            },
+                            '& .MuiInputLabel-root.Mui-disabled': {
+                              color: travelColors.text.secondary
                             }
                           }}
                         />
