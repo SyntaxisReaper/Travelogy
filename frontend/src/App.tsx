@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Typography, Button } from '@mui/material';
+import { useSelector } from 'react-redux';
+import type { RootState } from './store/store';
 
 // Test theme with travel colors
 const testTheme = createTheme({
@@ -20,23 +22,30 @@ const testTheme = createTheme({
   },
 });
 
-// Simple landing page component
-const SimpleLandingPage: React.FC = () => (
-  <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
-    <Typography variant="h1" gutterBottom sx={{ color: 'primary.main' }}>
-      🌐 Travelogy
-    </Typography>
-    <Typography variant="h4" gutterBottom sx={{ color: 'text.secondary', mb: 4 }}>
-      Your Personal Travel Journal
-    </Typography>
-    <Typography variant="body1" sx={{ mb: 4 }}>
-      Basic routing and theme test - If you can see this, the core app structure works!
-    </Typography>
-    <Button variant="contained" color="primary" size="large">
-      Get Started
-    </Button>
-  </Container>
-);
+// Simple landing page component with Redux test
+const SimpleLandingPage: React.FC = () => {
+  const loading = useSelector((state: RootState) => state.ui.loading);
+  
+  return (
+    <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
+      <Typography variant="h1" gutterBottom sx={{ color: 'primary.main' }}>
+        🌐 Travelogy
+      </Typography>
+      <Typography variant="h4" gutterBottom sx={{ color: 'text.secondary', mb: 4 }}>
+        Your Personal Travel Journal
+      </Typography>
+      <Typography variant="body1" sx={{ mb: 4 }}>
+        Step 2: Basic routing, theme, ErrorBoundary + Redux Store test
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 4, opacity: 0.7 }}>
+        Redux Loading State: {loading ? 'true' : 'false'}
+      </Typography>
+      <Button variant="contained" color="primary" size="large">
+        Get Started
+      </Button>
+    </Container>
+  );
+};
 
 // Simple dashboard page
 const SimpleDashboard: React.FC = () => (
