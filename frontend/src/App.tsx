@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box, Container, Typography, Grid, Toolbar } from '@mui/material';
 import { motion } from 'framer-motion';
-import { colors, techTheme as calmTheme } from './styles/techTheme';
+import { colors } from './styles/techTheme';
 import LightweightBackground from './components/LightweightBackground';
 import GlitchText from './components/GlitchText';
 import HolographicCard from './components/HolographicCard';

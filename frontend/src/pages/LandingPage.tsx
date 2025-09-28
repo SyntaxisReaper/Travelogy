@@ -196,7 +196,7 @@ const LandingPage: React.FC = () => {
             {stats.map((stat, index) => (
               <Grid item xs={6} md={3} key={index}>
                 <TravelCard
-                  cardVariant={['ocean', 'sunset', 'forest', 'paper'][index] as any}
+                  cardVariant={(['ocean', 'sunset', 'forest', 'paper'][index] as 'ocean' | 'sunset' | 'forest' | 'paper')}
                   cardElevation="medium"
                   borderAccent
                   sx={{ textAlign: 'center', p: 3, height: '150px' }}
@@ -250,7 +250,7 @@ const LandingPage: React.FC = () => {
                   transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
                 >
                   <TravelCard
-                    cardVariant={['ocean', 'sunset', 'forest', 'coral'][index] as any}
+                    cardVariant={(['ocean', 'sunset', 'forest', 'coral'][index] as 'ocean' | 'sunset' | 'forest' | 'coral')}
                     cardElevation="high"
                     borderAccent
                     sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}
