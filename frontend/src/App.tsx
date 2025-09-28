@@ -512,7 +512,7 @@ const App: React.FC = () => {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/" element={<DashboardPageWrapper />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>
