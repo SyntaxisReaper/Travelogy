@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import TechDashboard from '../components/TechDashboard';
+import FirebaseTest from '../components/FirebaseTest';
 
 const DashboardPageWrapper: React.FC = () => {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ const DashboardPageWrapper: React.FC = () => {
     navigate('/');
   };
 
-  return <TechDashboard onClose={handleClose} />;
+  return <FirebaseTest />;
 };
 
 export default DashboardPageWrapper;
