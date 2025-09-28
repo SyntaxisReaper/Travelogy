@@ -498,7 +498,6 @@ const App: React.FC = () => {
             <Routes>
               {/* All routes are now public - no authentication required */}
               <Route path="/dashboard" element={<DashboardPageWrapper />} />
-              <Route path="/working" element={<LandingPage />} />
               <Route path="/trips" element={<TripsPage />} />
               <Route path="/trips/list" element={<TripsListPage />} />
               <Route path="/trips/:id" element={<TripDetailsPage />} />
@@ -512,7 +511,7 @@ const App: React.FC = () => {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/" element={<DashboardPageWrapper />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>
