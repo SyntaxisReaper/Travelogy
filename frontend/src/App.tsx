@@ -10,8 +10,8 @@ import { travelColors } from './styles/travelTheme';
 const travelTheme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: travelColors.primary.ocean },
-    secondary: { main: travelColors.primary.sunset },
+    primary: { main: travelColors.primary.sunset }, // Sunset orange for visibility
+    secondary: { main: travelColors.primary.ocean },
     background: {
       default: travelColors.backgrounds.cream,
       paper: travelColors.backgrounds.paper,
@@ -37,6 +37,9 @@ const SimpleLandingPage: React.FC = () => {
       </Typography>
       <Typography variant="body1" sx={{ mb: 4 }}>
         Step 3: Basic app + Redux + CSS imports + Travel theme test
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 2, color: 'primary.main' }}>
+        🧪 Theme Test: If you see ORANGE button/text, travel theme loaded!
       </Typography>
       <Typography variant="body2" sx={{ mb: 4, opacity: 0.7 }}>
         Redux Loading State: {loading ? 'true' : 'false'}
