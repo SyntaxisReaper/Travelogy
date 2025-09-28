@@ -11,6 +11,13 @@ import { FIREBASE_CONFIG } from '../config/env';
 // Initialize Firebase
 const app = initializeApp(FIREBASE_CONFIG);
 
+// Disable App Check to avoid token validation errors in development/production
+// App Check can be re-enabled later with proper reCAPTCHA configuration
+if (typeof window !== 'undefined') {
+  console.log('🔒 App Check: DISABLED to avoid token validation errors');
+  console.log('📝 To enable App Check: Configure reCAPTCHA in Firebase Console');
+}
+
 // Enhanced debug info for both development and production
 if (typeof window !== 'undefined') {
   console.log('🔧 Firebase Config Check:');
