@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Container, Typography, Box, Stack, Chip, Grid, ImageList, ImageListItem, Alert, Skeleton, Fab, Collapse, IconButton, TextField, Button, Divider } from '@mui/material';
+import { Container, Typography, Box, Stack, Chip, Grid, ImageList, ImageListItem, Alert, Skeleton } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
   Book,
@@ -17,18 +17,12 @@ import {
   DirectionsBike,
   Train,
   Flight,
-  Add,
-  Close,
-  CloudUpload,
-  Save,
-  NoteAdd
 } from '@mui/icons-material';
 import { tripsAPI } from '../services/api';
 import { travelColors } from '../styles/travelTheme';
 import TravelText from '../components/TravelText';
 import TravelCard from '../components/TravelCard';
 import AdventureButton from '../components/AdventureButton';
-import { EnhancedPhotoUpload, PhotoFile } from '../upgrades/photo-system';
 
 interface DiaryEntry { 
   id?: string; 
@@ -48,11 +42,6 @@ const JournalPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [trips, setTrips] = useState<any[]>([]);
   
-  // Enhanced photo upload state
-  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
-  const [newPhotos, setNewPhotos] = useState<PhotoFile[]>([]);
-  const [journalNote, setJournalNote] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -104,7 +93,7 @@ const JournalPage: React.FC = () => {
         setEntries(all);
       } catch (e) {
         console.error('Failed to load journal entries:', e);
-        setError('Failed to load journal entries. You can still use the photo upload feature!');
+        setError('Failed to load journal entries.');
         // Set empty arrays so the page still renders
         setEntries([]);
         setTrips([]);
@@ -123,52 +112,6 @@ const JournalPage: React.FC = () => {
     });
   }, [entries]);
 
-  // Save journal entry function
-  const saveJournalEntry = async () => {
-    if (!journalNote.trim() && newPhotos.length === 0) {
-      setError('Please add a note or photos to save your journal entry.');
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      // Create a new journal entry
-      const newEntry: DiaryEntry = {
-        id: `journal-${Date.now()}`,
-        note: journalNote.trim(),
-        photos: newPhotos.map(photo => ({
-          url: photo.preview, // In a real app, you'd upload to Firebase Storage first
-          caption: photo.caption
-        })),
-        created_at: new Date().toISOString(),
-        trip_id: undefined, // This is a standalone journal entry
-        transport_mode: undefined,
-        distance_km: undefined,
-        location_name: newPhotos.find(p => p.metadata.location) 
-          ? `📍 ${newPhotos.find(p => p.metadata.location)?.metadata.location?.lat.toFixed(4)}, ${newPhotos.find(p => p.metadata.location)?.metadata.location?.lng.toFixed(4)}`
-          : undefined
-      };
-
-      // Add to entries state (in real app, save to backend/Firebase)
-      setEntries(prevEntries => [newEntry, ...prevEntries]);
-      
-      // Clear the form
-      setJournalNote('');
-      setNewPhotos([]);
-      setShowPhotoUpload(false);
-      
-      // Success message (you could use a toast/snackbar here)
-      console.log('Journal entry saved!', newEntry);
-      
-    } catch (err) {
-      console.error('Failed to save journal entry:', err);
-      setError('Failed to save journal entry. Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const getTransportModeEmoji = (mode: string) => {
     switch (mode?.toLowerCase()) {
@@ -347,9 +290,6 @@ const JournalPage: React.FC = () => {
                 }}
               >
                 {error}
-              </Alert>
-              <Alert severity="info" sx={{ mb: 3 }}>
-                Tip: Click the + button at the bottom-right to add photos to your journal.
               </Alert>
             </>
           )}
@@ -584,207 +524,8 @@ const JournalPage: React.FC = () => {
             </motion.div>
           )}
 
-          {/* Enhanced Photo Upload Panel */}
-          <Collapse in={showPhotoUpload}>
-            <TravelCard
-              cardVariant="ocean"
-              cardElevation="high"
-              borderAccent
-              sx={{ p: 3, mt: 3 }}
-            >
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <CloudUpload sx={{ fontSize: 32, color: travelColors.primary.ocean }} />
-                  <TravelText
-                    text="Enhanced Photo Upload"
-                    textVariant="adventure"
-                    variant="h5"
-                  />
-                </Box>
-                <IconButton 
-                  onClick={() => setShowPhotoUpload(false)}
-                  sx={{ color: travelColors.primary.ocean }}
-                >
-                  <Close />
-                </IconButton>
-              </Stack>
-              
-              <Alert severity="info" sx={{ mb: 3 }}>
-                <Typography variant="body2">
-                  <strong>✨ New Enhanced Features:</strong> Drag & drop photos, automatic compression, 
-                  location data extraction, EXIF metadata viewing, and smart image optimization!
-                </Typography>
-              </Alert>
-
-              <EnhancedPhotoUpload
-                onPhotosChange={setNewPhotos}
-                maxFiles={20}
-                maxFileSizeMB={25}
-                compressImages={true}
-                compressionQuality={0.85}
-                showMetadata={true}
-                enableGeolocation={true}
-              />
-              
-              {/* Journal Entry Creation */}
-              <Divider sx={{ my: 3 }} />
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <NoteAdd sx={{ fontSize: 24, color: travelColors.primary.ocean }} />
-                <Typography variant="h6">
-                  Create Journal Entry
-                </Typography>
-              </Box>
-              
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                placeholder="What's on your mind? Describe your experience, thoughts, or memories..."
-                value={journalNote}
-                onChange={(e) => setJournalNote(e.target.value)}
-                variant="outlined"
-                sx={{
-                  mb: 3,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '12px',
-                    '&:hover fieldset': {
-                      borderColor: travelColors.primary.ocean,
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: travelColors.primary.ocean,
-                      borderWidth: '2px',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: travelColors.primary.ocean,
-                  },
-                }}
-              />
-
-              {newPhotos.length > 0 && (
-                <Box sx={{ mb: 3, p: 2, bgcolor: 'success.light', borderRadius: 2 }}>
-                  <Typography variant="body2" color="success.contrastText" sx={{ mb: 1 }}>
-                    📸 <strong>{newPhotos.length} photos ready!</strong> These enhanced photos include:
-                  </Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                    {newPhotos.some(p => p.compressed) && (
-                      <Chip label="Compressed images" size="small" color="success" />
-                    )}
-                    {newPhotos.some(p => p.metadata.location) && (
-                      <Chip label="GPS coordinates" size="small" color="success" />
-                    )}
-                    <Chip label="EXIF metadata" size="small" color="success" />
-                    <Chip label="Smart optimization" size="small" color="success" />
-                  </Stack>
-                </Box>
-              )}
-              
-              {/* Save/Action Buttons */}
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 3 }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  startIcon={<Save />}
-                  onClick={saveJournalEntry}
-                  disabled={isSaving || (!journalNote.trim() && newPhotos.length === 0)}
-                  sx={{
-                    bgcolor: travelColors.primary.ocean,
-                    color: 'white',
-                    borderRadius: '12px',
-                    py: 1.5,
-                    '&:hover': {
-                      bgcolor: travelColors.primary.forest,
-                    },
-                    '&:disabled': {
-                      bgcolor: 'rgba(0,0,0,0.12)',
-                    }
-                  }}
-                >
-                  {isSaving ? 'Saving...' : 'Save Journal Entry'}
-                </Button>
-                
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => {
-                    setJournalNote('');
-                    setNewPhotos([]);
-                    setShowPhotoUpload(false);
-                  }}
-                  disabled={isSaving}
-                  sx={{
-                    borderColor: travelColors.primary.coral,
-                    color: travelColors.primary.coral,
-                    borderRadius: '12px',
-                    py: 1.5,
-                    '&:hover': {
-                      borderColor: travelColors.primary.coral,
-                      bgcolor: `${travelColors.primary.coral}10`,
-                    }
-                  }}
-                >
-                  Cancel
-                </Button>
-              </Stack>
-              
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-                💡 <strong>Tip:</strong> Your journal entry will include the note, photos with captions, and any GPS location data from your images.
-              </Typography>
-            </TravelCard>
-          </Collapse>
         </motion.div>
       </Container>
-      
-      {/* Enhanced Photo Upload FAB */}
-      <Fab
-        sx={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          bgcolor: '#1de9b6', // Bright cyan for high visibility
-          color: '#000',      // Black for contrast
-          width: 64,
-          height: 64,
-          boxShadow: '0 8px 24px rgba(29, 233, 182, 0.4)',
-          border: '2px solid rgba(29, 233, 182, 0.6)',
-          '&:hover': {
-            bgcolor: '#00e676',
-            transform: 'scale(1.1)',
-            boxShadow: '0 12px 32px rgba(29, 233, 182, 0.6)'
-          },
-          '&:before': {
-            content: '""',
-            position: 'absolute',
-            top: -2,
-            left: -2,
-            right: -2,
-            bottom: -2,
-            borderRadius: '50%',
-            border: '2px solid #1de9b6',
-            animation: error ? 'pulse 2s infinite' : 'none'
-          },
-          '@keyframes pulse': {
-            '0%': {
-              transform: 'scale(1)',
-              opacity: 1
-            },
-            '50%': {
-              transform: 'scale(1.1)',
-              opacity: 0.7
-            },
-            '100%': {
-              transform: 'scale(1)',
-              opacity: 1
-            }
-          },
-          transition: 'all 0.3s ease',
-          zIndex: 9999
-        }}
-        onClick={() => setShowPhotoUpload(!showPhotoUpload)}
-      >
-        {showPhotoUpload ? <Close fontSize="large" /> : <Add fontSize="large" />}
-      </Fab>
     </Box>
   );
 };

@@ -40,10 +40,6 @@ const StoresPage = lazy(() => import('./pages/StoresPage'));
 const FeedbackAdminPage = lazy(() => import('./pages/FeedbackAdminPage'));
 
 // Route Planner integrated into TripsPage
-// DEVELOPMENT: Photo upload testing - remove when satisfied
-const PhotoUploadDemo = lazy(() => import('./upgrades/photo-system/PhotoUploadDemo'));
-// DEVELOPMENT: AI Trip Planner testing - remove when satisfied
-const SimpleAITripPlannerDemo = lazy(() => import('./upgrades/ai-trip-planner/SimpleAITripPlannerDemo'));
 
 // Google Fonts for tech typography
 const googleFontsLink = document.createElement('link');
@@ -518,13 +514,6 @@ const App: React.FC = () => {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              
-              {/* DEVELOPMENT: Testing enhanced photo upload - remove when satisfied */}
-              <Route path="/dev/photos" element={<PhotoUploadDemo />} />
-              
-              
-              {/* DEVELOPMENT: Testing AI Trip Planner with ML - remove when satisfied */}
-              <Route path="/dev/ai-planner" element={<SimpleAITripPlannerDemo />} />
               
               <Route path="/" element={<LandingPage />} />
               <Route path="*" element={<NotFoundPage />} />

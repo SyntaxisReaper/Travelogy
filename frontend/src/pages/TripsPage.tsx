@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Container, Typography, Box, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider, Tabs, Tab } from '@mui/material';
+import { Container, Typography, Box, Stack, Alert, Chip, TextField, ImageList, ImageListItem, Divider } from '@mui/material';
 import { motion } from 'framer-motion';
-import { PlayArrow, Stop, PhotoCamera, Save, Explore, Route, MyLocation } from '@mui/icons-material';
+import { PlayArrow, Stop, PhotoCamera, Save, Explore } from '@mui/icons-material';
 import FlipButton from '../components/ui/FlipButton';
 import { MapContainer, TileLayer, Polyline, Circle, useMap, Marker, Popup } from 'react-leaflet';
 import { travelColors } from '../styles/travelTheme';
@@ -15,7 +15,6 @@ import { tripsAPI } from '../services/api';
 import { uploadTripPhotos } from '../services/storage';
 import { storage } from '../services/firebase';
 import { fetchNearbyPlaces, NearbyPlace } from '../services/nearby';
-import { RoutePlannerMap } from '../upgrades/enhanced-maps';
 import L from 'leaflet';
 
 const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -252,12 +251,6 @@ const emojiFor = (subtype?: string) => {
     return null;
   };
 
-  // Tab state for switching between modes
-  const [activeTab, setActiveTab] = useState<'tracking' | 'planning'>('tracking');
-  
-  // Route planner state
-  const [plannedRoute, setPlannedRoute] = useState<any>(null);
-  const [plannedWaypoints, setPlannedWaypoints] = useState<any[]>([]);
 
   // My trips list
   const [trips, setTrips] = useState<any[]>([]);
@@ -337,42 +330,6 @@ const emojiFor = (subtype?: string) => {
             </Alert>
           )}
 
-          {/* Mode Selection Tabs */}
-          <TravelCard cardVariant="default" cardElevation="medium" sx={{ mb: 3 }}>
-            <Tabs
-              value={activeTab}
-              onChange={(_, newValue) => setActiveTab(newValue)}
-              sx={{
-                borderBottom: 1,
-                borderColor: 'divider',
-                '& .MuiTab-root': {
-                  color: travelColors.text.secondary,
-                  '&.Mui-selected': {
-                    color: travelColors.primary.ocean,
-                  },
-                },
-                '& .MuiTabs-indicator': {
-                  backgroundColor: travelColors.primary.ocean,
-                },
-              }}
-            >
-              <Tab
-                icon={<MyLocation />}
-                label="Live Tracking"
-                value="tracking"
-                iconPosition="start"
-              />
-              <Tab
-                icon={<Route />}
-                label="Route Planning"
-                value="planning"
-                iconPosition="start"
-              />
-            </Tabs>
-          </TravelCard>
-
-          {activeTab === 'tracking' && (
-            <>
               <TravelCard cardVariant="ocean" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
                 <Box sx={{ p: 3 }}>
                   <TravelText
@@ -764,140 +721,6 @@ const emojiFor = (subtype?: string) => {
               )}
             </Box>
           </TravelCard>
-          </>
-          )}
-
-          {activeTab === 'planning' && (
-            <>
-              {/* Route Planning Section */}
-              <TravelCard cardVariant="ocean" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
-                <Box sx={{ p: 3 }}>
-                  <TravelText
-                    text="Plan Your Route"
-                    textVariant="gradient"
-                    variant="h6"
-                    sx={{ mb: 3 }}
-                  />
-                  <Alert 
-                    severity="info" 
-                    sx={{ 
-                      mb: 3,
-                      backgroundColor: `${travelColors.primary.sky}15`,
-                      border: `1px solid ${travelColors.primary.sky}40`,
-                      color: travelColors.primary.ocean,
-                    }}
-                  >
-                    <Typography variant="body2">
-                      <strong>Enhanced Route Planner:</strong> Click on the map to add waypoints, choose your travel mode, and get real-time distance calculations!
-                    </Typography>
-                  </Alert>
-                  
-                  {/* Route Summary */}
-                  {plannedRoute && (
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 3 }}>
-                      <Chip 
-                        label={`Planned Distance: ${(plannedRoute.distance / 1000).toFixed(2)} km`} 
-                        sx={{ 
-                          backgroundColor: `${travelColors.primary.sunset}20`,
-                          color: travelColors.primary.sunset,
-                          fontWeight: 'bold'
-                        }}
-                      />
-                      <Chip 
-                        label={`Estimated Time: ${Math.round(plannedRoute.duration / 60)} min`} 
-                        sx={{ 
-                          backgroundColor: `${travelColors.primary.forest}20`,
-                          color: travelColors.primary.forest,
-                          fontWeight: 'bold'
-                        }}
-                      />
-                      <Chip 
-                        label={`Waypoints: ${plannedWaypoints.length}`} 
-                        sx={{ 
-                          backgroundColor: `${travelColors.primary.ocean}20`,
-                          color: travelColors.primary.ocean,
-                          fontWeight: 'bold'
-                        }}
-                      />
-                    </Stack>
-                  )}
-                </Box>
-              </TravelCard>
-
-              {/* Enhanced Route Planner Map */}
-              <TravelCard cardVariant="forest" cardElevation="high" borderAccent sx={{ mb: 3 }}>
-                <Box sx={{ 
-                  overflow: 'hidden',
-                  borderRadius: '12px'
-                }}>
-                  <RoutePlannerMap
-                    height={600}
-                    onRouteChange={(route) => setPlannedRoute(route)}
-                    onWaypointsChange={(waypoints) => setPlannedWaypoints(waypoints)}
-                  />
-                </Box>
-              </TravelCard>
-
-              {/* Route Actions */}
-              <TravelCard cardVariant="sunset" cardElevation="medium" borderAccent sx={{ mb: 3 }}>
-                <Box sx={{ p: 3 }}>
-                  <TravelText
-                    text="Route Actions"
-                    textVariant="adventure"
-                    variant="h6"
-                    sx={{ mb: 3 }}
-                  />
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                    <AdventureButton 
-                      buttonVariant="ocean"
-                      startIcon={<PlayArrow />}
-                      disabled={plannedWaypoints.length < 2}
-                      onClick={() => {
-                        // Switch to tracking mode and start with planned route
-                        setActiveTab('tracking');
-                        notify('Switched to tracking mode. Start your planned journey!');
-                      }}
-                      adventure
-                    >
-                      Start This Route
-                    </AdventureButton>
-                    <AdventureButton 
-                      buttonVariant="forest"
-                      startIcon={<Save />}
-                      disabled={!plannedRoute}
-                      onClick={() => {
-                        if (plannedRoute && plannedWaypoints.length > 0) {
-                          const routeData = {
-                            waypoints: plannedWaypoints,
-                            distance: plannedRoute.distance,
-                            duration: plannedRoute.duration,
-                            created: new Date().toISOString()
-                          };
-                          localStorage.setItem('planned_route', JSON.stringify(routeData));
-                          notify('Route saved locally!');
-                        }
-                      }}
-                    >
-                      Save Route
-                    </AdventureButton>
-                    <AdventureButton 
-                      size="small"
-                      buttonVariant="coral"
-                      onClick={() => {
-                        setPlannedRoute(null);
-                        setPlannedWaypoints([]);
-                        notify('Route cleared');
-                      }}
-                    >
-                      Clear Route
-                    </AdventureButton>
-                  </Stack>
-                </Box>
-              </TravelCard>
-            </>
-          )}
-
-          {/* Shared sections visible in both modes */}
           <TravelCard cardVariant="paper" cardElevation="medium" sx={{ mb: 3 }}>
             <Box sx={{ p: 3 }}>
               <TravelText
@@ -916,7 +739,7 @@ const emojiFor = (subtype?: string) => {
                     fontStyle: 'italic'
                   }}
                 >
-                  No trips yet. Start {activeTab === 'planning' ? 'planning and then ' : ''}tracking to record your first adventure!
+                  No trips yet. Start tracking to record your first adventure!
                 </Typography>
               )}
               <Stack spacing={2}>
