@@ -278,7 +278,7 @@ const AdventureButton: React.FC<AdventureButtonProps> = ({
         rotateX: 0,
       }}
       animate={{
-        rotateY: isClicking ? [0, -10, 10, 0] : 0,
+        rotateY: isClicking ? 10 : 0,
       }}
       transition={{ 
         type: 'spring', 
