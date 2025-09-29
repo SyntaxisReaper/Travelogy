@@ -278,15 +278,12 @@ const AdventureButton: React.FC<AdventureButtonProps> = ({
         rotateX: 0,
       }}
       animate={{
-        rotateY: isClicking ? 5 : 0,
+        rotateY: isClicking ? 10 : 0,
       }}
       transition={{ 
-        rotateY: { type: 'tween', duration: 0.3 },
-        default: {
-          type: 'spring', 
-          stiffness: adventure ? 500 : 400, 
-          damping: adventure ? 25 : 17,
-        }
+        type: 'spring', 
+        stiffness: adventure ? 500 : 400, 
+        damping: adventure ? 25 : 17,
       }}
       style={{ perspective: '1000px' }}
     >
@@ -355,17 +352,12 @@ const AdventureButton: React.FC<AdventureButtonProps> = ({
           <>
             <motion.div
               animate={{
-                y: -8,
-                opacity: 1,
-              }}
-              initial={{
-                y: -2,
-                opacity: 0.6,
+                y: [-2, -8, -2],
+                opacity: [0.6, 1, 0.6],
               }}
               transition={{
                 duration: 2,
                 repeat: Infinity,
-                repeatType: "reverse",
                 ease: 'easeInOut',
               }}
               style={{
@@ -382,17 +374,12 @@ const AdventureButton: React.FC<AdventureButtonProps> = ({
             />
             <motion.div
               animate={{
-                y: -10,
-                opacity: 0.8,
-              }}
-              initial={{
-                y: -3,
-                opacity: 0.4,
+                y: [-3, -10, -3],
+                opacity: [0.4, 0.8, 0.4],
               }}
               transition={{
                 duration: 2.5,
                 repeat: Infinity,
-                repeatType: "reverse",
                 ease: 'easeInOut',
                 delay: 0.5,
               }}
