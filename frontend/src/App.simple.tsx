@@ -1,15 +1,16 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box, Typography, Button, Container, Grid, Card, CardContent, CircularProgress } from '@mui/material';
+import { CssBaseline, Box, Typography, Button, Container, Grid, Card, CardContent, CircularProgress, Toolbar } from '@mui/material';
 import { TravelExplore, FlightTakeoff, PhotoCamera, Public } from '@mui/icons-material';
 import { travelColors } from './styles/travelTheme';
+import Navbar from './components/Navbar';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const DashboardPageWrapper = lazy(() => import('./pages/DashboardPageWrapper'));
-const TripsPage = lazy(() => import('./pages/TripsPage'));
+const TripsPage = lazy(() => import('./pages/TripsPage.simple'));
 const TripsListPage = lazy(() => import('./pages/TripsListPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -309,29 +310,40 @@ const SimpleApp: React.FC = () => {
       <CssBaseline />
       <Router>
         <Box sx={{ minHeight: '100vh' }}>
-          <Suspense fallback={<TravelLoader />}>
-            <Routes>
-              {/* Main Routes */}
-              <Route path="/dashboard" element={<DashboardPageWrapper />} />
-              <Route path="/trips" element={<TripsPage />} />
-              <Route path="/trips/list" element={<TripsListPage />} />
-              <Route path="/trips/:id" element={<TripDetailsPage />} />
-              <Route path="/analytics" element={<AnalyticsPage />} />
-              <Route path="/journal" element={<JournalPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/book" element={<BookingsPage />} />
-              <Route path="/stores" element={<StoresPage />} />
-              <Route path="/admin/feedback" element={<FeedbackAdminPage />} />
-              <Route path="/weather" element={<WeatherPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              
-              {/* Home and 404 */}
-              <Route path="/" element={<TravelLanding />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
+          {/* Navigation Bar */}
+          <Navbar 
+            themeMode="light"
+            themeFont="system"
+            accent="cyan"
+          />
+          
+          {/* Main Content */}
+          <Box component="main">
+            <Toolbar /> {/* Spacer for fixed navbar */}
+            <Suspense fallback={<TravelLoader />}>
+              <Routes>
+                {/* Main Routes */}
+                <Route path="/dashboard" element={<DashboardPageWrapper />} />
+                <Route path="/trips" element={<TripsPage />} />
+                <Route path="/trips/list" element={<TripsListPage />} />
+                <Route path="/trips/:id" element={<TripDetailsPage />} />
+                <Route path="/analytics" element={<AnalyticsPage />} />
+                <Route path="/journal" element={<JournalPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/book" element={<BookingsPage />} />
+                <Route path="/stores" element={<StoresPage />} />
+                <Route path="/admin/feedback" element={<FeedbackAdminPage />} />
+                <Route path="/weather" element={<WeatherPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                
+                {/* Home and 404 */}
+                <Route path="/" element={<TravelLanding />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Suspense>
+          </Box>
         </Box>
       </Router>
     </ThemeProvider>
