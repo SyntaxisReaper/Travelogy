@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Container, 
   Typography, 
@@ -8,7 +8,9 @@ import {
   CardContent, 
   Button,
   Alert,
-  Chip
+  Chip,
+  Paper,
+  LinearProgress
 } from '@mui/material';
 import { 
   FlightTakeoff, 
@@ -16,12 +18,143 @@ import {
   Timer, 
   PhotoCamera,
   Map as MapIcon,
-  TravelExplore 
+  TravelExplore,
+  Stop,
+  GpsFixed
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { travelColors } from '../styles/travelTheme';
+import RouteTrackingMap from '../components/RouteTrackingMap';
 
 const SimpleTripsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [isTracking, setIsTracking] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [trackingData, setTrackingData] = useState({
+    distance: 0,
+    duration: 0,
+    startTime: null as number | null,
+    path: [] as {lat: number, lng: number, timestamp: number}[]
+  });
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  // GPS tracking functions
+  const startTracking = async () => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocation is not supported by your browser');
+      return;
+    }
+
+    try {
+      // Get initial position
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      const startLocation = { lat: latitude, lng: longitude };
+      
+      setCurrentLocation(startLocation);
+      setIsTracking(true);
+      setLocationError(null);
+      setTrackingData({
+        distance: 0,
+        duration: 0,
+        startTime: Date.now(),
+        path: [{ ...startLocation, timestamp: Date.now() }]
+      });
+
+      // Start watching position
+      const watchId = navigator.geolocation.watchPosition(
+        (newPosition) => {
+          const newLoc = {
+            lat: newPosition.coords.latitude,
+            lng: newPosition.coords.longitude
+          };
+          setCurrentLocation(newLoc);
+          
+          // Update path and calculate distance
+          setTrackingData(prev => {
+            const newPath = [...prev.path, { ...newLoc, timestamp: Date.now() }];
+            let totalDistance = 0;
+            
+            // Simple distance calculation (Haversine formula)
+            for (let i = 1; i < newPath.length; i++) {
+              const prev = newPath[i - 1];
+              const curr = newPath[i];
+              const R = 6371; // Earth's radius in km
+              const dLat = (curr.lat - prev.lat) * Math.PI / 180;
+              const dLng = (curr.lng - prev.lng) * Math.PI / 180;
+              const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                       Math.cos(prev.lat * Math.PI / 180) * Math.cos(curr.lat * Math.PI / 180) *
+                       Math.sin(dLng/2) * Math.sin(dLng/2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              totalDistance += R * c;
+            }
+            
+            return {
+              ...prev,
+              path: newPath,
+              distance: totalDistance,
+              duration: prev.startTime ? (Date.now() - prev.startTime) / 1000 / 60 : 0
+            };
+          });
+        },
+        (error) => {
+          setLocationError(`GPS Error: ${error.message}`);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 1000
+        }
+      );
+
+      // Store watch ID to clear it later
+      (window as any).trackingWatchId = watchId;
+      
+    } catch (error: any) {
+      setLocationError(`Failed to get location: ${error.message}`);
+    }
+  };
+
+  const stopTracking = () => {
+    if ((window as any).trackingWatchId) {
+      navigator.geolocation.clearWatch((window as any).trackingWatchId);
+      (window as any).trackingWatchId = null;
+    }
+    setIsTracking(false);
+  };
+
+  // Format duration as readable string
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) {
+      return `${Math.round(minutes)}m`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    return `${hours}h ${mins}m`;
+  };
+
+  // Navigation functions
+  const openRouteePlanner = () => {
+    // Check if we have a map-enabled version of trips page
+    navigate('/trips/list'); // Navigate to trips list for now
+  };
+
+  const viewOnMap = () => {
+    if (currentLocation) {
+      // Open Google Maps with current location
+      const url = `https://www.google.com/maps/@${currentLocation.lat},${currentLocation.lng},15z`;
+      window.open(url, '_blank');
+    } else {
+      setLocationError('No current location available');
+    }
+  };
 
   const mockTrips = [
     {
@@ -75,27 +208,30 @@ const SimpleTripsPage: React.FC = () => {
           {/* Trip Tracking Controls */}
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap', mb: 4 }}>
             <Button
-              variant={isTracking ? 'outlined' : 'contained'}
+              variant={isTracking ? 'contained' : 'contained'}
               size="large"
-              startIcon={isTracking ? <LocationOn /> : <FlightTakeoff />}
-              onClick={() => setIsTracking(!isTracking)}
+              startIcon={isTracking ? <Stop /> : <FlightTakeoff />}
+              onClick={isTracking ? stopTracking : startTracking}
               sx={{
-                background: !isTracking ? `linear-gradient(45deg, ${travelColors.primary.ocean}, ${travelColors.primary.sky})` : undefined,
-                color: !isTracking ? 'white' : travelColors.primary.ocean,
-                borderColor: isTracking ? travelColors.primary.ocean : undefined,
+                background: isTracking ? 
+                  `linear-gradient(45deg, ${travelColors.accents.error}, ${travelColors.primary.coral})` :
+                  `linear-gradient(45deg, ${travelColors.primary.ocean}, ${travelColors.primary.sky})`,
+                color: 'white',
                 px: 4,
                 py: 1.5,
                 '&:hover': {
                   transform: 'translateY(-2px)',
+                  boxShadow: `0 4px 20px ${isTracking ? travelColors.accents.error : travelColors.primary.ocean}40`,
                 },
               }}
             >
-              {isTracking ? 'Stop Tracking' : 'Start New Adventure'}
+              {isTracking ? 'Stop Adventure' : 'Start GPS Tracking'}
             </Button>
             <Button
               variant="outlined"
               size="large"
               startIcon={<MapIcon />}
+              onClick={openRouteePlanner}
               sx={{
                 borderColor: travelColors.primary.sunset,
                 color: travelColors.primary.sunset,
@@ -110,21 +246,130 @@ const SimpleTripsPage: React.FC = () => {
             >
               View Route Planner
             </Button>
+            {currentLocation && (
+              <Button
+                variant="outlined"
+                size="large"
+                startIcon={<GpsFixed />}
+                onClick={viewOnMap}
+                sx={{
+                  borderColor: travelColors.primary.forest,
+                  color: travelColors.primary.forest,
+                  px: 4,
+                  py: 1.5,
+                  '&:hover': {
+                    borderColor: travelColors.primary.forest,
+                    backgroundColor: `${travelColors.primary.forest}10`,
+                    transform: 'translateY(-2px)',
+                  },
+                }}
+              >
+                View on Map
+              </Button>
+            )}
           </Box>
+
+          {/* Error Display */}
+          {locationError && (
+            <Alert 
+              severity="error" 
+              onClose={() => setLocationError(null)}
+              sx={{ 
+                maxWidth: 500, 
+                mx: 'auto',
+                mb: 3
+              }}
+            >
+              {locationError}
+            </Alert>
+          )}
 
           {/* Tracking Status */}
           {isTracking && (
-            <Alert 
-              severity="info" 
+            <Paper 
+              elevation={3}
               sx={{ 
-                maxWidth: 400, 
+                maxWidth: 600, 
                 mx: 'auto',
-                backgroundColor: `${travelColors.primary.ocean}10`,
-                borderColor: travelColors.primary.ocean
+                p: 3,
+                backgroundColor: `${travelColors.primary.ocean}05`,
+                border: `2px solid ${travelColors.primary.ocean}30`,
+                borderRadius: 3,
+                mb: 2
               }}
             >
-              📍 Adventure tracking active! Your route is being recorded.
-            </Alert>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <LocationOn sx={{ color: travelColors.primary.ocean, fontSize: 28 }} />
+                <Typography variant="h6" sx={{ color: travelColors.primary.ocean, fontWeight: 600 }}>
+                  🎯 Adventure in Progress!
+                </Typography>
+              </Box>
+              
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={4}>
+                  <Typography variant="body2" color="text.secondary">Distance</Typography>
+                  <Typography variant="h6" sx={{ color: travelColors.primary.sunset, fontWeight: 600 }}>
+                    {trackingData.distance.toFixed(2)} km
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant="body2" color="text.secondary">Duration</Typography>
+                  <Typography variant="h6" sx={{ color: travelColors.primary.forest, fontWeight: 600 }}>
+                    {formatDuration(trackingData.duration)}
+                  </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography variant="body2" color="text.secondary">Points</Typography>
+                  <Typography variant="h6" sx={{ color: travelColors.primary.coral, fontWeight: 600 }}>
+                    {trackingData.path.length}
+                  </Typography>
+                </Grid>
+              </Grid>
+              
+              {currentLocation && (
+                <Typography variant="body2" sx={{ 
+                  color: travelColors.text.secondary,
+                  fontFamily: 'monospace',
+                  fontSize: '0.8rem'
+                }}>
+                  📍 Current: {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+                </Typography>
+              )}
+              
+              <LinearProgress 
+                variant="indeterminate" 
+                sx={{ 
+                  mt: 2,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: `${travelColors.primary.ocean}20`,
+                  '& .MuiLinearProgress-bar': {
+                    backgroundColor: travelColors.primary.ocean
+                  }
+                }} 
+              />
+            </Paper>
+          )}
+
+          {/* Route Map - Show when tracking or has tracked data */}
+          {(isTracking || trackingData.path.length > 0) && (
+            <Box sx={{ mb: 6 }}>
+              <Typography variant="h4" gutterBottom sx={{ 
+                color: travelColors.primary.ocean,
+                fontFamily: '"Playfair Display", serif',
+                textAlign: 'center',
+                mb: 3
+              }}>
+                🗺️ Live Route Map
+              </Typography>
+              
+              <RouteTrackingMap
+                currentLocation={currentLocation}
+                routePath={trackingData.path}
+                isTracking={isTracking}
+                height={400}
+              />
+            </Box>
           )}
         </Box>
 
