@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useCallback, Suspense, lazy, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box, Container, Typography, Grid, Toolbar } from '@mui/material';
-import { motion } from 'framer-motion';
-import { colors } from './styles/techTheme';
-import LightweightBackground from './components/LightweightBackground';
-import GlitchText from './components/GlitchText';
-import HolographicCard from './components/HolographicCard';
-import NeonButton from './components/NeonButton';
+import { CssBaseline, Box, Typography, Toolbar } from '@mui/material';
+import { travelColors, travelMuiTheme } from './styles/travelTheme';
 import TechLoader from './components/TechLoader';
 import NotificationSystem from './components/NotificationSystem';
 import ContactFab from './components/ContactFab';
@@ -29,7 +24,7 @@ const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const WeatherPage = lazy(() => import('./pages/WeatherPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LandingPage = lazy(() => import('./pages/LandingPage.simple'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const BookingsPage = lazy(() => import('./pages/BookingsPage'));
 const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage'));
@@ -56,62 +51,64 @@ const App: React.FC = () => {
   });
   
   // Theme controls
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => (localStorage.getItem('themeMode') as 'light' | 'dark') || 'dark');
-  const [themeFont, setThemeFont] = useState<'tech' | 'system' | 'mono' | 'grotesk'>(() => (localStorage.getItem('themeFont') as any) || 'tech');
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => (localStorage.getItem('themeMode') as 'light' | 'dark') || 'light');
+  const [themeFont, setThemeFont] = useState<'tech' | 'system' | 'mono' | 'grotesk'>(() => (localStorage.getItem('themeFont') as any) || 'system');
   const [accent, setAccent] = useState<'cyan' | 'pink' | 'green' | 'orange' | 'purple' | 'blue' | 'teal' | 'amber'>(() => (localStorage.getItem('accent') as any) || 'cyan');
   const [themePanelOpen, setThemePanelOpen] = useState(false);
-
-  const accentHex = useMemo(() => ({
-    cyan: '#1de9b6',
-    pink: '#ff4081',
-    green: '#66bb6a',
-    orange: '#ffa726',
-    purple: '#ab47bc',
-    blue: '#42a5f5',
-    teal: '#26a69a',
-    amber: '#ffca28',
-  }[accent]), [accent]);
 
   const activeTheme = useMemo(() => createTheme({
     palette: {
       mode: themeMode,
-      primary: { main: accentHex },
-      secondary: { main: themeMode === 'dark' ? '#90caf9' : '#8b5cf6' },
-      background: themeMode === 'dark' ? {
-        default: '#0b0f15',
-        paper: '#10151d',
-      } : {
-        default: '#f7fafc',
-        paper: '#ffffff',
+      primary: {
+        main: accent === 'cyan' ? travelColors.primary.ocean :
+              accent === 'pink' ? travelColors.primary.coral :
+              accent === 'green' ? travelColors.primary.forest :
+              accent === 'orange' ? travelColors.primary.sunset :
+              travelColors.primary.ocean,
       },
-      text: themeMode === 'dark' ? {
-        primary: '#e6f8ff',
-        secondary: '#9fb6bf',
-      } : {
-        primary: '#0f172a',
-        secondary: '#475569',
+      secondary: {
+        main: travelColors.primary.sunset,
       },
-      divider: themeMode === 'dark' ? 'rgba(29,233,182,0.2)' : 'rgba(2,132,199,0.2)'
+      background: themeMode === 'light' ? {
+        default: travelColors.backgrounds.cream,
+        paper: travelColors.backgrounds.paper,
+      } : {
+        default: '#0f1419',
+        paper: '#1a1f2e',
+      },
+      text: themeMode === 'light' ? {
+        primary: travelColors.text.primary,
+        secondary: travelColors.text.secondary,
+      } : {
+        primary: '#ffffff',
+        secondary: '#b0b9c1',
+      },
     },
-    components: themeMode === 'light' ? {
-      MuiPaper: { styleOverrides: { root: { border: '1px solid rgba(2,132,199,0.12)', backgroundImage: 'none' } } },
-      MuiCard: { styleOverrides: { root: { border: '1px solid rgba(2,132,199,0.16)', backgroundImage: 'none', boxShadow: '0 8px 24px rgba(2,132,199,0.06)' } } },
-      MuiAppBar: { styleOverrides: { root: { backgroundColor: '#ffffffcc', backdropFilter: 'blur(12px)', color: '#0f172a' } } },
-      MuiButton: { styleOverrides: { root: { borderRadius: 8 } } },
-      MuiTextField: { styleOverrides: { root: { '& .MuiOutlinedInput-root': { backgroundColor: '#ffffff' } } } },
-    } : {},
     typography: {
-      fontFamily:
-        themeFont === 'tech' ? '"Orbitron","Roboto Mono", monospace' :
-        themeFont === 'mono' ? '"Fira Code","Roboto Mono", monospace' :
-        themeFont === 'grotesk' ? '"Space Grotesk","Inter","Segoe UI", Arial, sans-serif' :
-        'Inter, Roboto, Segoe UI, Arial, sans-serif',
-      h1: { fontWeight: 800 },
-      h2: { fontWeight: 800 },
-      h3: { fontWeight: 700 },
+      fontFamily: themeFont === 'tech' ? '"Orbitron", "Roboto Mono", monospace' :
+                  themeFont === 'mono' ? '"Fira Code", "Roboto Mono", monospace' :
+                  themeFont === 'grotesk' ? '"Space Grotesk", "Inter", sans-serif' :
+                  '"Inter", "Roboto", sans-serif',
+      h1: { fontWeight: 700, fontFamily: '"Playfair Display", serif' },
+      h2: { fontWeight: 600, fontFamily: '"Playfair Display", serif' },
+      h3: { fontWeight: 600, fontFamily: '"Playfair Display", serif' },
       button: { textTransform: 'none' },
     },
-  }), [themeMode, themeFont, accentHex]);
+    shape: {
+      borderRadius: 12,
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: '12px',
+            textTransform: 'none',
+            fontWeight: 600,
+          },
+        },
+      },
+    },
+  }), [themeMode, themeFont, accent]);
 
   const handleChangeThemeMode = useCallback((m: 'light'|'dark') => { setThemeMode(m); localStorage.setItem('themeMode', m); }, []);
   const handleChangeThemeFont = useCallback((f: 'tech'|'system'|'mono'|'grotesk') => { setThemeFont(f); localStorage.setItem('themeFont', f); }, []);
@@ -193,11 +190,10 @@ const App: React.FC = () => {
         <TechLoader
           type={currentLoaderType}
           size="large"
-          text="Initializing Travelogy Protocol..."
-          color={colors.neonCyan}
+          text="Loading your travel companion..."
+          color={travelColors.primary.ocean}
           fullscreen
         />
-        <LightweightBackground />
       </ThemeProvider>
     );
   }
@@ -216,9 +212,14 @@ const App: React.FC = () => {
         />
         <ScrollToTop />
         <Toolbar />
-        <Box sx={{ minHeight: '100vh', position: 'relative', overflowX: 'hidden' }}>
-          {/* Background effects */}
-          <LightweightBackground />
+        <Box sx={{ 
+          minHeight: '100vh', 
+          position: 'relative', 
+          overflowX: 'hidden',
+          background: themeMode === 'light' ? 
+            `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 50%, ${travelColors.primary.sky}20 100%)` :
+            `linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, ${travelColors.primary.ocean}10 100%)`
+        }}>
           
           <NotifyProvider onNotify={(message) => setNotifications(prev => [...prev, message])}>
             <Suspense fallback={
@@ -226,7 +227,7 @@ const App: React.FC = () => {
                 type="circuit"
                 size="large"
                 text="Loading..."
-                color={colors.neonCyan}
+                color={travelColors.primary.ocean}
                 fullscreen
               />
             }>
