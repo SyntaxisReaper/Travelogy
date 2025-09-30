@@ -5,6 +5,7 @@ import { CssBaseline, Box, Typography, Button, Container, Grid, Card, CardConten
 import { TravelExplore, FlightTakeoff, PhotoCamera, Public } from '@mui/icons-material';
 import { travelColors } from './styles/travelTheme';
 import Navbar from './components/Navbar';
+import './styles/animations.css';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -22,6 +23,7 @@ const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage'));
 const JournalPage = lazy(() => import('./pages/JournalPage'));
 const StoresPage = lazy(() => import('./pages/StoresPage'));
 const FeedbackAdminPage = lazy(() => import('./pages/FeedbackAdminPage'));
+const NewLandingPage = lazy(() => import('./pages/LandingPage.new'));
 
 // Simple loading component
 const TravelLoader: React.FC = () => (
@@ -324,6 +326,7 @@ const SimpleApp: React.FC = () => {
               <Routes>
                 {/* Main Routes */}
                 <Route path="/dashboard" element={<DashboardPageWrapper />} />
+                <Route path="/adventures" element={<TripsPage />} />
                 <Route path="/trips" element={<TripsPage />} />
                 <Route path="/trips/list" element={<TripsListPage />} />
                 <Route path="/trips/:id" element={<TripDetailsPage />} />
@@ -339,7 +342,7 @@ const SimpleApp: React.FC = () => {
                 <Route path="/register" element={<RegisterPage />} />
                 
                 {/* Home and 404 */}
-                <Route path="/" element={<TravelLanding />} />
+                <Route path="/" element={<NewLandingPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

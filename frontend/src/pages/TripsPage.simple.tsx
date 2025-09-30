@@ -25,10 +25,27 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { travelColors } from '../styles/travelTheme';
 import RouteTrackingMap from '../components/RouteTrackingMap';
+import TravelText from '../components/TravelText';
+import TypewriterText from '../components/TypewriterText';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const SimpleTripsPage: React.FC = () => {
   const navigate = useNavigate();
   const [isTracking, setIsTracking] = useState(false);
+  const [isInitializingGPS, setIsInitializingGPS] = useState(false);
+  const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
+  const [gpsSignalStrength, setGpsSignalStrength] = useState<'weak' | 'good' | 'excellent'>('good');
+  const [currentSpeed, setCurrentSpeed] = useState<number | null>(null);
+  const [currentHeading, setCurrentHeading] = useState<number | null>(null);
+
+  const trackingMessages = [
+    'Ready to explore? Start your GPS adventure! 🎯',
+    'Track every step of your journey 🚶‍♂️',
+    'Create memories that last forever ✨',
+    'Your next adventure awaits 🏔️',
+    'Discover the world, one step at a time 🌍'
+  ];
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
   const [trackingData, setTrackingData] = useState({
     distance: 0,
@@ -45,6 +62,9 @@ const SimpleTripsPage: React.FC = () => {
       return;
     }
 
+    setIsInitializingGPS(true);
+    setLocationError(null);
+
     try {
       // Get initial position
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -60,6 +80,7 @@ const SimpleTripsPage: React.FC = () => {
       
       setCurrentLocation(startLocation);
       setIsTracking(true);
+      setIsInitializingGPS(false);
       setLocationError(null);
       setTrackingData({
         distance: 0,
@@ -76,6 +97,27 @@ const SimpleTripsPage: React.FC = () => {
             lng: newPosition.coords.longitude
           };
           setCurrentLocation(newLoc);
+          setLastUpdateTime(new Date());
+          
+          // Update accuracy and signal strength
+          const accuracy = newPosition.coords.accuracy;
+          setLocationAccuracy(accuracy);
+          
+          // Update speed and heading if available
+          if (newPosition.coords.speed !== null) {
+            setCurrentSpeed(newPosition.coords.speed * 3.6); // Convert m/s to km/h
+          }
+          if (newPosition.coords.heading !== null) {
+            setCurrentHeading(newPosition.coords.heading);
+          }
+          
+          if (accuracy < 10) {
+            setGpsSignalStrength('excellent');
+          } else if (accuracy < 50) {
+            setGpsSignalStrength('good');
+          } else {
+            setGpsSignalStrength('weak');
+          }
           
           // Update path and calculate distance
           setTrackingData(prev => {
@@ -84,13 +126,13 @@ const SimpleTripsPage: React.FC = () => {
             
             // Simple distance calculation (Haversine formula)
             for (let i = 1; i < newPath.length; i++) {
-              const prev = newPath[i - 1];
+              const prevPoint = newPath[i - 1];
               const curr = newPath[i];
               const R = 6371; // Earth's radius in km
-              const dLat = (curr.lat - prev.lat) * Math.PI / 180;
-              const dLng = (curr.lng - prev.lng) * Math.PI / 180;
+              const dLat = (curr.lat - prevPoint.lat) * Math.PI / 180;
+              const dLng = (curr.lng - prevPoint.lng) * Math.PI / 180;
               const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                       Math.cos(prev.lat * Math.PI / 180) * Math.cos(curr.lat * Math.PI / 180) *
+                       Math.cos(prevPoint.lat * Math.PI / 180) * Math.cos(curr.lat * Math.PI / 180) *
                        Math.sin(dLng/2) * Math.sin(dLng/2);
               const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
               totalDistance += R * c;
@@ -106,6 +148,7 @@ const SimpleTripsPage: React.FC = () => {
         },
         (error) => {
           setLocationError(`GPS Error: ${error.message}`);
+          setGpsSignalStrength('weak');
         },
         {
           enableHighAccuracy: true,
@@ -119,6 +162,7 @@ const SimpleTripsPage: React.FC = () => {
       
     } catch (error: any) {
       setLocationError(`Failed to get location: ${error.message}`);
+      setIsInitializingGPS(false);
     }
   };
 
@@ -193,17 +237,33 @@ const SimpleTripsPage: React.FC = () => {
     }}>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Hero Section */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h2" gutterBottom sx={{ 
-            color: travelColors.primary.ocean,
-            fontFamily: '"Playfair Display", serif',
-            fontWeight: 700
-          }}>
-            🗺️ Adventures & Trips
-          </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
-            Plan, track, and document your travel adventures
-          </Typography>
+        <Box sx={{ textAlign: 'center', mb: 8 }}>
+          <TravelText
+            text="🗺️ Adventures & Trips"
+            textVariant="adventure"
+            animated={true}
+            variant="h2"
+            sx={{
+              fontFamily: '"Playfair Display", serif',
+              fontWeight: 700,
+              mb: 3
+            }}
+          />
+          
+          <Box sx={{ mb: 4, minHeight: '60px' }}>
+            <TypewriterText
+              lines={trackingMessages}
+              variant="h6"
+              typingSpeedMs={50}
+              pauseMs={3000}
+              sx={{
+                color: travelColors.primary.forest,
+                fontWeight: 500,
+                maxWidth: 700,
+                mx: 'auto'
+              }}
+            />
+          </Box>
 
           {/* Trip Tracking Controls */}
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap', mb: 4 }}>
@@ -284,6 +344,18 @@ const SimpleTripsPage: React.FC = () => {
             </Alert>
           )}
 
+          {/* GPS Initialization Loading */}
+          {isInitializingGPS && (
+            <Box sx={{ mb: 4 }}>
+              <LoadingSpinner
+                travel={true}
+                compact={true}
+                message="🛰️ Initializing GPS... Please allow location access"
+                size={50}
+              />
+            </Box>
+          )}
+
           {/* Tracking Status */}
           {isTracking && (
             <Paper 
@@ -298,27 +370,54 @@ const SimpleTripsPage: React.FC = () => {
                 mb: 2
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <LocationOn sx={{ color: travelColors.primary.ocean, fontSize: 28 }} />
-                <Typography variant="h6" sx={{ color: travelColors.primary.ocean, fontWeight: 600 }}>
-                  🎯 Adventure in Progress!
-                </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <LocationOn sx={{ color: travelColors.primary.ocean, fontSize: 28 }} />
+                  <Typography variant="h6" sx={{ color: travelColors.primary.ocean, fontWeight: 600 }}>
+                    🎯 Adventure in Progress!
+                  </Typography>
+                </Box>
+                
+                {/* Live GPS Status */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: gpsSignalStrength === 'excellent' ? '#4CAF50' : gpsSignalStrength === 'good' ? '#FF9800' : '#F44336',
+                    animation: 'pulse 2s infinite',
+                    '@keyframes pulse': {
+                      '0%': { opacity: 1 },
+                      '50%': { opacity: 0.5 },
+                      '100%': { opacity: 1 },
+                    }
+                  }} />
+                  <Typography variant="body2" sx={{ fontSize: '0.75rem', color: travelColors.text.secondary }}>
+                    {gpsSignalStrength.toUpperCase()} GPS
+                  </Typography>
+                </Box>
               </Box>
               
               <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={4}>
+                <Grid item xs={6} md={3}>
                   <Typography variant="body2" color="text.secondary">Distance</Typography>
                   <Typography variant="h6" sx={{ color: travelColors.primary.sunset, fontWeight: 600 }}>
                     {trackingData.distance.toFixed(2)} km
                   </Typography>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} md={3}>
                   <Typography variant="body2" color="text.secondary">Duration</Typography>
                   <Typography variant="h6" sx={{ color: travelColors.primary.forest, fontWeight: 600 }}>
                     {formatDuration(trackingData.duration)}
                   </Typography>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6} md={3}>
+                  <Typography variant="body2" color="text.secondary">Speed</Typography>
+                  <Typography variant="h6" sx={{ color: travelColors.primary.ocean, fontWeight: 600 }}>
+                    {currentSpeed ? `${currentSpeed.toFixed(1)} km/h` : '- km/h'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} md={3}>
                   <Typography variant="body2" color="text.secondary">Points</Typography>
                   <Typography variant="h6" sx={{ color: travelColors.primary.coral, fontWeight: 600 }}>
                     {trackingData.path.length}
@@ -327,13 +426,40 @@ const SimpleTripsPage: React.FC = () => {
               </Grid>
               
               {currentLocation && (
-                <Typography variant="body2" sx={{ 
-                  color: travelColors.text.secondary,
-                  fontFamily: 'monospace',
-                  fontSize: '0.8rem'
-                }}>
-                  📍 Current: {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
-                </Typography>
+                <Box sx={{ mt: 2, p: 2, backgroundColor: `${travelColors.primary.ocean}08`, borderRadius: 2 }}>
+                  <Typography variant="body2" sx={{ 
+                    color: travelColors.text.secondary,
+                    fontFamily: 'monospace',
+                    fontSize: '0.8rem',
+                    mb: 1
+                  }}>
+                    📍 Current: {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    {locationAccuracy && (
+                      <Typography variant="caption" sx={{ 
+                        color: travelColors.text.secondary,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5
+                      }}>
+                        🎯 Accuracy: ±{locationAccuracy.toFixed(0)}m
+                      </Typography>
+                    )}
+                    
+                    {lastUpdateTime && (
+                      <Typography variant="caption" sx={{ 
+                        color: travelColors.text.secondary,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5
+                      }}>
+                        🕒 Updated: {lastUpdateTime.toLocaleTimeString()}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
               )}
               
               <LinearProgress 
