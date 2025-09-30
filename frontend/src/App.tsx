@@ -24,7 +24,7 @@ const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const WeatherPage = lazy(() => import('./pages/WeatherPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LandingPage = lazy(() => import('./pages/LandingPage.simple'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const BookingsPage = lazy(() => import('./pages/BookingsPage'));
 const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage'));
