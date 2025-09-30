@@ -1,9 +1,45 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box, Typography, Button, Container, Grid, Card, CardContent } from '@mui/material';
+import { CssBaseline, Box, Typography, Button, Container, Grid, Card, CardContent, CircularProgress } from '@mui/material';
 import { TravelExplore, FlightTakeoff, PhotoCamera, Public } from '@mui/icons-material';
 import { travelColors } from './styles/travelTheme';
+
+// Lazy load pages for better performance
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const DashboardPageWrapper = lazy(() => import('./pages/DashboardPageWrapper'));
+const TripsPage = lazy(() => import('./pages/TripsPage'));
+const TripsListPage = lazy(() => import('./pages/TripsListPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const WeatherPage = lazy(() => import('./pages/WeatherPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const BookingsPage = lazy(() => import('./pages/BookingsPage'));
+const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage'));
+const JournalPage = lazy(() => import('./pages/JournalPage'));
+const StoresPage = lazy(() => import('./pages/StoresPage'));
+const FeedbackAdminPage = lazy(() => import('./pages/FeedbackAdminPage'));
+
+// Simple loading component
+const TravelLoader: React.FC = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      background: `linear-gradient(135deg, ${travelColors.backgrounds.cream} 0%, ${travelColors.backgrounds.lightSand} 100%)`,
+    }}
+  >
+    <CircularProgress size={60} sx={{ color: travelColors.primary.ocean, mb: 2 }} />
+    <Typography variant="h6" sx={{ color: travelColors.text.primary }}>
+      Loading your travel companion...
+    </Typography>
+  </Box>
+);
 
 // Beautiful travel theme
 const travelTheme = createTheme({
@@ -76,6 +112,8 @@ const travelTheme = createTheme({
 
 // Beautiful Travel Landing Component
 const TravelLanding: React.FC = () => {
+  const navigate = useNavigate();
+  
   const features = [
     {
       icon: <PhotoCamera fontSize="large" sx={{ color: travelColors.primary.ocean }} />,
@@ -163,6 +201,7 @@ const TravelLanding: React.FC = () => {
               variant="contained"
               size="large"
               startIcon={<TravelExplore />}
+              onClick={() => navigate('/dashboard')}
               sx={{
                 background: `linear-gradient(45deg, ${travelColors.primary.ocean}, ${travelColors.primary.sky})`,
                 color: 'white',
@@ -174,12 +213,13 @@ const TravelLanding: React.FC = () => {
                 },
               }}
             >
-              Start Your Journey
+              Launch Dashboard
             </Button>
             <Button
               variant="outlined"
               size="large"
               startIcon={<FlightTakeoff />}
+              onClick={() => navigate('/trips')}
               sx={{
                 borderColor: travelColors.primary.sunset,
                 color: travelColors.primary.sunset,
@@ -192,7 +232,23 @@ const TravelLanding: React.FC = () => {
                 },
               }}
             >
-              Explore Features
+              Plan Trips
+            </Button>
+          </Box>
+
+          {/* Quick Access Buttons */}
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center', mb: 6 }}>
+            <Button variant="text" onClick={() => navigate('/weather')} sx={{ color: travelColors.primary.ocean }}>
+              Weather
+            </Button>
+            <Button variant="text" onClick={() => navigate('/journal')} sx={{ color: travelColors.primary.sunset }}>
+              Journal
+            </Button>
+            <Button variant="text" onClick={() => navigate('/analytics')} sx={{ color: travelColors.primary.forest }}>
+              Analytics
+            </Button>
+            <Button variant="text" onClick={() => navigate('/profile')} sx={{ color: travelColors.primary.coral }}>
+              Profile
             </Button>
           </Box>
 
@@ -252,9 +308,31 @@ const SimpleApp: React.FC = () => {
     <ThemeProvider theme={travelTheme}>
       <CssBaseline />
       <Router>
-        <Routes>
-          <Route path="*" element={<TravelLanding />} />
-        </Routes>
+        <Box sx={{ minHeight: '100vh' }}>
+          <Suspense fallback={<TravelLoader />}>
+            <Routes>
+              {/* Main Routes */}
+              <Route path="/dashboard" element={<DashboardPageWrapper />} />
+              <Route path="/trips" element={<TripsPage />} />
+              <Route path="/trips/list" element={<TripsListPage />} />
+              <Route path="/trips/:id" element={<TripDetailsPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/journal" element={<JournalPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/book" element={<BookingsPage />} />
+              <Route path="/stores" element={<StoresPage />} />
+              <Route path="/admin/feedback" element={<FeedbackAdminPage />} />
+              <Route path="/weather" element={<WeatherPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              
+              {/* Home and 404 */}
+              <Route path="/" element={<TravelLanding />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </Box>
       </Router>
     </ThemeProvider>
   );
