@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import './styles/ui.css';
 import 'leaflet/dist/leaflet.css';
-import App from './App';
+import App from './App.simple';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
