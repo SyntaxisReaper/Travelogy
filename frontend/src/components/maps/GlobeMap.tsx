@@ -96,7 +96,11 @@ const GlobeMap: React.FC<GlobeMapProps> = ({ latitude, longitude, label, weather
     }
   }, [showRadar]);
 
-  if (!MAPBOX_TOKEN || (MAPBOX_TOKEN && MAPBOX_TOKEN.startsWith('sk.'))) {
+  // Better error handling and fallback
+  if (!MAPBOX_TOKEN || !MAPBOX_TOKEN.startsWith('pk.')) {
+    console.warn('🗺️ Mapbox token not configured or invalid, falling back to Leaflet maps');
+    console.warn('To enable Mapbox: Set REACT_APP_MAPBOX_TOKEN in environment variables');
+    
     // Fallback to Leaflet with a fly-to animation to emulate globe zoom
     return (
       <LeafletMap
